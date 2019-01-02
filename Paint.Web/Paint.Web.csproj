@@ -12,8 +12,8 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Platfirm.Web</RootNamespace>
-    <AssemblyName>Platfirm.Web</AssemblyName>
+    <RootNamespace>Paint.Web</RootNamespace>
+    <AssemblyName>Paint.Web</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
@@ -24,7 +24,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -90,6 +90,8 @@
   <ItemGroup>
     <TypeScriptCompile Include="model\core\engine.ts" />
     <TypeScriptCompile Include="model\core\entity.ts" />
+    <TypeScriptCompile Include="model\core\node.ts" />
+    <TypeScriptCompile Include="model\core\system.ts" />
     <TypeScriptCompile Include="model\game.ts" />
     <TypeScriptCompile Include="model\player.ts" />
   </ItemGroup>
