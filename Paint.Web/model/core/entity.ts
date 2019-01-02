@@ -1,12 +1,12 @@
 ﻿class Entity {
     private static nameCounter: number = 0;
 
-    _name: string;
+    private _name: string;
     get name(): string {
         return this._name;
     }
 
-    components: any[];
+    components: Component[];
 
     constructor(name?: string) {
         if (name) {
@@ -16,12 +16,12 @@
         }
     }
 
-    public AddComponent(component: any): Entity {
+    public AddComponent(component: Component): Entity {
         this.components.push(component);
         return this;
     }
 
-    public RemoveComponent(component: any): any {
+    public RemoveComponent(component: Component): Component {
         var index = this.components.indexOf(component)
         if (index !== -1) {
             var component = this.components[index];
@@ -34,5 +34,15 @@
 
     public GetAllComponents(): any[] {
         return this.components.slice();
+    }
+
+    public HasComponent(component: Component): boolean {
+        for (var _component in this.components) {
+            if (this.components[_component] === component) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
