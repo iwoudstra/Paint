@@ -13,9 +13,9 @@
         "model/game.ts",
         "model/**/*"
     ],
-	"exclude": [
-		"node_modules",
-		"wwwroot",
-		"bundles"
-	]
+    "exclude": [
+        "node_modules",
+        "wwwroot",
+        "bundles"
+    ]
 }
