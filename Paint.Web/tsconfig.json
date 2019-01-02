@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "system",
+        "noImplicitAny": true,
+        "noEmitOnError": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "target": "es6",
+        "outFile": "bundles/all.js"
+    },
+    "include": [
+        "model/game.ts",
+        "model/**/*"
+    ],
+	"exclude": [
+		"node_modules",
+		"wwwroot",
+		"bundles"
+	]
+}
