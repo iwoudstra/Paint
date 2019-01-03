@@ -26,6 +26,18 @@
         return null;
     }
 
+    public GetEntities(componentTypes: string[]): Entity[] {
+        var result: Entity[];
+
+        for (var i = 0; i < this.entities.length; ++i) {
+            if (this.entities[i].HasComponents(componentTypes)) {
+                result.push(this.entities[i]);
+            }
+        }
+
+        return result;
+    }
+
     public Update(deltaTime: number): void {
         this.updating = true;
 

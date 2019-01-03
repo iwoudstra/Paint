@@ -1,15 +1,10 @@
 ﻿abstract class System {
     priority: number = 0;
+    engine: Engine;
 
-    public AddedToEngine(engine: Engine): void {
-
+    constructor(engine: Engine) {
+        this.engine = engine;
     }
 
-    public RemovedFromEngine(engine: Engine): void {
-
-    }
-
-    public Update(deltaTime: number): void {
-
-    }
+    public abstract Update(deltaTime: number): void;
 }

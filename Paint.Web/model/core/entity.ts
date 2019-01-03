@@ -6,7 +6,7 @@
         return this._name;
     }
 
-    components: Component[];
+    components: Map<string, Component>;
 
     constructor(name?: string) {
         if (name) {
@@ -17,32 +17,43 @@
     }
 
     public AddComponent(component: Component): Entity {
-        this.components.push(component);
+        this.components.set(component.constructor.name, component);
         return this;
     }
 
-    public RemoveComponent(component: Component): Component {
-        var index = this.components.indexOf(component)
-        if (index !== -1) {
-            var component = this.components[index];
-            this.components.splice(index, 1);
+    public RemoveComponent(componentType: string): Component {
+        if (this.components.has(componentType)) {
+            var component = this.components.get(componentType);
+            this.components.delete(componentType);
             return component;
         }
 
         return null;
     }
 
-    public GetAllComponents(): any[] {
-        return this.components.slice();
+    public GetAllComponents(): Component[] {
+        var result : Component[] = [];
+        this.components.forEach(function (c) {
+            result.push(c);
+        })
+        return result;
     }
 
-    public HasComponent(component: Component): boolean {
-        for (var _component in this.components) {
-            if (this.components[_component] === component) {
-                return true;
+    public GetComponent(componentType: string): Component {
+        return this.components.get(componentType);
+    }
+
+    public HasComponent(componentType: string): boolean {
+        return this.components.has(componentType);
+    }
+
+    public HasComponents(componentTypes: string[]): boolean {
+        for (var i = 0; i < componentTypes.length; ++i) {
+            if (!this.HasComponent(componentTypes[i])) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 }
