@@ -101,7 +101,9 @@
     <TypeScriptCompile Include="model\helper\vector2d.ts" />
     <TypeScriptCompile Include="model\player.ts" />
     <TypeScriptCompile Include="model\systems\inputhandlingsystem.ts" />
+    <TypeScriptCompile Include="model\systems\movingsystem.ts" />
     <TypeScriptCompile Include="model\systems\playersystem.ts" />
+    <TypeScriptCompile Include="model\systems\renderingsystem.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

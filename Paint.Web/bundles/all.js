@@ -11,23 +11,23 @@ class Game {
         this.engine = new Engine();
         var player = new Entity("player");
         player.AddComponent(new InputComponent());
-        var moveableComponent = new MoveableComponent();
-        player.AddComponent(moveableComponent);
         var positionComponent = new PositionComponent();
         player.AddComponent(positionComponent);
-        player.AddComponent(new RenderableComponent());
+        var moveableComponent = new MoveableComponent(positionComponent);
+        player.AddComponent(moveableComponent);
+        player.AddComponent(new RenderableComponent(positionComponent));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent));
         this.engine.AddEntity(player);
-        this.lastTime = Date.now();
-        this.Handle();
+        this.lastTime = performance.now();
+        this.Handle(this.lastTime);
     }
-    Handle() {
-        this.now = Date.now();
+    Handle(timestamp) {
+        this.now = timestamp;
         this.deltaTime = (this.now - this.lastTime) / 1000.0;
         this.engine.Update(this.deltaTime);
         this.lastTime = this.now;
-        window.requestAnimationFrame(function (_) {
-            Game.Instance.Handle();
+        window.requestAnimationFrame(function (newTimestamp) {
+            Game.Instance.Handle(newTimestamp);
         });
     }
 }
@@ -44,9 +44,10 @@ class InputComponent extends Component {
     }
 }
 class MoveableComponent extends Component {
-    constructor() {
-        super(...arguments);
+    constructor(positionComponent) {
+        super();
         this.velocity = new Vector2d(0, 0);
+        this.positionComponent = positionComponent;
     }
 }
 var PlayerState;
@@ -69,7 +70,11 @@ class PositionComponent extends Component {
         this.position = new Vector2d(0, 0);
     }
 }
-class RenderableComponent {
+class RenderableComponent extends Component {
+    constructor(positionComponent) {
+        super();
+        this.positionComponent = positionComponent;
+    }
 }
 class Engine {
     constructor() {
@@ -79,6 +84,8 @@ class Engine {
         this.updating = false;
         this.systems.push(new PlayerSystem(this));
         this.systems.push(new InputHandlingSystem(this));
+        this.systems.push(new MovingSystem(this));
+        this.systems.push(new RenderingSystem(this));
     }
     AddEntity(entity) {
         if (this.entityNames.has(entity.name)) {
@@ -368,11 +375,24 @@ class InputHandlingSystem extends System {
         }
     }
 }
+class MovingSystem extends System {
+    constructor() {
+        super(...arguments);
+        this.requiredComponents = [MoveableComponent.name];
+    }
+    Update(deltaTime) {
+        var entities = this.engine.GetEntities(this.requiredComponents);
+        for (var i = 0; i < entities.length; ++i) {
+            var moveableComponent = entities[i].GetComponent(MoveableComponent.name);
+            moveableComponent.positionComponent.position.add(moveableComponent.velocity.multiplyByScalar(deltaTime));
+        }
+    }
+}
 class PlayerSystem extends System {
     constructor() {
         super(...arguments);
         this.requiredComponents = [PlayerComponent.name];
-        this.movementSpeed = 120;
+        this.movementSpeed = 400;
     }
     Update(deltaTime) {
         var entities = this.engine.GetEntities(this.requiredComponents);
@@ -403,10 +423,31 @@ class PlayerSystem extends System {
         else if (inputComponent.moveRightActive && !inputComponent.moveLeftActive) {
             moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
         }
+        else {
+            moveableComponent.velocity = new Vector2d(0, 0);
+        }
     }
     HandleJumpingState(entity, playerComponent, inputComponent, moveableComponent) {
     }
     HandleMovingState(entity, playerComponent, inputComponent, moveableComponent) {
+    }
+}
+class RenderingSystem extends System {
+    constructor() {
+        super(...arguments);
+        this.requiredComponents = [RenderableComponent.name];
+    }
+    Update(deltaTime) {
+        var context = Game.Instance.context;
+        context.clearRect(0, 0, 800, 600);
+        var entities = this.engine.GetEntities(this.requiredComponents);
+        for (var i = 0; i < entities.length; ++i) {
+            var renderableComponent = entities[i].GetComponent(RenderableComponent.name);
+            context.beginPath();
+            context.fillStyle = '#f0f';
+            context.strokeStyle = '#f0f';
+            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, 100, 50);
+        }
     }
 }
 //# sourceMappingURL=all.js.map

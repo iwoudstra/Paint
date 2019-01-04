@@ -2,7 +2,7 @@
 
 class PlayerSystem extends System {
     private requiredComponents: string[] = [PlayerComponent.name];
-    private movementSpeed: number = 120;
+    private movementSpeed: number = 400;
 
     public Update(deltaTime: number): void {
         var entities = this.engine.GetEntities(this.requiredComponents);
@@ -33,6 +33,8 @@ class PlayerSystem extends System {
             moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
         } else if (inputComponent.moveRightActive && !inputComponent.moveLeftActive) {
             moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
+        } else {
+            moveableComponent.velocity = new Vector2d(0, 0);
         }
     }
 

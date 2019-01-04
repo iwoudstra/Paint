@@ -22,28 +22,28 @@
 
         var player = new Entity("player");
         player.AddComponent(new InputComponent());
-        var moveableComponent = new MoveableComponent();
-        player.AddComponent(moveableComponent);
         var positionComponent = new PositionComponent()
         player.AddComponent(positionComponent);
-        player.AddComponent(new RenderableComponent());
+        var moveableComponent = new MoveableComponent(positionComponent);
+        player.AddComponent(moveableComponent);
+        player.AddComponent(new RenderableComponent(positionComponent));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent));
 
         this.engine.AddEntity(player);
 
-        this.lastTime = Date.now();
-        this.Handle();
+        this.lastTime = performance.now();
+        this.Handle(this.lastTime);
     }
 
-    public Handle(): void {
-        this.now = Date.now();
+    public Handle(timestamp: number): void {
+        this.now = timestamp;
         this.deltaTime = (this.now - this.lastTime) / 1000.0;
 
         this.engine.Update(this.deltaTime);
 
         this.lastTime = this.now;
-        window.requestAnimationFrame(function (_: number) {
-            Game.Instance.Handle();
+        window.requestAnimationFrame(function (newTimestamp: number) {
+            Game.Instance.Handle(newTimestamp);
         });
     }
 }
