@@ -90,6 +90,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
     <TypeScriptCompile Include="model\components\movablecomponent.ts" />
+    <TypeScriptCompile Include="model\components\playercomponent.ts" />
     <TypeScriptCompile Include="model\components\positioncomponent.ts" />
     <TypeScriptCompile Include="model\components\renderablecomponent.ts" />
     <TypeScriptCompile Include="model\core\engine.ts" />
@@ -100,6 +101,7 @@
     <TypeScriptCompile Include="model\helper\vector2d.ts" />
     <TypeScriptCompile Include="model\player.ts" />
     <TypeScriptCompile Include="model\systems\inputhandlingsystem.ts" />
+    <TypeScriptCompile Include="model\systems\playersystem.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

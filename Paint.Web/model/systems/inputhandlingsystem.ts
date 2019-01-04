@@ -1,20 +1,20 @@
 ﻿/// <reference path="../core/system.ts" />
 
 class InputHandlingSystem extends System {
-    private requiredComponents: string[] = [InputComponent.name, PositionComponent.name, MoveableComponent.name];
+    private requiredComponents: string[] = [InputComponent.name];
 
     constructor(engine: Engine) {
         super(engine);
 
-        window.addEventListener("keydown", this.HandleKeyDown);
-        window.addEventListener("keyup", this.HandleKeyUp);
+        document.body.addEventListener("keydown", this.HandleKeyDown);
+        document.body.addEventListener("keyup", this.HandleKeyUp);
     }
 
-    private HandleKeyDown(ev: KeyboardEvent) {
+    private HandleKeyDown = (ev: KeyboardEvent) => {
         this.HandleKey(ev, true);
     }
 
-    private HandleKeyUp(ev: KeyboardEvent) {
+    private HandleKeyUp = (ev: KeyboardEvent) => {
         this.HandleKey(ev, false);
     }
 

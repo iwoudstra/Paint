@@ -7,11 +7,28 @@ class Game {
     static get Instance() {
         return this._instance || (this._instance = new this());
     }
+    Init() {
+        this.engine = new Engine();
+        var player = new Entity("player");
+        player.AddComponent(new InputComponent());
+        var moveableComponent = new MoveableComponent();
+        player.AddComponent(moveableComponent);
+        var positionComponent = new PositionComponent();
+        player.AddComponent(positionComponent);
+        player.AddComponent(new RenderableComponent());
+        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent));
+        this.engine.AddEntity(player);
+        this.lastTime = Date.now();
+        this.Handle();
+    }
     Handle() {
         this.now = Date.now();
         this.deltaTime = (this.now - this.lastTime) / 1000.0;
+        this.engine.Update(this.deltaTime);
         this.lastTime = this.now;
-        this.requestAnimFrame(this.Handle);
+        window.requestAnimationFrame(function (_) {
+            Game.Instance.Handle();
+        });
     }
 }
 class Player {
@@ -27,14 +44,41 @@ class InputComponent extends Component {
     }
 }
 class MoveableComponent extends Component {
+    constructor() {
+        super(...arguments);
+        this.velocity = new Vector2d(0, 0);
+    }
+}
+var PlayerState;
+(function (PlayerState) {
+    PlayerState[PlayerState["Idle"] = 0] = "Idle";
+    PlayerState[PlayerState["Moving"] = 1] = "Moving";
+    PlayerState[PlayerState["Jumping"] = 2] = "Jumping";
+})(PlayerState || (PlayerState = {}));
+class PlayerComponent extends Component {
+    constructor(positionComponent, moveableComponent) {
+        super();
+        this.currentState = PlayerState.Idle;
+        this.positionComponent = positionComponent;
+        this.moveableComponent = moveableComponent;
+    }
 }
 class PositionComponent extends Component {
+    constructor() {
+        super(...arguments);
+        this.position = new Vector2d(0, 0);
+    }
 }
 class RenderableComponent {
 }
 class Engine {
     constructor() {
+        this.entities = [];
+        this.entityNames = new Map();
+        this.systems = [];
         this.updating = false;
+        this.systems.push(new PlayerSystem(this));
+        this.systems.push(new InputHandlingSystem(this));
     }
     AddEntity(entity) {
         if (this.entityNames.has(entity.name)) {
@@ -54,7 +98,7 @@ class Engine {
         return null;
     }
     GetEntities(componentTypes) {
-        var result;
+        var result = [];
         for (var i = 0; i < this.entities.length; ++i) {
             if (this.entities[i].HasComponents(componentTypes)) {
                 result.push(this.entities[i]);
@@ -72,6 +116,7 @@ class Engine {
 }
 class Entity {
     constructor(name) {
+        this.components = new Map();
         if (name) {
             this._name = name;
         }
@@ -284,15 +329,15 @@ class Vector2d {
 class InputHandlingSystem extends System {
     constructor(engine) {
         super(engine);
-        this.requiredComponents = [InputComponent.name, PositionComponent.name, MoveableComponent.name];
-        window.addEventListener("keydown", this.HandleKeyDown);
-        window.addEventListener("keyup", this.HandleKeyUp);
-    }
-    HandleKeyDown(ev) {
-        this.HandleKey(ev, true);
-    }
-    HandleKeyUp(ev) {
-        this.HandleKey(ev, false);
+        this.requiredComponents = [InputComponent.name];
+        this.HandleKeyDown = (ev) => {
+            this.HandleKey(ev, true);
+        };
+        this.HandleKeyUp = (ev) => {
+            this.HandleKey(ev, false);
+        };
+        document.body.addEventListener("keydown", this.HandleKeyDown);
+        document.body.addEventListener("keyup", this.HandleKeyUp);
     }
     HandleKey(ev, active) {
         if (ev.repeat) {
@@ -321,6 +366,47 @@ class InputHandlingSystem extends System {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
         }
+    }
+}
+class PlayerSystem extends System {
+    constructor() {
+        super(...arguments);
+        this.requiredComponents = [PlayerComponent.name];
+        this.movementSpeed = 120;
+    }
+    Update(deltaTime) {
+        var entities = this.engine.GetEntities(this.requiredComponents);
+        for (var i = 0; i < entities.length; ++i) {
+            var playerComponent = entities[i].GetComponent(PlayerComponent.name);
+            var inputComponent = entities[i].GetComponent(InputComponent.name);
+            var moveableComponent = entities[i].GetComponent(MoveableComponent.name);
+            switch (playerComponent.currentState) {
+                case PlayerState.Idle: {
+                    this.HandleIdleState(entities[i], playerComponent, inputComponent, moveableComponent);
+                    break;
+                }
+                case PlayerState.Jumping: {
+                    this.HandleJumpingState(entities[i], playerComponent, inputComponent, moveableComponent);
+                    break;
+                }
+                case PlayerState.Moving: {
+                    this.HandleMovingState(entities[i], playerComponent, inputComponent, moveableComponent);
+                    break;
+                }
+            }
+        }
+    }
+    HandleIdleState(entity, playerComponent, inputComponent, moveableComponent) {
+        if (inputComponent.moveLeftActive && !inputComponent.moveRightActive) {
+            moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
+        }
+        else if (inputComponent.moveRightActive && !inputComponent.moveLeftActive) {
+            moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
+        }
+    }
+    HandleJumpingState(entity, playerComponent, inputComponent, moveableComponent) {
+    }
+    HandleMovingState(entity, playerComponent, inputComponent, moveableComponent) {
     }
 }
 //# sourceMappingURL=all.js.map

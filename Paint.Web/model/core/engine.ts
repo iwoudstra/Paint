@@ -1,8 +1,13 @@
 ﻿class Engine {
-    private entities: Entity[];
-    private entityNames: Map<string, Entity>;
-    private systems: System[];
+    private entities: Entity[] = [];
+    private entityNames: Map<string, Entity> = new Map<string, Entity>();
+    private systems: System[] = [];
     private updating: boolean = false;
+
+    constructor() {
+        this.systems.push(new PlayerSystem(this));
+        this.systems.push(new InputHandlingSystem(this));
+    }
 
     public AddEntity(entity: Entity): void {
         if (this.entityNames.has(entity.name)) {
@@ -27,7 +32,7 @@
     }
 
     public GetEntities(componentTypes: string[]): Entity[] {
-        var result: Entity[];
+        var result: Entity[] = [];
 
         for (var i = 0; i < this.entities.length; ++i) {
             if (this.entities[i].HasComponents(componentTypes)) {

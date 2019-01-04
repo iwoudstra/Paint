@@ -6,7 +6,7 @@
         return this._name;
     }
 
-    components: Map<string, Component>;
+    components: Map<string, Component> = new Map<string, Component>();
 
     constructor(name?: string) {
         if (name) {
