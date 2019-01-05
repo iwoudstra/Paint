@@ -7,7 +7,7 @@ class MovingSystem extends System {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
             var moveableComponent: MoveableComponent = <MoveableComponent>entities[i].GetComponent(MoveableComponent.name);
-            moveableComponent.positionComponent.position.add(moveableComponent.velocity.multiplyByScalar(deltaTime));
+            moveableComponent.positionComponent.position.add(moveableComponent.velocity.clone().multiplyByScalar(deltaTime));
         }
     }
 }

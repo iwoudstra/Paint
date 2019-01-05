@@ -10,13 +10,14 @@ class Game {
     Init() {
         this.engine = new Engine();
         var player = new Entity("player");
-        player.AddComponent(new InputComponent());
+        var inputComponent = new InputComponent();
+        player.AddComponent(inputComponent);
         var positionComponent = new PositionComponent();
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
         player.AddComponent(new RenderableComponent(positionComponent));
-        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent));
+        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
         this.engine.AddEntity(player);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
@@ -55,13 +56,15 @@ var PlayerState;
     PlayerState[PlayerState["Idle"] = 0] = "Idle";
     PlayerState[PlayerState["Moving"] = 1] = "Moving";
     PlayerState[PlayerState["Jumping"] = 2] = "Jumping";
+    PlayerState[PlayerState["Falling"] = 3] = "Falling";
 })(PlayerState || (PlayerState = {}));
 class PlayerComponent extends Component {
-    constructor(positionComponent, moveableComponent) {
+    constructor(positionComponent, moveableComponent, inputComponent) {
         super();
         this.currentState = PlayerState.Idle;
         this.positionComponent = positionComponent;
         this.moveableComponent = moveableComponent;
+        this.inputComponent = inputComponent;
     }
 }
 class PositionComponent extends Component {
@@ -384,7 +387,7 @@ class MovingSystem extends System {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
             var moveableComponent = entities[i].GetComponent(MoveableComponent.name);
-            moveableComponent.positionComponent.position.add(moveableComponent.velocity.multiplyByScalar(deltaTime));
+            moveableComponent.positionComponent.position.add(moveableComponent.velocity.clone().multiplyByScalar(deltaTime));
         }
     }
 }
@@ -393,43 +396,61 @@ class PlayerSystem extends System {
         super(...arguments);
         this.requiredComponents = [PlayerComponent.name];
         this.movementSpeed = 400;
+        this.fallSpeed = 800;
     }
     Update(deltaTime) {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
             var playerComponent = entities[i].GetComponent(PlayerComponent.name);
-            var inputComponent = entities[i].GetComponent(InputComponent.name);
-            var moveableComponent = entities[i].GetComponent(MoveableComponent.name);
             switch (playerComponent.currentState) {
                 case PlayerState.Idle: {
-                    this.HandleIdleState(entities[i], playerComponent, inputComponent, moveableComponent);
-                    break;
-                }
-                case PlayerState.Jumping: {
-                    this.HandleJumpingState(entities[i], playerComponent, inputComponent, moveableComponent);
+                    this.HandleIdleState(entities[i], playerComponent);
                     break;
                 }
                 case PlayerState.Moving: {
-                    this.HandleMovingState(entities[i], playerComponent, inputComponent, moveableComponent);
+                    this.HandleMovingState(entities[i], playerComponent);
+                    break;
+                }
+                case PlayerState.Jumping: {
+                    this.HandleJumpingState(entities[i], playerComponent);
+                    break;
+                }
+                case PlayerState.Falling: {
+                    this.HandleFallingState(entities[i], playerComponent);
                     break;
                 }
             }
         }
     }
-    HandleIdleState(entity, playerComponent, inputComponent, moveableComponent) {
-        if (inputComponent.moveLeftActive && !inputComponent.moveRightActive) {
-            moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
+    IsOnGround(playerComponent) {
+        return playerComponent.positionComponent.position.y >= 500;
+    }
+    HandleIdleState(entity, playerComponent) {
+        if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
+            playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
         }
-        else if (inputComponent.moveRightActive && !inputComponent.moveLeftActive) {
-            moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
+        else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
+            playerComponent.moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
         }
         else {
-            moveableComponent.velocity = new Vector2d(0, 0);
+            playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
+        }
+        if (!this.IsOnGround(playerComponent)) {
+            playerComponent.currentState = PlayerState.Falling;
         }
     }
-    HandleJumpingState(entity, playerComponent, inputComponent, moveableComponent) {
+    HandleMovingState(entity, playerComponent) {
     }
-    HandleMovingState(entity, playerComponent, inputComponent, moveableComponent) {
+    HandleJumpingState(entity, playerComponent) {
+    }
+    HandleFallingState(entity, playerComponent) {
+        if (this.IsOnGround(playerComponent)) {
+            playerComponent.moveableComponent.velocity.y = 0;
+            playerComponent.currentState = PlayerState.Idle;
+        }
+        else {
+            playerComponent.moveableComponent.velocity.y = ((playerComponent.moveableComponent.velocity.y * 7.0) + this.fallSpeed) / 8.0;
+        }
     }
 }
 class RenderingSystem extends System {
@@ -446,7 +467,7 @@ class RenderingSystem extends System {
             context.beginPath();
             context.fillStyle = '#f0f';
             context.strokeStyle = '#f0f';
-            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, 100, 50);
+            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, 50, 100);
         }
     }
 }

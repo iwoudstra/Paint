@@ -21,13 +21,14 @@
         this.engine = new Engine();
 
         var player = new Entity("player");
-        player.AddComponent(new InputComponent());
+        var inputComponent = new InputComponent()
+        player.AddComponent(inputComponent);
         var positionComponent = new PositionComponent()
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
         player.AddComponent(new RenderableComponent(positionComponent));
-        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent));
+        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
 
         this.engine.AddEntity(player);
 

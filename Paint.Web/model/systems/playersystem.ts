@@ -3,46 +3,66 @@
 class PlayerSystem extends System {
     private requiredComponents: string[] = [PlayerComponent.name];
     private movementSpeed: number = 400;
+    private fallSpeed: number = 800;
 
     public Update(deltaTime: number): void {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
             var playerComponent: PlayerComponent = <PlayerComponent>entities[i].GetComponent(PlayerComponent.name);
-            var inputComponent: InputComponent = <InputComponent>entities[i].GetComponent(InputComponent.name);
-            var moveableComponent: MoveableComponent = <MoveableComponent>entities[i].GetComponent(MoveableComponent.name);
 
             switch (playerComponent.currentState) {
                 case PlayerState.Idle: {
-                    this.HandleIdleState(entities[i], playerComponent, inputComponent, moveableComponent);
-                    break;
-                }
-                case PlayerState.Jumping: {
-                    this.HandleJumpingState(entities[i], playerComponent, inputComponent, moveableComponent);
+                    this.HandleIdleState(entities[i], playerComponent);
                     break;
                 }
                 case PlayerState.Moving: {
-                    this.HandleMovingState(entities[i], playerComponent, inputComponent, moveableComponent);
+                    this.HandleMovingState(entities[i], playerComponent);
+                    break;
+                }
+                case PlayerState.Jumping: {
+                    this.HandleJumpingState(entities[i], playerComponent);
+                    break;
+                }
+                case PlayerState.Falling: {
+                    this.HandleFallingState(entities[i], playerComponent);
                     break;
                 }
             }
         }
     }
 
-    private HandleIdleState(entity: Entity, playerComponent: PlayerComponent, inputComponent: InputComponent, moveableComponent: MoveableComponent): void {
-        if (inputComponent.moveLeftActive && !inputComponent.moveRightActive) {
-            moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
-        } else if (inputComponent.moveRightActive && !inputComponent.moveLeftActive) {
-            moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
+    private IsOnGround(playerComponent: PlayerComponent): boolean {
+        return playerComponent.positionComponent.position.y >= 500;
+    }
+
+    private HandleIdleState(entity: Entity, playerComponent: PlayerComponent): void {
+        if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
+            playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
+        } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
+            playerComponent.moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
         } else {
-            moveableComponent.velocity = new Vector2d(0, 0);
+            playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
+        }
+
+        if (!this.IsOnGround(playerComponent)) {
+            playerComponent.currentState = PlayerState.Falling;
         }
     }
 
-    private HandleJumpingState(entity: Entity, playerComponent: PlayerComponent, inputComponent: InputComponent, moveableComponent: MoveableComponent): void {
+    private HandleMovingState(entity: Entity, playerComponent: PlayerComponent): void {
 
     }
 
-    private HandleMovingState(entity: Entity, playerComponent: PlayerComponent, inputComponent: InputComponent, moveableComponent: MoveableComponent): void {
+    private HandleJumpingState(entity: Entity, playerComponent: PlayerComponent): void {
 
+    }
+
+    private HandleFallingState(entity: Entity, playerComponent: PlayerComponent): void {
+        if (this.IsOnGround(playerComponent)) {
+            playerComponent.moveableComponent.velocity.y = 0;
+            playerComponent.currentState = PlayerState.Idle;
+        } else {
+            playerComponent.moveableComponent.velocity.y = ((playerComponent.moveableComponent.velocity.y * 7.0) + this.fallSpeed) / 8.0;
+        }
     }
 }

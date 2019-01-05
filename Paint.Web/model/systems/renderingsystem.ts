@@ -13,7 +13,7 @@ class RenderingSystem extends System {
             context.beginPath();
             context.fillStyle = '#f0f';
             context.strokeStyle = '#f0f';
-            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, 100, 50);
+            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, 50, 100);
         }
     }
 }
