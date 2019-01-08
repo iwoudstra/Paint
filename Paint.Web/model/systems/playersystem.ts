@@ -31,10 +31,6 @@ class PlayerSystem extends System {
         }
     }
 
-    private IsOnGround(playerComponent: PlayerComponent): boolean {
-        return playerComponent.positionComponent.position.y >= 500;
-    }
-
     private HandleIdleState(entity: Entity, playerComponent: PlayerComponent): void {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
@@ -44,7 +40,7 @@ class PlayerSystem extends System {
             playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
         }
 
-        if (!this.IsOnGround(playerComponent)) {
+        if (!MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
         }
     }
@@ -58,7 +54,7 @@ class PlayerSystem extends System {
     }
 
     private HandleFallingState(entity: Entity, playerComponent: PlayerComponent): void {
-        if (this.IsOnGround(playerComponent)) {
+        if (MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
             playerComponent.currentState = PlayerState.Idle;
         } else {

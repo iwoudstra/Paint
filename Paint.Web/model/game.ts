@@ -27,10 +27,20 @@
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        player.AddComponent(new RenderableComponent(positionComponent));
+        player.AddComponent(new RenderableComponent(positionComponent, 50, 100, '#ff00ff'));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
 
         this.engine.AddEntity(player);
+
+        var platform1 = new Entity("platform1");
+        var positionComponentPlatform = new PositionComponent();
+        positionComponentPlatform.position = new Vector2d(0, 200);
+        positionComponentPlatform.width = 200;
+        positionComponentPlatform.height = 10;
+        platform1.AddComponent(positionComponentPlatform);
+        platform1.AddComponent(new RenderableComponent(positionComponentPlatform, 200, 10, '#0000ff'));
+        platform1.AddComponent(new PlatformComponent(positionComponentPlatform, 200, 10));
+        this.engine.AddEntity(platform1);
 
         this.lastTime = performance.now();
         this.Handle(this.lastTime);

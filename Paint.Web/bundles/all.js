@@ -16,9 +16,18 @@ class Game {
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        player.AddComponent(new RenderableComponent(positionComponent));
+        player.AddComponent(new RenderableComponent(positionComponent, 50, 100, '#ff00ff'));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
         this.engine.AddEntity(player);
+        var platform1 = new Entity("platform1");
+        var positionComponentPlatform = new PositionComponent();
+        positionComponentPlatform.position = new Vector2d(0, 200);
+        positionComponentPlatform.width = 200;
+        positionComponentPlatform.height = 10;
+        platform1.AddComponent(positionComponentPlatform);
+        platform1.AddComponent(new RenderableComponent(positionComponentPlatform, 200, 10, '#0000ff'));
+        platform1.AddComponent(new PlatformComponent(positionComponentPlatform, 200, 10));
+        this.engine.AddEntity(platform1);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
@@ -48,7 +57,16 @@ class MoveableComponent extends Component {
     constructor(positionComponent) {
         super();
         this.velocity = new Vector2d(0, 0);
+        this.leftoverYMovement = 0;
         this.positionComponent = positionComponent;
+    }
+}
+class PlatformComponent extends Component {
+    constructor(positionComponent, width, height) {
+        super();
+        this.positionComponent = positionComponent;
+        this.width = width;
+        this.height = height;
     }
 }
 var PlayerState;
@@ -71,12 +89,17 @@ class PositionComponent extends Component {
     constructor() {
         super(...arguments);
         this.position = new Vector2d(0, 0);
+        this.width = 50;
+        this.height = 100;
     }
 }
 class RenderableComponent extends Component {
-    constructor(positionComponent) {
+    constructor(positionComponent, width, height, color) {
         super();
         this.positionComponent = positionComponent;
+        this.width = width;
+        this.height = height;
+        this.color = color;
     }
 }
 class Engine {
@@ -383,11 +406,42 @@ class MovingSystem extends System {
         super(...arguments);
         this.requiredComponents = [MoveableComponent.name];
     }
+    static IsOnGround(engine, moveableComponent) {
+        var platforms = engine.GetEntities([PlatformComponent.name]);
+        for (var i = 0; i < platforms.length; ++i) {
+            var platformComponent = platforms[i].GetComponent(PlatformComponent.name);
+            if ((moveableComponent.positionComponent.position.x <= platformComponent.positionComponent.position.x + platformComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > platformComponent.positionComponent.position.x)
+                && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(platformComponent.positionComponent.position.y + 0.5 * platformComponent.height))) {
+                console.log(true);
+                return true;
+            }
+        }
+        return moveableComponent.positionComponent.position.y >= 500;
+    }
     Update(deltaTime) {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
             var moveableComponent = entities[i].GetComponent(MoveableComponent.name);
-            moveableComponent.positionComponent.position.add(moveableComponent.velocity.clone().multiplyByScalar(deltaTime));
+            var movement = moveableComponent.velocity.clone().multiplyByScalar(deltaTime);
+            moveableComponent.positionComponent.position.x += movement.x;
+            if (movement.y > 0) {
+                var ymovement = movement.y + moveableComponent.leftoverYMovement;
+                for (var steps = 0; steps < ymovement; ++steps) {
+                    if (MovingSystem.IsOnGround(this.engine, moveableComponent)) {
+                        moveableComponent.leftoverYMovement = 0;
+                        moveableComponent.velocity.y = 0;
+                    }
+                    else {
+                        moveableComponent.positionComponent.position.y += 1;
+                    }
+                }
+                moveableComponent.leftoverYMovement = ymovement - Math.floor(ymovement);
+            }
+            else if (movement.y < 0) {
+                var ymovement = Math.floor(movement.y);
+                moveableComponent.positionComponent.position.y += ymovement;
+                moveableComponent.leftoverYMovement = movement.y - ymovement;
+            }
         }
     }
 }
@@ -422,9 +476,6 @@ class PlayerSystem extends System {
             }
         }
     }
-    IsOnGround(playerComponent) {
-        return playerComponent.positionComponent.position.y >= 500;
-    }
     HandleIdleState(entity, playerComponent) {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
@@ -435,7 +486,7 @@ class PlayerSystem extends System {
         else {
             playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
         }
-        if (!this.IsOnGround(playerComponent)) {
+        if (!MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
         }
     }
@@ -444,7 +495,7 @@ class PlayerSystem extends System {
     HandleJumpingState(entity, playerComponent) {
     }
     HandleFallingState(entity, playerComponent) {
-        if (this.IsOnGround(playerComponent)) {
+        if (MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
             playerComponent.currentState = PlayerState.Idle;
         }
@@ -465,9 +516,9 @@ class RenderingSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent = entities[i].GetComponent(RenderableComponent.name);
             context.beginPath();
-            context.fillStyle = '#f0f';
-            context.strokeStyle = '#f0f';
-            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, 50, 100);
+            context.fillStyle = renderableComponent.color;
+            context.strokeStyle = renderableComponent.color;
+            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
         }
     }
 }

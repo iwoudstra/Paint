@@ -11,9 +11,9 @@ class RenderingSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent: RenderableComponent = <RenderableComponent>entities[i].GetComponent(RenderableComponent.name);
             context.beginPath();
-            context.fillStyle = '#f0f';
-            context.strokeStyle = '#f0f';
-            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, 50, 100);
+            context.fillStyle = renderableComponent.color;
+            context.strokeStyle = renderableComponent.color;
+            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
         }
     }
 }
