@@ -61,7 +61,12 @@ class PlayerSystem extends System {
     }
 
     private HandleJumpingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
-        console.log(playerComponent.moveableComponent.velocity.y);
+        if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
+            playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
+        } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
+            playerComponent.moveableComponent.velocity.x = this.movementSpeed;
+        }
+
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
             playerComponent.currentState = PlayerState.Falling;
@@ -69,12 +74,9 @@ class PlayerSystem extends System {
     }
 
     private HandleFallingState(entity: Entity, playerComponent: PlayerComponent): void {
-        var noAction = true;
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
-            noAction = false;
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
         } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
-            noAction = false;
             playerComponent.moveableComponent.velocity.x = this.movementSpeed;
         }
 
