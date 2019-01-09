@@ -466,7 +466,7 @@ class PlayerSystem extends System {
                     break;
                 }
                 case PlayerState.Jumping: {
-                    this.HandleJumpingState(entities[i], playerComponent);
+                    this.HandleJumpingState(entities[i], playerComponent, deltaTime);
                     break;
                 }
                 case PlayerState.Falling: {
@@ -477,13 +477,21 @@ class PlayerSystem extends System {
         }
     }
     HandleIdleState(entity, playerComponent) {
+        var noAction = true;
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
+            noAction = false;
             playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
         }
         else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
+            noAction = false;
             playerComponent.moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
         }
-        else {
+        if (playerComponent.inputComponent.jumpActive) {
+            noAction = false;
+            playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
+            playerComponent.currentState = PlayerState.Jumping;
+        }
+        if (noAction) {
             playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
         }
         if (!MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
@@ -492,9 +500,23 @@ class PlayerSystem extends System {
     }
     HandleMovingState(entity, playerComponent) {
     }
-    HandleJumpingState(entity, playerComponent) {
+    HandleJumpingState(entity, playerComponent, deltaTime) {
+        console.log(playerComponent.moveableComponent.velocity.y);
+        playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
+        if (playerComponent.moveableComponent.velocity.y >= 0) {
+            playerComponent.currentState = PlayerState.Falling;
+        }
     }
     HandleFallingState(entity, playerComponent) {
+        var noAction = true;
+        if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
+            noAction = false;
+            playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
+        }
+        else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
+            noAction = false;
+            playerComponent.moveableComponent.velocity.x = this.movementSpeed;
+        }
         if (MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
             playerComponent.currentState = PlayerState.Idle;
