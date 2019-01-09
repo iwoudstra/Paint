@@ -28,6 +28,15 @@ class Game {
         platform1.AddComponent(new RenderableComponent(positionComponentPlatform, 200, 10, '#0000ff'));
         platform1.AddComponent(new PlatformComponent(positionComponentPlatform, 200, 10));
         this.engine.AddEntity(platform1);
+        var platform2 = new Entity("platform2");
+        var positionComponentPlatform = new PositionComponent();
+        positionComponentPlatform.position = new Vector2d(200, 400);
+        positionComponentPlatform.width = 200;
+        positionComponentPlatform.height = 10;
+        platform2.AddComponent(positionComponentPlatform);
+        platform2.AddComponent(new RenderableComponent(positionComponentPlatform, 200, 10, '#0000ff'));
+        platform2.AddComponent(new PlatformComponent(positionComponentPlatform, 200, 10));
+        this.engine.AddEntity(platform2);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
