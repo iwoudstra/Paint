@@ -65,6 +65,8 @@ class PlayerSystem extends System {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
         } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             playerComponent.moveableComponent.velocity.x = this.movementSpeed;
+        } else {
+            playerComponent.moveableComponent.velocity.x = 0;
         }
 
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
@@ -78,6 +80,8 @@ class PlayerSystem extends System {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
         } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             playerComponent.moveableComponent.velocity.x = this.movementSpeed;
+        } else {
+            playerComponent.moveableComponent.velocity.x = 0;
         }
 
 

@@ -4,6 +4,7 @@ class RenderingSystem extends System {
     private requiredComponents: string[] = [RenderableComponent.name];
 
     public Update(deltaTime: number): void {
+        var camera = <CameraComponent>this.engine.GetEntities([CameraComponent.name])[0].GetComponent(CameraComponent.name);
         var context = Game.Instance.context;
         context.clearRect(0, 0, 800, 600);
 
@@ -13,7 +14,7 @@ class RenderingSystem extends System {
             context.beginPath();
             context.fillStyle = renderableComponent.color;
             context.strokeStyle = renderableComponent.color;
-            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
+            context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿/// <reference path="../core/component.ts" />
 
-class PlatformComponent extends Component {
+class CameraComponent extends Component {
     positionComponent: PositionComponent;
+    horizontalTime: number = 0;
+    horizontalDirection: number = 0;
 
     constructor(positionComponent: PositionComponent) {
         super();

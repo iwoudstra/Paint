@@ -19,24 +19,13 @@ class Game {
         player.AddComponent(new RenderableComponent(positionComponent, 50, 100, '#ff00ff'));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
         this.engine.AddEntity(player);
-        var platform1 = new Entity("platform1");
-        var positionComponentPlatform = new PositionComponent();
-        positionComponentPlatform.position = new Vector2d(0, 200);
-        positionComponentPlatform.width = 200;
-        positionComponentPlatform.height = 10;
-        platform1.AddComponent(positionComponentPlatform);
-        platform1.AddComponent(new RenderableComponent(positionComponentPlatform, 200, 10, '#0000ff'));
-        platform1.AddComponent(new PlatformComponent(positionComponentPlatform, 200, 10));
-        this.engine.AddEntity(platform1);
-        var platform2 = new Entity("platform2");
-        var positionComponentPlatform = new PositionComponent();
-        positionComponentPlatform.position = new Vector2d(200, 400);
-        positionComponentPlatform.width = 200;
-        positionComponentPlatform.height = 10;
-        platform2.AddComponent(positionComponentPlatform);
-        platform2.AddComponent(new RenderableComponent(positionComponentPlatform, 200, 10, '#0000ff'));
-        platform2.AddComponent(new PlatformComponent(positionComponentPlatform, 200, 10));
-        this.engine.AddEntity(platform2);
+        this.engine.AddEntity(EntityHelper.CreatePlatform(0, 200, 200, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(200, 400, 200, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(300, 400, 50, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(550, 450, 200, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(600, 250, 150, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(700, 500, 100, 10));
+        this.engine.AddEntity(EntityHelper.CreateCamera());
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
@@ -53,6 +42,14 @@ class Game {
 class Player {
 }
 class Component {
+}
+class CameraComponent extends Component {
+    constructor(positionComponent) {
+        super();
+        this.horizontalTime = 0;
+        this.horizontalDirection = 0;
+        this.positionComponent = positionComponent;
+    }
 }
 class InputComponent extends Component {
     constructor() {
@@ -71,11 +68,9 @@ class MoveableComponent extends Component {
     }
 }
 class PlatformComponent extends Component {
-    constructor(positionComponent, width, height) {
+    constructor(positionComponent) {
         super();
         this.positionComponent = positionComponent;
-        this.width = width;
-        this.height = height;
     }
 }
 var PlayerState;
@@ -120,6 +115,7 @@ class Engine {
         this.systems.push(new PlayerSystem(this));
         this.systems.push(new InputHandlingSystem(this));
         this.systems.push(new MovingSystem(this));
+        this.systems.push(new CameraSystem(this));
         this.systems.push(new RenderingSystem(this));
     }
     AddEntity(entity) {
@@ -208,6 +204,26 @@ class System {
     constructor(engine) {
         this.priority = 0;
         this.engine = engine;
+    }
+}
+class EntityHelper {
+    static CreatePlatform(x, y, width, height) {
+        var platform = new Entity();
+        var positionComponent = new PositionComponent();
+        positionComponent.position = new Vector2d(x, y);
+        positionComponent.width = width;
+        positionComponent.height = height;
+        platform.AddComponent(positionComponent);
+        platform.AddComponent(new RenderableComponent(positionComponent, width, height, '#0000ff'));
+        platform.AddComponent(new PlatformComponent(positionComponent));
+        return platform;
+    }
+    static CreateCamera() {
+        var camera = new Entity();
+        var positionComponent = new PositionComponent();
+        camera.AddComponent(positionComponent);
+        camera.AddComponent(new CameraComponent(positionComponent));
+        return camera;
     }
 }
 const precision = [
@@ -368,6 +384,62 @@ class Vector2d {
         return new Vector2d(this.x, this.y);
     }
 }
+class CameraSystem extends System {
+    constructor() {
+        super(...arguments);
+        this.requiredComponents = [MoveableComponent.name];
+    }
+    Update(deltaTime) {
+        var player = this.engine.GetEntities([PlayerComponent.name])[0].GetComponent(PlayerComponent.name);
+        var camera = this.engine.GetEntities([CameraComponent.name])[0].GetComponent(CameraComponent.name);
+        if (player.moveableComponent.velocity.x < 0) {
+            if (camera.horizontalDirection < 0) {
+                camera.horizontalTime += deltaTime;
+            }
+            else {
+                camera.horizontalDirection = player.moveableComponent.velocity.x;
+                camera.horizontalTime = deltaTime;
+            }
+        }
+        else if (player.moveableComponent.velocity.x > 0) {
+            if (camera.horizontalDirection > 0) {
+                camera.horizontalTime += deltaTime;
+            }
+            else {
+                camera.horizontalDirection = player.moveableComponent.velocity.x;
+                camera.horizontalTime = deltaTime;
+            }
+        }
+        else {
+            if (camera.horizontalTime !== 0) {
+                camera.horizontalTime = 0;
+            }
+            camera.horizontalDirection = 0;
+            camera.horizontalTime += deltaTime;
+        }
+        var preferredXPosition = camera.positionComponent.position.x;
+        var speedFactor = 32;
+        if (camera.horizontalTime > 0.5) {
+            speedFactor = 8;
+            if (camera.horizontalDirection < 0) {
+                preferredXPosition = player.positionComponent.position.x - 600;
+            }
+            else if (camera.horizontalDirection > 0) {
+                preferredXPosition = player.positionComponent.position.x - 200;
+            }
+            else {
+                preferredXPosition = player.positionComponent.position.x - 400;
+            }
+        }
+        else {
+            preferredXPosition = player.positionComponent.position.x - 400;
+        }
+        if (preferredXPosition < 0) {
+            preferredXPosition = 0;
+        }
+        camera.positionComponent.position.x = (camera.positionComponent.position.x * (speedFactor - 1) + preferredXPosition) / speedFactor;
+    }
+}
 class InputHandlingSystem extends System {
     constructor(engine) {
         super(engine);
@@ -419,9 +491,8 @@ class MovingSystem extends System {
         var platforms = engine.GetEntities([PlatformComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
             var platformComponent = platforms[i].GetComponent(PlatformComponent.name);
-            if ((moveableComponent.positionComponent.position.x <= platformComponent.positionComponent.position.x + platformComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > platformComponent.positionComponent.position.x)
-                && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(platformComponent.positionComponent.position.y + 0.5 * platformComponent.height))) {
-                console.log(true);
+            if ((moveableComponent.positionComponent.position.x <= platformComponent.positionComponent.position.x + platformComponent.positionComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > platformComponent.positionComponent.position.x)
+                && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(platformComponent.positionComponent.position.y + 0.5 * platformComponent.positionComponent.height))) {
                 return true;
             }
         }
@@ -433,6 +504,9 @@ class MovingSystem extends System {
             var moveableComponent = entities[i].GetComponent(MoveableComponent.name);
             var movement = moveableComponent.velocity.clone().multiplyByScalar(deltaTime);
             moveableComponent.positionComponent.position.x += movement.x;
+            if (moveableComponent.positionComponent.position.x < 0) {
+                moveableComponent.positionComponent.position.x = 0;
+            }
             if (movement.y > 0) {
                 var ymovement = movement.y + moveableComponent.leftoverYMovement;
                 for (var steps = 0; steps < ymovement; ++steps) {
@@ -516,6 +590,9 @@ class PlayerSystem extends System {
         else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             playerComponent.moveableComponent.velocity.x = this.movementSpeed;
         }
+        else {
+            playerComponent.moveableComponent.velocity.x = 0;
+        }
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
             playerComponent.currentState = PlayerState.Falling;
@@ -527,6 +604,9 @@ class PlayerSystem extends System {
         }
         else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             playerComponent.moveableComponent.velocity.x = this.movementSpeed;
+        }
+        else {
+            playerComponent.moveableComponent.velocity.x = 0;
         }
         if (MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
@@ -543,6 +623,7 @@ class RenderingSystem extends System {
         this.requiredComponents = [RenderableComponent.name];
     }
     Update(deltaTime) {
+        var camera = this.engine.GetEntities([CameraComponent.name])[0].GetComponent(CameraComponent.name);
         var context = Game.Instance.context;
         context.clearRect(0, 0, 800, 600);
         var entities = this.engine.GetEntities(this.requiredComponents);
@@ -551,7 +632,7 @@ class RenderingSystem extends System {
             context.beginPath();
             context.fillStyle = renderableComponent.color;
             context.strokeStyle = renderableComponent.color;
-            context.fillRect(renderableComponent.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
+            context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
         }
     }
 }

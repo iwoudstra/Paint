@@ -32,25 +32,13 @@
 
         this.engine.AddEntity(player);
 
-        var platform1 = new Entity("platform1");
-        var positionComponentPlatform = new PositionComponent();
-        positionComponentPlatform.position = new Vector2d(0, 200);
-        positionComponentPlatform.width = 200;
-        positionComponentPlatform.height = 10;
-        platform1.AddComponent(positionComponentPlatform);
-        platform1.AddComponent(new RenderableComponent(positionComponentPlatform, 200, 10, '#0000ff'));
-        platform1.AddComponent(new PlatformComponent(positionComponentPlatform, 200, 10));
-        this.engine.AddEntity(platform1);
-
-        var platform2 = new Entity("platform2");
-        var positionComponentPlatform = new PositionComponent();
-        positionComponentPlatform.position = new Vector2d(200, 400);
-        positionComponentPlatform.width = 200;
-        positionComponentPlatform.height = 10;
-        platform2.AddComponent(positionComponentPlatform);
-        platform2.AddComponent(new RenderableComponent(positionComponentPlatform, 200, 10, '#0000ff'));
-        platform2.AddComponent(new PlatformComponent(positionComponentPlatform, 200, 10));
-        this.engine.AddEntity(platform2);
+        this.engine.AddEntity(EntityHelper.CreatePlatform(0, 200, 200, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(200, 400, 200, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(300, 400, 50, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(550, 450, 200, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(600, 250, 150, 10));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(700, 500, 100, 10));
+        this.engine.AddEntity(EntityHelper.CreateCamera());
 
         this.lastTime = performance.now();
         this.Handle(this.lastTime);

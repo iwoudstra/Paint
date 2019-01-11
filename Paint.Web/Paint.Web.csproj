@@ -88,6 +88,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="model\components\cameracomponent.ts" />
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
     <TypeScriptCompile Include="model\components\movablecomponent.ts" />
     <TypeScriptCompile Include="model\components\platformcomponent.ts" />
@@ -99,8 +100,10 @@
     <TypeScriptCompile Include="model\core\component.ts" />
     <TypeScriptCompile Include="model\core\system.ts" />
     <TypeScriptCompile Include="model\game.ts" />
+    <TypeScriptCompile Include="model\helper\entityhelper.ts" />
     <TypeScriptCompile Include="model\helper\vector2d.ts" />
     <TypeScriptCompile Include="model\player.ts" />
+    <TypeScriptCompile Include="model\systems\camerasystem.ts" />
     <TypeScriptCompile Include="model\systems\inputhandlingsystem.ts" />
     <TypeScriptCompile Include="model\systems\movingsystem.ts" />
     <TypeScriptCompile Include="model\systems\playersystem.ts" />
