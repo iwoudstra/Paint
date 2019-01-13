@@ -30,7 +30,6 @@
         player.AddComponent(new RenderableComponent(positionComponent, 50, 100, '#ff00ff'));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
 
-        this.engine.AddEntity(player);
 
         this.engine.AddEntity(EntityHelper.CreatePlatform(0, 200, 200, 10));
         this.engine.AddEntity(EntityHelper.CreatePlatform(200, 400, 200, 10));
@@ -39,6 +38,8 @@
         this.engine.AddEntity(EntityHelper.CreatePlatform(600, 250, 150, 10));
         this.engine.AddEntity(EntityHelper.CreatePlatform(700, 500, 100, 10));
         this.engine.AddEntity(EntityHelper.CreateCamera());
+
+        this.engine.AddEntity(player);
 
         this.lastTime = performance.now();
         this.Handle(this.lastTime);

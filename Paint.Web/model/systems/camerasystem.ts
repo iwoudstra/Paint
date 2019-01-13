@@ -29,17 +29,19 @@ class CameraSystem extends System {
             camera.horizontalTime += deltaTime;
         }
 
-        var preferredXPosition = camera.positionComponent.position.x;
-        var speedFactor = 32;
-        if (camera.horizontalTime > 0.5) {
-            speedFactor = 8;
-
-            if (camera.horizontalDirection < 0) {
-                preferredXPosition = player.positionComponent.position.x - 600;
-            } else if (camera.horizontalDirection > 0) {
-                preferredXPosition = player.positionComponent.position.x - 200;
+        var preferredXPosition;
+        var speedFactor = 16;
+        if (camera.horizontalDirection < 0) {
+            if (camera.horizontalTime > 0.5) {
+                preferredXPosition = player.positionComponent.position.x - 700;
             } else {
-                preferredXPosition = player.positionComponent.position.x - 400;
+                preferredXPosition = player.positionComponent.position.x - 550;
+            }
+        } else if (camera.horizontalDirection > 0) {
+            if (camera.horizontalTime > 0.5) {
+                preferredXPosition = player.positionComponent.position.x - 100;
+            } else {
+                preferredXPosition = player.positionComponent.position.x - 250;
             }
         } else {
             preferredXPosition = player.positionComponent.position.x - 400;
@@ -49,6 +51,10 @@ class CameraSystem extends System {
             preferredXPosition = 0;
         }
 
-        camera.positionComponent.position.x = (camera.positionComponent.position.x * (speedFactor - 1) + preferredXPosition) / speedFactor;
+        if (Math.abs(camera.positionComponent.position.x - preferredXPosition) < Math.abs(player.moveableComponent.velocity.x * 2 * deltaTime)) {
+            camera.positionComponent.position.x = preferredXPosition;
+        } else {
+            camera.positionComponent.position.x = (camera.positionComponent.position.x * (speedFactor - 1) + preferredXPosition) / speedFactor;
+        }
     }
 }

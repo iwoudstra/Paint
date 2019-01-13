@@ -18,7 +18,6 @@ class Game {
         player.AddComponent(moveableComponent);
         player.AddComponent(new RenderableComponent(positionComponent, 50, 100, '#ff00ff'));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
-        this.engine.AddEntity(player);
         this.engine.AddEntity(EntityHelper.CreatePlatform(0, 200, 200, 10));
         this.engine.AddEntity(EntityHelper.CreatePlatform(200, 400, 200, 10));
         this.engine.AddEntity(EntityHelper.CreatePlatform(300, 400, 50, 10));
@@ -26,6 +25,7 @@ class Game {
         this.engine.AddEntity(EntityHelper.CreatePlatform(600, 250, 150, 10));
         this.engine.AddEntity(EntityHelper.CreatePlatform(700, 500, 100, 10));
         this.engine.AddEntity(EntityHelper.CreateCamera());
+        this.engine.AddEntity(player);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
@@ -114,8 +114,8 @@ class Engine {
         this.updating = false;
         this.systems.push(new PlayerSystem(this));
         this.systems.push(new InputHandlingSystem(this));
-        this.systems.push(new MovingSystem(this));
         this.systems.push(new CameraSystem(this));
+        this.systems.push(new MovingSystem(this));
         this.systems.push(new RenderingSystem(this));
     }
     AddEntity(entity) {
@@ -417,18 +417,22 @@ class CameraSystem extends System {
             camera.horizontalDirection = 0;
             camera.horizontalTime += deltaTime;
         }
-        var preferredXPosition = camera.positionComponent.position.x;
-        var speedFactor = 32;
-        if (camera.horizontalTime > 0.5) {
-            speedFactor = 8;
-            if (camera.horizontalDirection < 0) {
-                preferredXPosition = player.positionComponent.position.x - 600;
-            }
-            else if (camera.horizontalDirection > 0) {
-                preferredXPosition = player.positionComponent.position.x - 200;
+        var preferredXPosition;
+        var speedFactor = 16;
+        if (camera.horizontalDirection < 0) {
+            if (camera.horizontalTime > 0.5) {
+                preferredXPosition = player.positionComponent.position.x - 700;
             }
             else {
-                preferredXPosition = player.positionComponent.position.x - 400;
+                preferredXPosition = player.positionComponent.position.x - 550;
+            }
+        }
+        else if (camera.horizontalDirection > 0) {
+            if (camera.horizontalTime > 0.5) {
+                preferredXPosition = player.positionComponent.position.x - 100;
+            }
+            else {
+                preferredXPosition = player.positionComponent.position.x - 250;
             }
         }
         else {
@@ -437,7 +441,12 @@ class CameraSystem extends System {
         if (preferredXPosition < 0) {
             preferredXPosition = 0;
         }
-        camera.positionComponent.position.x = (camera.positionComponent.position.x * (speedFactor - 1) + preferredXPosition) / speedFactor;
+        if (Math.abs(camera.positionComponent.position.x - preferredXPosition) < Math.abs(player.moveableComponent.velocity.x * 2 * deltaTime)) {
+            camera.positionComponent.position.x = preferredXPosition;
+        }
+        else {
+            camera.positionComponent.position.x = (camera.positionComponent.position.x * (speedFactor - 1) + preferredXPosition) / speedFactor;
+        }
     }
 }
 class InputHandlingSystem extends System {
