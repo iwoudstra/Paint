@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\sprites\characterspritesheet.png" />
+    <Content Include="assets\sprites\rockplatform.png" />
     <Content Include="bundles\all.js" />
     <Content Include="index.html" />
     <Content Include="Web.config" />
@@ -89,6 +90,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="assets\sprites\characterspritesheet.ts" />
     <TypeScriptCompile Include="model\components\cameracomponent.ts" />
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
     <TypeScriptCompile Include="model\components\movablecomponent.ts" />
@@ -101,6 +103,7 @@
     <TypeScriptCompile Include="model\core\component.ts" />
     <TypeScriptCompile Include="model\core\system.ts" />
     <TypeScriptCompile Include="model\game.ts" />
+    <TypeScriptCompile Include="model\helper\gameanimation.ts" />
     <TypeScriptCompile Include="model\helper\entityhelper.ts" />
     <TypeScriptCompile Include="model\helper\vector2d.ts" />
     <TypeScriptCompile Include="model\player.ts" />

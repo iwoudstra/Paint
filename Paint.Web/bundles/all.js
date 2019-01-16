@@ -1,22 +1,29 @@
 class Game {
     constructor() {
         this.requestAnimFrame = window.requestAnimationFrame;
+        this.animations = new Map();
         this.canvas = document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
     }
     static get Instance() {
         return this._instance || (this._instance = new this());
     }
+    InitSprites() {
+        var characterspritesheet = new Image();
+        characterspritesheet.src = "assets/sprites/characterspritesheet.png";
+        this.animations.set('playerwalking', new GameAnimation(characterspritesheet, 0, 361, 391, 361, 6, 'playerwalking'));
+    }
     Init() {
         this.engine = new Engine();
+        this.InitSprites();
         var player = new Entity("player");
         var inputComponent = new InputComponent();
         player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent();
+        var positionComponent = new PositionComponent(0, 0, 130, 120);
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        player.AddComponent(new RenderableComponent(positionComponent, 50, 100, '#ff00ff'));
+        player.AddComponent(new RenderableComponent(positionComponent, 130, 120, '#ff00ff', this.animations.get('playerwalking')));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
         this.engine.AddEntity(EntityHelper.CreatePlatform(0, 200, 200, 10));
         this.engine.AddEntity(EntityHelper.CreatePlatform(200, 400, 200, 10));
@@ -90,20 +97,25 @@ class PlayerComponent extends Component {
     }
 }
 class PositionComponent extends Component {
-    constructor() {
-        super(...arguments);
+    constructor(x = 0, y = 0, width = 50, height = 100) {
+        super();
         this.position = new Vector2d(0, 0);
-        this.width = 50;
-        this.height = 100;
+        this.position.x = x;
+        this.position.y = y;
+        this.width = width;
+        this.height = height;
     }
 }
 class RenderableComponent extends Component {
-    constructor(positionComponent, width, height, color) {
+    constructor(positionComponent, width, height, color, gameAnimation = null) {
         super();
+        this.frame = 0;
+        this.frameTimer = 0;
         this.positionComponent = positionComponent;
         this.width = width;
         this.height = height;
         this.color = color;
+        this.gameAnimation = gameAnimation;
     }
 }
 class Engine {
@@ -224,6 +236,17 @@ class EntityHelper {
         camera.AddComponent(positionComponent);
         camera.AddComponent(new CameraComponent(positionComponent));
         return camera;
+    }
+}
+class GameAnimation {
+    constructor(imageFile, sourceX, sourceY, width, height, frames, name) {
+        this.imageFile = imageFile;
+        this.sourceX = sourceX;
+        this.sourceY = sourceY;
+        this.width = width;
+        this.height = height;
+        this.frames = frames;
+        this.name = name;
     }
 }
 const precision = [
@@ -550,7 +573,7 @@ class PlayerSystem extends System {
             var playerComponent = entities[i].GetComponent(PlayerComponent.name);
             switch (playerComponent.currentState) {
                 case PlayerState.Idle: {
-                    this.HandleIdleState(entities[i], playerComponent);
+                    this.HandleIdleState(entities[i], playerComponent, deltaTime);
                     break;
                 }
                 case PlayerState.Moving: {
@@ -568,7 +591,7 @@ class PlayerSystem extends System {
             }
         }
     }
-    HandleIdleState(entity, playerComponent) {
+    HandleIdleState(entity, playerComponent, deltaTime) {
         var noAction = true;
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             noAction = false;
@@ -585,6 +608,17 @@ class PlayerSystem extends System {
         }
         if (noAction) {
             playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
+        }
+        else {
+            var renderAbleComponent = entity.GetComponent(RenderableComponent.name);
+            renderAbleComponent.frameTimer += deltaTime;
+            if (renderAbleComponent.frameTimer >= 0.3) {
+                renderAbleComponent.frameTimer = 0;
+                renderAbleComponent.frame++;
+                if (renderAbleComponent.frame > renderAbleComponent.gameAnimation.frames) {
+                    renderAbleComponent.frame = 0;
+                }
+            }
         }
         if (!MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
@@ -638,10 +672,15 @@ class RenderingSystem extends System {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent = entities[i].GetComponent(RenderableComponent.name);
-            context.beginPath();
-            context.fillStyle = renderableComponent.color;
-            context.strokeStyle = renderableComponent.color;
-            context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
+            if (renderableComponent.gameAnimation) {
+                context.drawImage(renderableComponent.gameAnimation.imageFile, renderableComponent.gameAnimation.sourceX + (renderableComponent.gameAnimation.width * renderableComponent.frame), renderableComponent.gameAnimation.sourceY, renderableComponent.gameAnimation.width, renderableComponent.gameAnimation.height, renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y, 130, 120);
+            }
+            else {
+                context.beginPath();
+                context.fillStyle = renderableComponent.color;
+                context.strokeStyle = renderableComponent.color;
+                context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
+            }
         }
     }
 }

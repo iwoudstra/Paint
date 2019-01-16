@@ -8,6 +8,8 @@
     private deltaTime: number;
     private engine: Engine;
 
+    public animations: Map<string, GameAnimation> = new Map<string, GameAnimation>();
+
     private constructor() {
         this.canvas = <HTMLCanvasElement>document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
@@ -17,17 +19,26 @@
         return this._instance || (this._instance = new this());
     }
 
+    private InitSprites(): void {
+        var characterspritesheet: HTMLImageElement = new Image();
+        characterspritesheet.src = "assets/sprites/characterspritesheet.png";
+
+        this.animations.set('playerwalking', new GameAnimation(characterspritesheet, 0, 361, 391, 361, 6, 'playerwalking'));
+    }
+
     public Init(): void {
         this.engine = new Engine();
+
+        this.InitSprites();
 
         var player = new Entity("player");
         var inputComponent = new InputComponent()
         player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent()
+        var positionComponent = new PositionComponent(0, 0, 130, 120);
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        player.AddComponent(new RenderableComponent(positionComponent, 50, 100, '#ff00ff'));
+        player.AddComponent(new RenderableComponent(positionComponent, 130, 120, '#ff00ff', this.animations.get('playerwalking')));
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent));
 
 

@@ -11,6 +11,7 @@
     },
     "include": [
         "model/game.ts",
+        "assets/**/*.ts",
         "model/**/*"
     ],
     "exclude": [

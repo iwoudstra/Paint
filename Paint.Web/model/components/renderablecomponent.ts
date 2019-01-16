@@ -5,13 +5,17 @@ class RenderableComponent extends Component {
     width: number;
     height: number;
     color: string;
+    gameAnimation: GameAnimation;
+    public frame: number = 0;
+    public frameTimer: number = 0;
 
-    constructor(positionComponent: PositionComponent, width: number, height: number, color: string) {
+    constructor(positionComponent: PositionComponent, width: number, height: number, color: string, gameAnimation: GameAnimation = null) {
         super();
 
         this.positionComponent = positionComponent;
         this.width = width;
         this.height = height;
         this.color = color;
+        this.gameAnimation = gameAnimation;
     }
 }

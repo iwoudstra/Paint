@@ -12,7 +12,7 @@ class PlayerSystem extends System {
 
             switch (playerComponent.currentState) {
                 case PlayerState.Idle: {
-                    this.HandleIdleState(entities[i], playerComponent);
+                    this.HandleIdleState(entities[i], playerComponent, deltaTime);
                     break;
                 }
                 case PlayerState.Moving: {
@@ -31,7 +31,7 @@ class PlayerSystem extends System {
         }
     }
 
-    private HandleIdleState(entity: Entity, playerComponent: PlayerComponent): void {
+    private HandleIdleState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
         var noAction = true;
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             noAction = false;
@@ -49,6 +49,16 @@ class PlayerSystem extends System {
 
         if (noAction) {
             playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
+        } else {
+            var renderAbleComponent = <RenderableComponent>entity.GetComponent(RenderableComponent.name);
+            renderAbleComponent.frameTimer += deltaTime;
+            if (renderAbleComponent.frameTimer >= 0.3) {
+                renderAbleComponent.frameTimer = 0;
+                renderAbleComponent.frame++;
+                if (renderAbleComponent.frame > renderAbleComponent.gameAnimation.frames) {
+                    renderAbleComponent.frame = 0;
+                }
+            }
         }
 
         if (!MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
