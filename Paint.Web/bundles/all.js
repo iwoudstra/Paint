@@ -111,6 +111,7 @@ class RenderableComponent extends Component {
         super();
         this.frame = 0;
         this.frameTimer = 0;
+        this.orientationLeft = false;
         this.positionComponent = positionComponent;
         this.width = width;
         this.height = height;
@@ -592,14 +593,17 @@ class PlayerSystem extends System {
         }
     }
     HandleIdleState(entity, playerComponent, deltaTime) {
+        var renderAbleComponent = entity.GetComponent(RenderableComponent.name);
         var noAction = true;
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             noAction = false;
             playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
+            renderAbleComponent.orientationLeft = true;
         }
         else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             noAction = false;
             playerComponent.moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
+            renderAbleComponent.orientationLeft = false;
         }
         if (playerComponent.inputComponent.jumpActive) {
             noAction = false;
@@ -610,7 +614,6 @@ class PlayerSystem extends System {
             playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
         }
         else {
-            var renderAbleComponent = entity.GetComponent(RenderableComponent.name);
             renderAbleComponent.frameTimer += deltaTime;
             if (renderAbleComponent.frameTimer >= 0.1) {
                 renderAbleComponent.frameTimer = 0;
@@ -673,7 +676,16 @@ class RenderingSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent = entities[i].GetComponent(RenderableComponent.name);
             if (renderableComponent.gameAnimation) {
-                context.drawImage(renderableComponent.gameAnimation.imageFile, renderableComponent.gameAnimation.sourceX + (renderableComponent.gameAnimation.width * renderableComponent.frame), renderableComponent.gameAnimation.sourceY, renderableComponent.gameAnimation.width, renderableComponent.gameAnimation.height, renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y, 130, 120);
+                var extra = renderableComponent.orientationLeft ? renderableComponent.width : 0;
+                context.translate(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra, renderableComponent.positionComponent.position.y);
+                if (renderableComponent.orientationLeft) {
+                    context.scale(-1, 1);
+                }
+                context.drawImage(renderableComponent.gameAnimation.imageFile, renderableComponent.gameAnimation.sourceX + (renderableComponent.gameAnimation.width * renderableComponent.frame), renderableComponent.gameAnimation.sourceY, renderableComponent.gameAnimation.width, renderableComponent.gameAnimation.height, 0, 0, renderableComponent.width, renderableComponent.height);
+                if (renderableComponent.orientationLeft) {
+                    context.scale(-1, 1);
+                }
+                context.translate(-(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra), -renderableComponent.positionComponent.position.y);
             }
             else {
                 context.beginPath();

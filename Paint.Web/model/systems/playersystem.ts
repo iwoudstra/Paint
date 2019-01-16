@@ -32,13 +32,17 @@ class PlayerSystem extends System {
     }
 
     private HandleIdleState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
+        var renderAbleComponent = <RenderableComponent>entity.GetComponent(RenderableComponent.name);
         var noAction = true;
+
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             noAction = false;
             playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
+            renderAbleComponent.orientationLeft = true;
         } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             noAction = false;
             playerComponent.moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
+            renderAbleComponent.orientationLeft = false;
         }
 
         if (playerComponent.inputComponent.jumpActive) {
@@ -50,7 +54,6 @@ class PlayerSystem extends System {
         if (noAction) {
             playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
         } else {
-            var renderAbleComponent = <RenderableComponent>entity.GetComponent(RenderableComponent.name);
             renderAbleComponent.frameTimer += deltaTime;
             if (renderAbleComponent.frameTimer >= 0.1) {
                 renderAbleComponent.frameTimer = 0;

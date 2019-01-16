@@ -12,7 +12,19 @@ class RenderingSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent: RenderableComponent = <RenderableComponent>entities[i].GetComponent(RenderableComponent.name);
             if (renderableComponent.gameAnimation) {
-                context.drawImage(renderableComponent.gameAnimation.imageFile, renderableComponent.gameAnimation.sourceX + (renderableComponent.gameAnimation.width * renderableComponent.frame), renderableComponent.gameAnimation.sourceY, renderableComponent.gameAnimation.width, renderableComponent.gameAnimation.height, renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y, 130, 120);
+                var extra = renderableComponent.orientationLeft ? renderableComponent.width : 0;
+
+                context.translate(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra, renderableComponent.positionComponent.position.y);
+
+                if (renderableComponent.orientationLeft) {
+                    context.scale(-1, 1);
+                }
+                context.drawImage(renderableComponent.gameAnimation.imageFile, renderableComponent.gameAnimation.sourceX + (renderableComponent.gameAnimation.width * renderableComponent.frame), renderableComponent.gameAnimation.sourceY, renderableComponent.gameAnimation.width, renderableComponent.gameAnimation.height, 0, 0, renderableComponent.width, renderableComponent.height);
+                if (renderableComponent.orientationLeft) {
+                    context.scale(-1, 1);
+                }
+
+                context.translate(-(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra), -renderableComponent.positionComponent.position.y);
             } else {
                 context.beginPath();
                 context.fillStyle = renderableComponent.color;

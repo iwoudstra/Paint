@@ -8,6 +8,7 @@ class RenderableComponent extends Component {
     gameAnimation: GameAnimation;
     public frame: number = 0;
     public frameTimer: number = 0;
+    public orientationLeft: boolean = false;
 
     constructor(positionComponent: PositionComponent, width: number, height: number, color: string, gameAnimation: GameAnimation = null) {
         super();
