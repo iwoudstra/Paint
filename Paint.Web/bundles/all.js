@@ -612,7 +612,7 @@ class PlayerSystem extends System {
         else {
             var renderAbleComponent = entity.GetComponent(RenderableComponent.name);
             renderAbleComponent.frameTimer += deltaTime;
-            if (renderAbleComponent.frameTimer >= 0.2) {
+            if (renderAbleComponent.frameTimer >= 0.1) {
                 renderAbleComponent.frameTimer = 0;
                 renderAbleComponent.frame++;
                 if (renderAbleComponent.frame >= renderAbleComponent.gameAnimation.frames) {
