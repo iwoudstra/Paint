@@ -19,6 +19,10 @@
         return this._instance || (this._instance = new this());
     }
 
+    public AddEntity(entity: Entity): void {
+        this.engine.AddEntity(entity);
+    }
+
     private InitSprites(): void {
         var characterspritesheet: HTMLImageElement = new Image();
         characterspritesheet.src = 'assets/sprites/characterspritesheet.png';

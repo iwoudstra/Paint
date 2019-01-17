@@ -8,6 +8,9 @@ class Game {
     static get Instance() {
         return this._instance || (this._instance = new this());
     }
+    AddEntity(entity) {
+        this.engine.AddEntity(entity);
+    }
     InitSprites() {
         var characterspritesheet = new Image();
         characterspritesheet.src = 'assets/sprites/characterspritesheet.png';
@@ -66,9 +69,10 @@ class CameraComponent extends Component {
 class InputComponent extends Component {
     constructor() {
         super(...arguments);
-        this.moveLeftKey = "A";
-        this.moveRightKey = "D";
-        this.jumpKey = "W";
+        this.moveLeftKey = 'A';
+        this.moveRightKey = 'D';
+        this.jumpKey = 'W';
+        this.paintKey = ' ';
     }
 }
 class MoveableComponent extends Component {
@@ -77,6 +81,18 @@ class MoveableComponent extends Component {
         this.velocity = new Vector2d(0, 0);
         this.leftoverYMovement = 0;
         this.positionComponent = positionComponent;
+    }
+}
+var PaintType;
+(function (PaintType) {
+    PaintType[PaintType["HighJump"] = 0] = "HighJump";
+})(PaintType || (PaintType = {}));
+class PaintComponent extends Component {
+    constructor(positionComponent, renderableComponent, paintType) {
+        super();
+        this.positionComponent = positionComponent;
+        this.paintType = paintType;
+        this.renderableComponent = renderableComponent;
     }
 }
 class PlatformComponent extends Component {
@@ -243,6 +259,16 @@ class EntityHelper {
         camera.AddComponent(positionComponent);
         camera.AddComponent(new CameraComponent(positionComponent));
         return camera;
+    }
+    static CreateJumpPaint(x, y) {
+        var paint = new Entity();
+        var positionComponent = new PositionComponent(x, y, 100, 5);
+        paint.AddComponent(positionComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, 100, 5, '#0077ff');
+        paint.AddComponent(renderableComponent);
+        var paintComponent = new PaintComponent(positionComponent, renderableComponent, PaintType.HighJump);
+        paint.AddComponent(paintComponent);
+        return paint;
     }
 }
 class GameAnimation {
@@ -512,12 +538,18 @@ class InputHandlingSystem extends System {
                     inputComponent.jumpActive = active;
                     break;
                 }
+                case inputComponent.paintKey: {
+                    inputComponent.paintActive = active;
+                    break;
+                }
             }
         }
     }
     Update(deltaTime) {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
+            var inputComponent = entities[i].GetComponent(InputComponent.name);
+            inputComponent.paintActivePrevious = inputComponent.paintActive;
         }
     }
 }
@@ -598,6 +630,18 @@ class PlayerSystem extends System {
             }
         }
     }
+    static CollisionWithPaint(engine, positionComponent, paintType) {
+        var paints = engine.GetEntities([PaintComponent.name]);
+        for (var i = 0; i < paints.length; ++i) {
+            var paintComponent = paints[i].GetComponent(PaintComponent.name);
+            if (paintComponent.paintType == paintType
+                && (positionComponent.position.x <= paintComponent.positionComponent.position.x + paintComponent.positionComponent.width && positionComponent.position.x + positionComponent.width > paintComponent.positionComponent.position.x)
+                && (positionComponent.position.y <= paintComponent.positionComponent.position.y + paintComponent.positionComponent.height && positionComponent.position.y + positionComponent.height > paintComponent.positionComponent.position.y)) {
+                return true;
+            }
+        }
+        return false;
+    }
     HandleIdleState(entity, playerComponent, deltaTime) {
         var noAction = true;
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
@@ -612,7 +656,12 @@ class PlayerSystem extends System {
         }
         if (playerComponent.inputComponent.jumpActive) {
             noAction = false;
-            playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
+            if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
+                playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
+            }
+            else {
+                playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
+            }
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 1;
             playerComponent.currentState = PlayerState.Jumping;
@@ -634,6 +683,9 @@ class PlayerSystem extends System {
             playerComponent.currentState = PlayerState.Falling;
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 2;
+        }
+        else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious) {
+            Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
         }
     }
     HandleMovingState(entity, playerComponent) {

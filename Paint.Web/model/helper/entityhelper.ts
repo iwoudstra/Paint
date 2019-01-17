@@ -18,4 +18,16 @@
         camera.AddComponent(new CameraComponent(positionComponent));
         return camera;
     }
+
+    public static CreateJumpPaint(x: number, y: number): Entity {
+        var paint = new Entity();
+        var positionComponent = new PositionComponent(x, y, 100, 5);
+        paint.AddComponent(positionComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, 100, 5, '#0077ff');
+        paint.AddComponent(renderableComponent);
+        var paintComponent = new PaintComponent(positionComponent, renderableComponent, PaintType.HighJump);
+        paint.AddComponent(paintComponent);
+
+        return paint;
+    }
 }

@@ -31,6 +31,20 @@ class PlayerSystem extends System {
         }
     }
 
+    public static CollisionWithPaint(engine: Engine, positionComponent: PositionComponent, paintType: PaintType): boolean {
+        var paints = engine.GetEntities([PaintComponent.name]);
+        for (var i = 0; i < paints.length; ++i) {
+            var paintComponent = <PaintComponent>paints[i].GetComponent(PaintComponent.name);
+            if (paintComponent.paintType == paintType
+                && (positionComponent.position.x <= paintComponent.positionComponent.position.x + paintComponent.positionComponent.width && positionComponent.position.x + positionComponent.width > paintComponent.positionComponent.position.x)
+                && (positionComponent.position.y <= paintComponent.positionComponent.position.y + paintComponent.positionComponent.height && positionComponent.position.y + positionComponent.height > paintComponent.positionComponent.position.y)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private HandleIdleState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
         var noAction = true;
 
@@ -46,7 +60,11 @@ class PlayerSystem extends System {
 
         if (playerComponent.inputComponent.jumpActive) {
             noAction = false;
-            playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
+            if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
+                playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
+            } else {
+                playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
+            }
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 1;
             playerComponent.currentState = PlayerState.Jumping;
@@ -69,6 +87,8 @@ class PlayerSystem extends System {
             playerComponent.currentState = PlayerState.Falling;
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 2;
+        } else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious) {
+            Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
         }
     }
 

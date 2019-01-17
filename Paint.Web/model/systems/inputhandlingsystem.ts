@@ -40,6 +40,10 @@ class InputHandlingSystem extends System {
                     inputComponent.jumpActive = active;
                     break;
                 }
+                case inputComponent.paintKey: {
+                    inputComponent.paintActive = active;
+                    break;
+                }
             }
         }
 
@@ -47,9 +51,9 @@ class InputHandlingSystem extends System {
 
     public Update(deltaTime: number): void {
         var entities = this.engine.GetEntities(this.requiredComponents);
-
         for (var i = 0; i < entities.length; ++i) {
-
+            var inputComponent: InputComponent = <InputComponent>entities[i].GetComponent(InputComponent.name);
+            inputComponent.paintActivePrevious = inputComponent.paintActive;
         }
     }
 }

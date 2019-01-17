@@ -93,6 +93,7 @@
     <TypeScriptCompile Include="model\components\cameracomponent.ts" />
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
     <TypeScriptCompile Include="model\components\movablecomponent.ts" />
+    <TypeScriptCompile Include="model\components\paintcomponent.ts" />
     <TypeScriptCompile Include="model\components\platformcomponent.ts" />
     <TypeScriptCompile Include="model\components\playercomponent.ts" />
     <TypeScriptCompile Include="model\components\positioncomponent.ts" />
