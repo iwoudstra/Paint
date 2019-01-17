@@ -1,12 +1,12 @@
 ﻿class EntityHelper {
-    public static CreatePlatform(x: number, y: number, width: number, height: number): Entity {
+    public static CreatePlatform(x: number, y: number, width: number, height: number, gameAnimation: GameAnimation = null): Entity {
         var platform = new Entity();
         var positionComponent = new PositionComponent();
         positionComponent.position = new Vector2d(x, y);
         positionComponent.width = width;
         positionComponent.height = height;
         platform.AddComponent(positionComponent);
-        platform.AddComponent(new RenderableComponent(positionComponent, width, height, '#0000ff'));
+        platform.AddComponent(new RenderableComponent(positionComponent, width, height, '#0000ff', gameAnimation));
         platform.AddComponent(new PlatformComponent(positionComponent));
         return platform;
     }

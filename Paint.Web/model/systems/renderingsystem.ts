@@ -19,7 +19,15 @@ class RenderingSystem extends System {
                 if (renderableComponent.orientationLeft) {
                     context.scale(-1, 1);
                 }
-                context.drawImage(renderableComponent.gameAnimation.imageFile, renderableComponent.gameAnimation.sourceX + (renderableComponent.gameAnimation.width * renderableComponent.frame), renderableComponent.gameAnimation.sourceY, renderableComponent.gameAnimation.width, renderableComponent.gameAnimation.height, 0, 0, renderableComponent.width, renderableComponent.height);
+                context.drawImage(renderableComponent.gameAnimation.imageFile
+                    , renderableComponent.gameAnimation.sourceX + (renderableComponent.gameAnimation.width * renderableComponent.frame)
+                    , renderableComponent.gameAnimation.sourceY, renderableComponent.gameAnimation.width
+                    , renderableComponent.gameAnimation.height
+                    , 0
+                    , 0
+                    , renderableComponent.width
+                    , renderableComponent.height
+                );
                 if (renderableComponent.orientationLeft) {
                     context.scale(-1, 1);
                 }

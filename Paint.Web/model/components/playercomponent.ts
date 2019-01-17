@@ -12,12 +12,14 @@ class PlayerComponent extends Component {
     positionComponent: PositionComponent;
     moveableComponent: MoveableComponent;
     inputComponent: InputComponent;
+    renderableComponent: RenderableComponent;
 
-    constructor(positionComponent: PositionComponent, moveableComponent: MoveableComponent, inputComponent: InputComponent) {
+    constructor(positionComponent: PositionComponent, moveableComponent: MoveableComponent, inputComponent: InputComponent, renderableComponent: RenderableComponent) {
         super();
 
         this.positionComponent = positionComponent;
         this.moveableComponent = moveableComponent;
         this.inputComponent = inputComponent;
+        this.renderableComponent = renderableComponent;
     }
 }
