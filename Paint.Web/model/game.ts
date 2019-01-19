@@ -8,8 +8,10 @@
     private deltaTime: number;
     private engine: Engine;
 
-    public static ResolutionWidth: number = 1600;
-    public static ResolutionHeight: number = 900;
+    public static ResolutionWidth: number = 1280;
+    public static ResolutionHeight: number = 720;
+    public static MapWidth: number = 3000;
+    public static MapHeight: number = 1080;
 
     public animations: Map<string, GameAnimation> = new Map<string, GameAnimation>();
 
@@ -36,6 +38,10 @@
         var rockplatform: HTMLImageElement = new Image();
         rockplatform.src = 'assets/sprites/rockplatform.png';
         this.animations.set('rockplatform', new GameAnimation(rockplatform, 0, 0, 580, 540, 1, 'rockplatform'));
+
+        var gamemap: HTMLImageElement = new Image();
+        gamemap.src = 'assets/sprites/level.png';
+        this.animations.set('gamemap', new GameAnimation(gamemap, 0, 0, 3000, 1080, 1, 'gamemap'));
     }
 
     public Init(): void {
@@ -46,7 +52,7 @@
         var player = new Entity("player");
         var inputComponent = new InputComponent()
         player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent(0, 700, 130, 120);
+        var positionComponent = new PositionComponent(0, 600, 130, 120);
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
@@ -54,13 +60,11 @@
         player.AddComponent(renderableComponent);
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
 
-
-        this.engine.AddEntity(EntityHelper.CreatePlatform(0, 200, 200, 190, this.animations.get('rockplatform')));
-        this.engine.AddEntity(EntityHelper.CreatePlatform(200, 400, 200, 10));
-        this.engine.AddEntity(EntityHelper.CreatePlatform(300, 400, 50, 10));
-        this.engine.AddEntity(EntityHelper.CreatePlatform(550, 450, 200, 10));
-        this.engine.AddEntity(EntityHelper.CreatePlatform(600, 250, 150, 10));
-        this.engine.AddEntity(EntityHelper.CreatePlatform(700, 500, 100, 10));
+        this.engine.AddEntity(EntityHelper.CreateGameMap(3000, 1080, this.animations.get('gamemap')));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
+        this.engine.AddEntity(EntityHelper.CreatePaintPickupComponent(1710, 603, PaintType.HighJump));
         this.engine.AddEntity(EntityHelper.CreateCamera());
 
         this.engine.AddEntity(player);

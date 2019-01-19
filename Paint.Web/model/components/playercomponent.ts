@@ -13,6 +13,8 @@ class PlayerComponent extends Component {
     inputComponent: InputComponent;
     renderableComponent: RenderableComponent;
 
+    HasBluePaint: boolean;
+
     constructor(positionComponent: PositionComponent, moveableComponent: MoveableComponent, inputComponent: InputComponent, renderableComponent: RenderableComponent) {
         super();
 

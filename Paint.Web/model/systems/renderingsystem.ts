@@ -14,7 +14,7 @@ class RenderingSystem extends System {
             if (renderableComponent.gameAnimation) {
                 var extra = renderableComponent.orientationLeft ? renderableComponent.width : 0;
 
-                context.translate(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra, renderableComponent.positionComponent.position.y);
+                context.translate(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra, renderableComponent.positionComponent.position.y - camera.positionComponent.position.y);
 
                 if (renderableComponent.orientationLeft) {
                     context.scale(-1, 1);
@@ -32,12 +32,12 @@ class RenderingSystem extends System {
                     context.scale(-1, 1);
                 }
 
-                context.translate(-(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra), -renderableComponent.positionComponent.position.y);
+                context.translate(-(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra), -(renderableComponent.positionComponent.position.y - camera.positionComponent.position.y));
             } else {
                 context.beginPath();
                 context.fillStyle = renderableComponent.color;
                 context.strokeStyle = renderableComponent.color;
-                context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
+                context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y - camera.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
             }
         }
     }

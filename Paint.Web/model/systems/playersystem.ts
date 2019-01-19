@@ -41,6 +41,21 @@ class PlayerSystem extends System {
         return false;
     }
 
+    public static CollisionWithPickup(engine: Engine, positionComponent: PositionComponent, playerComponent: PlayerComponent): boolean {
+        var paints = engine.GetEntities([PaintPickupComponent.name]);
+        for (var i = 0; i < paints.length; ++i) {
+            var paintComponent = <PaintPickupComponent>paints[i].GetComponent(PaintPickupComponent.name);
+            if ((positionComponent.position.x <= paintComponent.positionComponent.position.x + paintComponent.positionComponent.width && positionComponent.position.x + positionComponent.width > paintComponent.positionComponent.position.x)
+                && (positionComponent.position.y <= paintComponent.positionComponent.position.y + paintComponent.positionComponent.height && positionComponent.position.y + positionComponent.height > paintComponent.positionComponent.position.y)) {
+                playerComponent.HasBluePaint = true;
+                engine.RemoveEntity(paints[i]);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private HandleMovement(playerComponent: PlayerComponent): void {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
@@ -61,13 +76,14 @@ class PlayerSystem extends System {
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 1;
             playerComponent.currentState = PlayerState.Jumping;
-        } else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent)) {
+        } else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent, false)) {
             playerComponent.positionComponent.position.y += 1;
         }
     }
 
     private HandleOnGroundState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
         this.HandleMovement(playerComponent);
+        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
         
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
@@ -84,13 +100,14 @@ class PlayerSystem extends System {
             playerComponent.currentState = PlayerState.Falling;
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 2;
-        } else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious) {
+        } else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.HasBluePaint) {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
         }
     }
 
     private HandleJumpingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
         this.HandleMovement(playerComponent);
+        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
 
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
@@ -101,6 +118,7 @@ class PlayerSystem extends System {
 
     private HandleFallingState(entity: Entity, playerComponent: PlayerComponent): void {
         this.HandleMovement(playerComponent);
+        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
 
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;

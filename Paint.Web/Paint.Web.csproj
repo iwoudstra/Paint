@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\sprites\characterspritesheet.png" />
+    <Content Include="assets\sprites\level.png" />
     <Content Include="assets\sprites\rockplatform.png" />
     <Content Include="bundles\all.js" />
     <Content Include="index.html" />
@@ -94,10 +95,12 @@
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
     <TypeScriptCompile Include="model\components\movablecomponent.ts" />
     <TypeScriptCompile Include="model\components\paintcomponent.ts" />
+    <TypeScriptCompile Include="model\components\paintpickupcomponent.ts" />
     <TypeScriptCompile Include="model\components\platformcomponent.ts" />
     <TypeScriptCompile Include="model\components\playercomponent.ts" />
     <TypeScriptCompile Include="model\components\positioncomponent.ts" />
     <TypeScriptCompile Include="model\components\renderablecomponent.ts" />
+    <TypeScriptCompile Include="model\components\solidplatform.ts" />
     <TypeScriptCompile Include="model\core\engine.ts" />
     <TypeScriptCompile Include="model\core\entity.ts" />
     <TypeScriptCompile Include="model\core\component.ts" />
@@ -106,7 +109,6 @@
     <TypeScriptCompile Include="model\helper\gameanimation.ts" />
     <TypeScriptCompile Include="model\helper\entityhelper.ts" />
     <TypeScriptCompile Include="model\helper\vector2d.ts" />
-    <TypeScriptCompile Include="model\player.ts" />
     <TypeScriptCompile Include="model\systems\camerasystem.ts" />
     <TypeScriptCompile Include="model\systems\inputhandlingsystem.ts" />
     <TypeScriptCompile Include="model\systems\movingsystem.ts" />

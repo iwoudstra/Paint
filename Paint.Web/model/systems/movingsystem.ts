@@ -4,10 +4,10 @@ class MovingSystem extends System {
     private requiredComponents: string[] = [MoveableComponent.name];
 
     public static IsOnGround(engine: Engine, moveableComponent: MoveableComponent): boolean {
-        return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.ResolutionHeight;
+        return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.MapHeight;
     }
 
-    public static IsOnPlatform(engine: Engine, moveableComponent: MoveableComponent): boolean {
+    public static IsOnPlatform(engine: Engine, moveableComponent: MoveableComponent, includingSolid: boolean): boolean {
         var platforms = engine.GetEntities([PlatformComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
             var platformComponent = <PlatformComponent>platforms[i].GetComponent(PlatformComponent.name);
@@ -16,11 +16,40 @@ class MovingSystem extends System {
                 return true;
             }
         }
+
+        if (includingSolid) {
+            var solidPlatforms = engine.GetEntities([SolidPlatformComponent.name]);
+            for (var i = 0; i < solidPlatforms.length; ++i) {
+                var solidPlatformComponent = <SolidPlatformComponent>solidPlatforms[i].GetComponent(SolidPlatformComponent.name);
+                if ((moveableComponent.positionComponent.position.x <= solidPlatformComponent.positionComponent.position.x + solidPlatformComponent.positionComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > solidPlatformComponent.positionComponent.position.x)
+                    && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(solidPlatformComponent.positionComponent.position.y + 0.01 * solidPlatformComponent.positionComponent.height))) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
+    public static CanMoveHorizontal(engine: Engine, moveableComponent: MoveableComponent, movement: number): boolean {
+        var solidPlatforms = engine.GetEntities([SolidPlatformComponent.name]);
+        for (var i = 0; i < solidPlatforms.length; ++i) {
+            var solidPlatformComponent = <SolidPlatformComponent>solidPlatforms[i].GetComponent(SolidPlatformComponent.name);
+            if ((moveableComponent.positionComponent.position.y <= solidPlatformComponent.positionComponent.position.y + solidPlatformComponent.positionComponent.height && moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height > solidPlatformComponent.positionComponent.position.y)
+                && ((movement < 0 && moveableComponent.positionComponent.position.x + movement === solidPlatformComponent.positionComponent.position.x + solidPlatformComponent.positionComponent.width)
+                    || (movement > 0 && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width + movement === solidPlatformComponent.positionComponent.position.x))) {
+                //console.log('moveable:');
+                //console.log(moveableComponent.positionComponent);
+                //console.log(solidPlatformComponent.positionComponent);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static IsOnGroundOrPlatform(engine: Engine, moveableComponent: MoveableComponent): boolean {
-        return this.IsOnPlatform(engine, moveableComponent) || this.IsOnGround(engine, moveableComponent);
+        return this.IsOnPlatform(engine, moveableComponent, true) || this.IsOnGround(engine, moveableComponent);
     }
 
     public Update(deltaTime: number): void {
@@ -28,10 +57,6 @@ class MovingSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var moveableComponent: MoveableComponent = <MoveableComponent>entities[i].GetComponent(MoveableComponent.name);
             var movement = moveableComponent.velocity.clone().multiplyByScalar(deltaTime);
-            moveableComponent.positionComponent.position.x += movement.x;
-            if (moveableComponent.positionComponent.position.x < 0) {
-                moveableComponent.positionComponent.position.x = 0;
-            }
 
             if (movement.y > 0) {
                 var ymovement = movement.y + moveableComponent.leftoverYMovement;
@@ -49,6 +74,31 @@ class MovingSystem extends System {
                 var ymovement = Math.floor(movement.y);
                 moveableComponent.positionComponent.position.y += ymovement;
                 moveableComponent.leftoverYMovement = movement.y - ymovement;
+            }
+
+            if (movement.x > 0) {
+                var xmovement = movement.x + moveableComponent.leftoverXMovement;
+                for (var steps = 0; steps < xmovement; ++steps) {
+                    if (!MovingSystem.CanMoveHorizontal(this.engine, moveableComponent, 1)) {
+                        moveableComponent.leftoverXMovement = 0;
+                        moveableComponent.velocity.x = 0;
+                    } else {
+                        moveableComponent.positionComponent.position.x += 1;
+                    }
+                }
+                moveableComponent.leftoverXMovement = xmovement - Math.floor(xmovement);
+            } else if (movement.x < 0) {
+                var xmovement = movement.x + moveableComponent.leftoverXMovement;
+                for (var steps = 0; steps > xmovement; --steps) {
+                    if (!MovingSystem.CanMoveHorizontal(this.engine, moveableComponent, -1)) {
+                        
+                        moveableComponent.leftoverXMovement = 0;
+                        moveableComponent.velocity.x = 0;
+                    } else {
+                        moveableComponent.positionComponent.position.x -= 1;
+                    }
+                }
+                moveableComponent.leftoverXMovement = xmovement - Math.floor(xmovement);
             }
         }
     }

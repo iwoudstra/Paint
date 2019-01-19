@@ -29,8 +29,30 @@ class CameraSystem extends System {
             camera.horizontalTime += deltaTime;
         }
 
-        var preferredXPosition;
+        if (player.moveableComponent.velocity.y < 0) {
+            if (camera.verticalDirection < 0) {
+                camera.verticalTime += deltaTime;
+            } else {
+                camera.verticalDirection = player.moveableComponent.velocity.y;
+                camera.verticalTime = deltaTime;
+            }
+        } else if (player.moveableComponent.velocity.y > 0) {
+            if (camera.verticalDirection > 0) {
+                camera.verticalTime += deltaTime;
+            } else {
+                camera.verticalDirection = player.moveableComponent.velocity.y;
+                camera.verticalTime = deltaTime;
+            }
+        } else {
+            if (camera.verticalTime !== 0) {
+                camera.verticalTime = 0;
+            }
+            camera.verticalDirection = 0;
+            camera.verticalTime += deltaTime;
+        }
+
         var speedFactor = 16;
+        var preferredXPosition;
         if (camera.horizontalDirection < 0) {
             if (camera.horizontalTime > 0.5) {
                 preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.90);
@@ -55,6 +77,34 @@ class CameraSystem extends System {
             camera.positionComponent.position.x = preferredXPosition;
         } else {
             camera.positionComponent.position.x = (camera.positionComponent.position.x * (speedFactor - 1) + preferredXPosition) / speedFactor;
+        }
+
+        
+        var preferredYPosition;
+        if (camera.verticalDirection < 0) {
+            if (camera.verticalTime > 0.5) {
+                preferredYPosition = player.positionComponent.position.y - (Game.ResolutionHeight * 0.90);
+            } else {
+                preferredYPosition = player.positionComponent.position.y - (Game.ResolutionHeight * 0.65);
+            }
+        } else if (camera.verticalDirection > 0) {
+            if (camera.verticalTime > 0.5) {
+                preferredYPosition = player.positionComponent.position.y - (Game.ResolutionHeight * 0.10);
+            } else {
+                preferredYPosition = player.positionComponent.position.y - (Game.ResolutionHeight * 0.35);
+            }
+        } else {
+            preferredYPosition = player.positionComponent.position.y - (Game.ResolutionHeight * 0.5);
+        }
+
+        if (preferredYPosition < 0) {
+            preferredYPosition = 0;
+        }
+
+        if (Math.abs(camera.positionComponent.position.y - preferredYPosition) < Math.abs(player.moveableComponent.velocity.y * 2 * deltaTime)) {
+            camera.positionComponent.position.y = preferredYPosition;
+        } else {
+            camera.positionComponent.position.y = (camera.positionComponent.position.y * (speedFactor - 1) + preferredYPosition) / speedFactor;
         }
     }
 }
