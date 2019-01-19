@@ -54,6 +54,8 @@ class Game {
         });
     }
 }
+Game.ResolutionWidth = 1600;
+Game.ResolutionHeight = 900;
 class Player {
 }
 class Component {
@@ -72,6 +74,7 @@ class InputComponent extends Component {
         this.moveLeftKey = 'A';
         this.moveRightKey = 'D';
         this.jumpKey = 'W';
+        this.downKey = 'S';
         this.paintKey = ' ';
     }
 }
@@ -103,15 +106,14 @@ class PlatformComponent extends Component {
 }
 var PlayerState;
 (function (PlayerState) {
-    PlayerState[PlayerState["Idle"] = 0] = "Idle";
-    PlayerState[PlayerState["Moving"] = 1] = "Moving";
-    PlayerState[PlayerState["Jumping"] = 2] = "Jumping";
-    PlayerState[PlayerState["Falling"] = 3] = "Falling";
+    PlayerState[PlayerState["OnGround"] = 0] = "OnGround";
+    PlayerState[PlayerState["Jumping"] = 1] = "Jumping";
+    PlayerState[PlayerState["Falling"] = 2] = "Falling";
 })(PlayerState || (PlayerState = {}));
 class PlayerComponent extends Component {
     constructor(positionComponent, moveableComponent, inputComponent, renderableComponent) {
         super();
-        this.currentState = PlayerState.Idle;
+        this.currentState = PlayerState.OnGround;
         this.positionComponent = positionComponent;
         this.moveableComponent = moveableComponent;
         this.inputComponent = inputComponent;
@@ -538,6 +540,10 @@ class InputHandlingSystem extends System {
                     inputComponent.jumpActive = active;
                     break;
                 }
+                case inputComponent.downKey: {
+                    inputComponent.downActive = active;
+                    break;
+                }
                 case inputComponent.paintKey: {
                     inputComponent.paintActive = active;
                     break;
@@ -559,6 +565,9 @@ class MovingSystem extends System {
         this.requiredComponents = [MoveableComponent.name];
     }
     static IsOnGround(engine, moveableComponent) {
+        return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.ResolutionHeight;
+    }
+    static IsOnPlatform(engine, moveableComponent) {
         var platforms = engine.GetEntities([PlatformComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
             var platformComponent = platforms[i].GetComponent(PlatformComponent.name);
@@ -567,7 +576,10 @@ class MovingSystem extends System {
                 return true;
             }
         }
-        return moveableComponent.positionComponent.position.y >= 500;
+        return false;
+    }
+    static IsOnGroundOrPlatform(engine, moveableComponent) {
+        return this.IsOnPlatform(engine, moveableComponent) || this.IsOnGround(engine, moveableComponent);
     }
     Update(deltaTime) {
         var entities = this.engine.GetEntities(this.requiredComponents);
@@ -581,7 +593,7 @@ class MovingSystem extends System {
             if (movement.y > 0) {
                 var ymovement = movement.y + moveableComponent.leftoverYMovement;
                 for (var steps = 0; steps < ymovement; ++steps) {
-                    if (MovingSystem.IsOnGround(this.engine, moveableComponent)) {
+                    if (MovingSystem.IsOnGroundOrPlatform(this.engine, moveableComponent)) {
                         moveableComponent.leftoverYMovement = 0;
                         moveableComponent.velocity.y = 0;
                     }
@@ -611,12 +623,8 @@ class PlayerSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var playerComponent = entities[i].GetComponent(PlayerComponent.name);
             switch (playerComponent.currentState) {
-                case PlayerState.Idle: {
-                    this.HandleIdleState(entities[i], playerComponent, deltaTime);
-                    break;
-                }
-                case PlayerState.Moving: {
-                    this.HandleMovingState(entities[i], playerComponent);
+                case PlayerState.OnGround: {
+                    this.HandleOnGroundState(entities[i], playerComponent, deltaTime);
                     break;
                 }
                 case PlayerState.Jumping: {
@@ -642,20 +650,19 @@ class PlayerSystem extends System {
         }
         return false;
     }
-    HandleIdleState(entity, playerComponent, deltaTime) {
-        var noAction = true;
+    HandleMovement(playerComponent) {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
-            noAction = false;
-            playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
+            playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = true;
         }
         else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
-            noAction = false;
-            playerComponent.moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
+            playerComponent.moveableComponent.velocity.x = this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = false;
         }
-        if (playerComponent.inputComponent.jumpActive) {
-            noAction = false;
+        else {
+            playerComponent.moveableComponent.velocity.x = 0;
+        }
+        if (playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
             }
@@ -666,10 +673,13 @@ class PlayerSystem extends System {
             playerComponent.renderableComponent.frame = 1;
             playerComponent.currentState = PlayerState.Jumping;
         }
-        if (noAction) {
-            playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
+        else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent)) {
+            playerComponent.positionComponent.position.y += 1;
         }
-        else {
+    }
+    HandleOnGroundState(entity, playerComponent, deltaTime) {
+        this.HandleMovement(playerComponent);
+        if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
             if (playerComponent.renderableComponent.frameTimer >= 0.1) {
                 playerComponent.renderableComponent.frameTimer = 0;
@@ -679,7 +689,7 @@ class PlayerSystem extends System {
                 }
             }
         }
-        if (!MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
+        if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 2;
@@ -688,18 +698,8 @@ class PlayerSystem extends System {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
         }
     }
-    HandleMovingState(entity, playerComponent) {
-    }
     HandleJumpingState(entity, playerComponent, deltaTime) {
-        if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
-            playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
-        }
-        else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
-            playerComponent.moveableComponent.velocity.x = this.movementSpeed;
-        }
-        else {
-            playerComponent.moveableComponent.velocity.x = 0;
-        }
+        this.HandleMovement(playerComponent);
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
             playerComponent.currentState = PlayerState.Falling;
@@ -707,18 +707,10 @@ class PlayerSystem extends System {
         }
     }
     HandleFallingState(entity, playerComponent) {
-        if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
-            playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
-        }
-        else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
-            playerComponent.moveableComponent.velocity.x = this.movementSpeed;
-        }
-        else {
-            playerComponent.moveableComponent.velocity.x = 0;
-        }
-        if (MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
+        this.HandleMovement(playerComponent);
+        if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
-            playerComponent.currentState = PlayerState.Idle;
+            playerComponent.currentState = PlayerState.OnGround;
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
             playerComponent.renderableComponent.frame = 0;
             playerComponent.renderableComponent.frameTimer = 0;
@@ -736,7 +728,7 @@ class RenderingSystem extends System {
     Update(deltaTime) {
         var camera = this.engine.GetEntities([CameraComponent.name])[0].GetComponent(CameraComponent.name);
         var context = Game.Instance.context;
-        context.clearRect(0, 0, 800, 600);
+        context.clearRect(0, 0, Game.ResolutionWidth, Game.ResolutionHeight);
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent = entities[i].GetComponent(RenderableComponent.name);

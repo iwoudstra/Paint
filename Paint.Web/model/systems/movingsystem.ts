@@ -4,6 +4,10 @@ class MovingSystem extends System {
     private requiredComponents: string[] = [MoveableComponent.name];
 
     public static IsOnGround(engine: Engine, moveableComponent: MoveableComponent): boolean {
+        return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.ResolutionHeight;
+    }
+
+    public static IsOnPlatform(engine: Engine, moveableComponent: MoveableComponent): boolean {
         var platforms = engine.GetEntities([PlatformComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
             var platformComponent = <PlatformComponent>platforms[i].GetComponent(PlatformComponent.name);
@@ -12,8 +16,11 @@ class MovingSystem extends System {
                 return true;
             }
         }
+        return false;
+    }
 
-        return moveableComponent.positionComponent.position.y >= 500;
+    public static IsOnGroundOrPlatform(engine: Engine, moveableComponent: MoveableComponent): boolean {
+        return this.IsOnPlatform(engine, moveableComponent) || this.IsOnGround(engine, moveableComponent);
     }
 
     public Update(deltaTime: number): void {
@@ -30,7 +37,7 @@ class MovingSystem extends System {
                 var ymovement = movement.y + moveableComponent.leftoverYMovement;
 
                 for (var steps = 0; steps < ymovement; ++steps) {
-                    if (MovingSystem.IsOnGround(this.engine, moveableComponent)) {
+                    if (MovingSystem.IsOnGroundOrPlatform(this.engine, moveableComponent)) {
                         moveableComponent.leftoverYMovement = 0;
                         moveableComponent.velocity.y = 0;
                     } else {

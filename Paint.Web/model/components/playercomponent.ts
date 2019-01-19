@@ -1,14 +1,13 @@
 ﻿/// <reference path="../core/component.ts" />
 
 enum PlayerState {
-    Idle,
-    Moving,
+    OnGround,
     Jumping,
     Falling
 }
 
 class PlayerComponent extends Component {
-    currentState: PlayerState = PlayerState.Idle;
+    currentState: PlayerState = PlayerState.OnGround;
     positionComponent: PositionComponent;
     moveableComponent: MoveableComponent;
     inputComponent: InputComponent;

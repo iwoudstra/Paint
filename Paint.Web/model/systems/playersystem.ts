@@ -11,12 +11,8 @@ class PlayerSystem extends System {
             var playerComponent: PlayerComponent = <PlayerComponent>entities[i].GetComponent(PlayerComponent.name);
 
             switch (playerComponent.currentState) {
-                case PlayerState.Idle: {
-                    this.HandleIdleState(entities[i], playerComponent, deltaTime);
-                    break;
-                }
-                case PlayerState.Moving: {
-                    this.HandleMovingState(entities[i], playerComponent);
+                case PlayerState.OnGround: {
+                    this.HandleOnGroundState(entities[i], playerComponent, deltaTime);
                     break;
                 }
                 case PlayerState.Jumping: {
@@ -45,21 +41,18 @@ class PlayerSystem extends System {
         return false;
     }
 
-    private HandleIdleState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
-        var noAction = true;
-
+    private HandleMovement(playerComponent: PlayerComponent): void {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
-            noAction = false;
-            playerComponent.moveableComponent.velocity = new Vector2d(-this.movementSpeed, 0);
+            playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = true;
         } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
-            noAction = false;
-            playerComponent.moveableComponent.velocity = new Vector2d(this.movementSpeed, 0);
+            playerComponent.moveableComponent.velocity.x = this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = false;
+        } else {
+            playerComponent.moveableComponent.velocity.x = 0;
         }
 
-        if (playerComponent.inputComponent.jumpActive) {
-            noAction = false;
+        if (playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
             } else {
@@ -68,11 +61,15 @@ class PlayerSystem extends System {
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 1;
             playerComponent.currentState = PlayerState.Jumping;
+        } else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent)) {
+            playerComponent.positionComponent.position.y += 1;
         }
+    }
 
-        if (noAction) {
-            playerComponent.moveableComponent.velocity = new Vector2d(0, 0);
-        } else {
+    private HandleOnGroundState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
+        this.HandleMovement(playerComponent);
+        
+        if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
             if (playerComponent.renderableComponent.frameTimer >= 0.1) {
                 playerComponent.renderableComponent.frameTimer = 0;
@@ -83,7 +80,7 @@ class PlayerSystem extends System {
             }
         }
 
-        if (!MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
+        if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
             playerComponent.renderableComponent.frame = 2;
@@ -92,18 +89,8 @@ class PlayerSystem extends System {
         }
     }
 
-    private HandleMovingState(entity: Entity, playerComponent: PlayerComponent): void {
-
-    }
-
     private HandleJumpingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
-        if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
-            playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
-        } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
-            playerComponent.moveableComponent.velocity.x = this.movementSpeed;
-        } else {
-            playerComponent.moveableComponent.velocity.x = 0;
-        }
+        this.HandleMovement(playerComponent);
 
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
@@ -113,18 +100,11 @@ class PlayerSystem extends System {
     }
 
     private HandleFallingState(entity: Entity, playerComponent: PlayerComponent): void {
-        if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
-            playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
-        } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
-            playerComponent.moveableComponent.velocity.x = this.movementSpeed;
-        } else {
-            playerComponent.moveableComponent.velocity.x = 0;
-        }
+        this.HandleMovement(playerComponent);
 
-
-        if (MovingSystem.IsOnGround(this.engine, playerComponent.moveableComponent)) {
+        if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
-            playerComponent.currentState = PlayerState.Idle;
+            playerComponent.currentState = PlayerState.OnGround;
             playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
             playerComponent.renderableComponent.frame = 0;
             playerComponent.renderableComponent.frameTimer = 0;

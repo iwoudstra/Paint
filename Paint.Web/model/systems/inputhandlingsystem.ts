@@ -40,6 +40,10 @@ class InputHandlingSystem extends System {
                     inputComponent.jumpActive = active;
                     break;
                 }
+                case inputComponent.downKey: {
+                    inputComponent.downActive = active;
+                    break;
+                }
                 case inputComponent.paintKey: {
                     inputComponent.paintActive = active;
                     break;

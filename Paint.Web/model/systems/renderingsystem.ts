@@ -6,7 +6,7 @@ class RenderingSystem extends System {
     public Update(deltaTime: number): void {
         var camera = <CameraComponent>this.engine.GetEntities([CameraComponent.name])[0].GetComponent(CameraComponent.name);
         var context = Game.Instance.context;
-        context.clearRect(0, 0, 800, 600);
+        context.clearRect(0, 0, Game.ResolutionWidth, Game.ResolutionHeight);
 
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {

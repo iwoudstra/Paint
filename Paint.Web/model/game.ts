@@ -8,6 +8,9 @@
     private deltaTime: number;
     private engine: Engine;
 
+    public static ResolutionWidth: number = 1600;
+    public static ResolutionHeight: number = 900;
+
     public animations: Map<string, GameAnimation> = new Map<string, GameAnimation>();
 
     private constructor() {
