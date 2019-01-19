@@ -660,6 +660,9 @@ class MovingSystem extends System {
     static IsOnGround(engine, moveableComponent) {
         return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.MapHeight;
     }
+    static HorizontalBounds(engine, moveableComponent, movement) {
+        return moveableComponent.positionComponent.position.x + movement <= 0;
+    }
     static IsOnPlatform(engine, moveableComponent, includingSolid) {
         var platforms = engine.GetEntities([PlatformComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
@@ -682,6 +685,9 @@ class MovingSystem extends System {
         return false;
     }
     static CanMoveHorizontal(engine, moveableComponent, movement) {
+        if (this.HorizontalBounds(engine, moveableComponent, movement)) {
+            return false;
+        }
         var solidPlatforms = engine.GetEntities([SolidPlatformComponent.name]);
         for (var i = 0; i < solidPlatforms.length; ++i) {
             var solidPlatformComponent = solidPlatforms[i].GetComponent(SolidPlatformComponent.name);

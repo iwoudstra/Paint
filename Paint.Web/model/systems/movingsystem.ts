@@ -7,6 +7,10 @@ class MovingSystem extends System {
         return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.MapHeight;
     }
 
+    public static HorizontalBounds(engine: Engine, moveableComponent: MoveableComponent, movement: number): boolean {
+        return moveableComponent.positionComponent.position.x + movement <= 0;
+    }
+
     public static IsOnPlatform(engine: Engine, moveableComponent: MoveableComponent, includingSolid: boolean): boolean {
         var platforms = engine.GetEntities([PlatformComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
@@ -32,15 +36,17 @@ class MovingSystem extends System {
     }
 
     public static CanMoveHorizontal(engine: Engine, moveableComponent: MoveableComponent, movement: number): boolean {
+        if (this.HorizontalBounds(engine, moveableComponent, movement)) {
+            return false;
+        }
+
         var solidPlatforms = engine.GetEntities([SolidPlatformComponent.name]);
+
         for (var i = 0; i < solidPlatforms.length; ++i) {
             var solidPlatformComponent = <SolidPlatformComponent>solidPlatforms[i].GetComponent(SolidPlatformComponent.name);
             if ((moveableComponent.positionComponent.position.y <= solidPlatformComponent.positionComponent.position.y + solidPlatformComponent.positionComponent.height && moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height > solidPlatformComponent.positionComponent.position.y)
                 && ((movement < 0 && moveableComponent.positionComponent.position.x + movement === solidPlatformComponent.positionComponent.position.x + solidPlatformComponent.positionComponent.width)
                     || (movement > 0 && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width + movement === solidPlatformComponent.positionComponent.position.x))) {
-                //console.log('moveable:');
-                //console.log(moveableComponent.positionComponent);
-                //console.log(solidPlatformComponent.positionComponent);
                 return false;
             }
         }
@@ -91,7 +97,7 @@ class MovingSystem extends System {
                 var xmovement = movement.x + moveableComponent.leftoverXMovement;
                 for (var steps = 0; steps > xmovement; --steps) {
                     if (!MovingSystem.CanMoveHorizontal(this.engine, moveableComponent, -1)) {
-                        
+
                         moveableComponent.leftoverXMovement = 0;
                         moveableComponent.velocity.x = 0;
                     } else {
