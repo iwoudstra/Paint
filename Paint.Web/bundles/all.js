@@ -26,7 +26,7 @@ class Game {
         var player = new Entity("player");
         var inputComponent = new InputComponent();
         player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent(0, 0, 130, 120);
+        var positionComponent = new PositionComponent(0, 700, 130, 120);
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
@@ -479,22 +479,22 @@ class CameraSystem extends System {
         var speedFactor = 16;
         if (camera.horizontalDirection < 0) {
             if (camera.horizontalTime > 0.5) {
-                preferredXPosition = player.positionComponent.position.x - 700;
+                preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.90);
             }
             else {
-                preferredXPosition = player.positionComponent.position.x - 550;
+                preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.65);
             }
         }
         else if (camera.horizontalDirection > 0) {
             if (camera.horizontalTime > 0.5) {
-                preferredXPosition = player.positionComponent.position.x - 100;
+                preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.10);
             }
             else {
-                preferredXPosition = player.positionComponent.position.x - 250;
+                preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.35);
             }
         }
         else {
-            preferredXPosition = player.positionComponent.position.x - 400;
+            preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.5);
         }
         if (preferredXPosition < 0) {
             preferredXPosition = 0;

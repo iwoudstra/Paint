@@ -33,18 +33,18 @@ class CameraSystem extends System {
         var speedFactor = 16;
         if (camera.horizontalDirection < 0) {
             if (camera.horizontalTime > 0.5) {
-                preferredXPosition = player.positionComponent.position.x - 700;
+                preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.90);
             } else {
-                preferredXPosition = player.positionComponent.position.x - 550;
+                preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.65);
             }
         } else if (camera.horizontalDirection > 0) {
             if (camera.horizontalTime > 0.5) {
-                preferredXPosition = player.positionComponent.position.x - 100;
+                preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.10);
             } else {
-                preferredXPosition = player.positionComponent.position.x - 250;
+                preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.35);
             }
         } else {
-            preferredXPosition = player.positionComponent.position.x - 400;
+            preferredXPosition = player.positionComponent.position.x - (Game.ResolutionWidth * 0.5);
         }
 
         if (preferredXPosition < 0) {

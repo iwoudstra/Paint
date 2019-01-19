@@ -46,7 +46,7 @@
         var player = new Entity("player");
         var inputComponent = new InputComponent()
         player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent(0, 0, 130, 120);
+        var positionComponent = new PositionComponent(0, 700, 130, 120);
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
