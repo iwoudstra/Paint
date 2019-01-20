@@ -16,7 +16,7 @@ class MovingSystem extends System {
         for (var i = 0; i < platforms.length; ++i) {
             var platformComponent = <PlatformComponent>platforms[i].GetComponent(PlatformComponent.name);
             if ((moveableComponent.positionComponent.position.x <= platformComponent.positionComponent.position.x + platformComponent.positionComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > platformComponent.positionComponent.position.x)
-                && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(platformComponent.positionComponent.position.y + 0.01 * platformComponent.positionComponent.height))) {
+                && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(platformComponent.positionComponent.position.y))) {
                 return true;
             }
         }
@@ -26,7 +26,7 @@ class MovingSystem extends System {
             for (var i = 0; i < solidPlatforms.length; ++i) {
                 var solidPlatformComponent = <SolidPlatformComponent>solidPlatforms[i].GetComponent(SolidPlatformComponent.name);
                 if ((moveableComponent.positionComponent.position.x <= solidPlatformComponent.positionComponent.position.x + solidPlatformComponent.positionComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > solidPlatformComponent.positionComponent.position.x)
-                    && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(solidPlatformComponent.positionComponent.position.y + 0.01 * solidPlatformComponent.positionComponent.height))) {
+                    && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(solidPlatformComponent.positionComponent.position.y))) {
                     return true;
                 }
             }

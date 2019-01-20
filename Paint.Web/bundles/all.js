@@ -37,9 +37,12 @@ class Game {
         player.AddComponent(renderableComponent);
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         this.engine.AddEntity(EntityHelper.CreateGameMap(3000, 1080, this.animations.get('gamemap')));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(1148, 219, 297, 323));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(1445, 219, 610, 170));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
         this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
         this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
@@ -709,7 +712,7 @@ class MovingSystem extends System {
         for (var i = 0; i < platforms.length; ++i) {
             var platformComponent = platforms[i].GetComponent(PlatformComponent.name);
             if ((moveableComponent.positionComponent.position.x <= platformComponent.positionComponent.position.x + platformComponent.positionComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > platformComponent.positionComponent.position.x)
-                && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(platformComponent.positionComponent.position.y + 0.01 * platformComponent.positionComponent.height))) {
+                && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(platformComponent.positionComponent.position.y))) {
                 return true;
             }
         }
@@ -718,7 +721,7 @@ class MovingSystem extends System {
             for (var i = 0; i < solidPlatforms.length; ++i) {
                 var solidPlatformComponent = solidPlatforms[i].GetComponent(SolidPlatformComponent.name);
                 if ((moveableComponent.positionComponent.position.x <= solidPlatformComponent.positionComponent.position.x + solidPlatformComponent.positionComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > solidPlatformComponent.positionComponent.position.x)
-                    && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(solidPlatformComponent.positionComponent.position.y + 0.01 * solidPlatformComponent.positionComponent.height))) {
+                    && (Math.floor(moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height) === Math.floor(solidPlatformComponent.positionComponent.position.y))) {
                     return true;
                 }
             }
