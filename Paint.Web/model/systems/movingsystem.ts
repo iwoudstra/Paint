@@ -35,6 +35,19 @@ class MovingSystem extends System {
         return false;
     }
 
+    public static CanMoveUpwards(engine: Engine, moveableComponent: MoveableComponent): boolean {
+        var solidPlatforms = engine.GetEntities([SolidPlatformComponent.name]);
+        for (var i = 0; i < solidPlatforms.length; ++i) {
+            var solidPlatformComponent = <SolidPlatformComponent>solidPlatforms[i].GetComponent(SolidPlatformComponent.name);
+            if ((moveableComponent.positionComponent.position.x <= solidPlatformComponent.positionComponent.position.x + solidPlatformComponent.positionComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > solidPlatformComponent.positionComponent.position.x)
+                && (Math.floor(moveableComponent.positionComponent.position.y) === Math.floor(solidPlatformComponent.positionComponent.position.y + solidPlatformComponent.positionComponent.height))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static CanMoveHorizontal(engine: Engine, moveableComponent: MoveableComponent, movement: number): boolean {
         if (this.HorizontalBounds(engine, moveableComponent, movement)) {
             return false;
@@ -77,9 +90,17 @@ class MovingSystem extends System {
                 }
                 moveableComponent.leftoverYMovement = ymovement - Math.floor(ymovement);
             } else if (movement.y < 0) {
-                var ymovement = Math.floor(movement.y);
-                moveableComponent.positionComponent.position.y += ymovement;
-                moveableComponent.leftoverYMovement = movement.y - ymovement;
+                var ymovement = movement.y + moveableComponent.leftoverYMovement;
+
+                for (var steps = 0; steps > ymovement; --steps) {
+                    if (!MovingSystem.CanMoveUpwards(this.engine, moveableComponent)) {
+                        moveableComponent.leftoverYMovement = 0;
+                        moveableComponent.velocity.y = 0;
+                    } else {
+                        moveableComponent.positionComponent.position.y -= 1;
+                    }
+                }
+                moveableComponent.leftoverYMovement = ymovement - Math.ceil(ymovement);
             }
 
             if (movement.x > 0) {
@@ -104,7 +125,7 @@ class MovingSystem extends System {
                         moveableComponent.positionComponent.position.x -= 1;
                     }
                 }
-                moveableComponent.leftoverXMovement = xmovement - Math.floor(xmovement);
+                moveableComponent.leftoverXMovement = xmovement - Math.ceil(xmovement);
             }
         }
     }

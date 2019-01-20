@@ -37,9 +37,12 @@ class Game {
         player.AddComponent(renderableComponent);
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         this.engine.AddEntity(EntityHelper.CreateGameMap(3000, 1080, this.animations.get('gamemap')));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
         this.engine.AddEntity(EntityHelper.CreatePaintPickupComponent(1710, 603, PaintType.HighJump));
         this.engine.AddEntity(EntityHelper.CreateCamera());
         this.engine.AddEntity(player);
@@ -684,6 +687,17 @@ class MovingSystem extends System {
         }
         return false;
     }
+    static CanMoveUpwards(engine, moveableComponent) {
+        var solidPlatforms = engine.GetEntities([SolidPlatformComponent.name]);
+        for (var i = 0; i < solidPlatforms.length; ++i) {
+            var solidPlatformComponent = solidPlatforms[i].GetComponent(SolidPlatformComponent.name);
+            if ((moveableComponent.positionComponent.position.x <= solidPlatformComponent.positionComponent.position.x + solidPlatformComponent.positionComponent.width && moveableComponent.positionComponent.position.x + moveableComponent.positionComponent.width > solidPlatformComponent.positionComponent.position.x)
+                && (Math.floor(moveableComponent.positionComponent.position.y) === Math.floor(solidPlatformComponent.positionComponent.position.y + solidPlatformComponent.positionComponent.height))) {
+                return false;
+            }
+        }
+        return true;
+    }
     static CanMoveHorizontal(engine, moveableComponent, movement) {
         if (this.HorizontalBounds(engine, moveableComponent, movement)) {
             return false;
@@ -721,9 +735,17 @@ class MovingSystem extends System {
                 moveableComponent.leftoverYMovement = ymovement - Math.floor(ymovement);
             }
             else if (movement.y < 0) {
-                var ymovement = Math.floor(movement.y);
-                moveableComponent.positionComponent.position.y += ymovement;
-                moveableComponent.leftoverYMovement = movement.y - ymovement;
+                var ymovement = movement.y + moveableComponent.leftoverYMovement;
+                for (var steps = 0; steps > ymovement; --steps) {
+                    if (!MovingSystem.CanMoveUpwards(this.engine, moveableComponent)) {
+                        moveableComponent.leftoverYMovement = 0;
+                        moveableComponent.velocity.y = 0;
+                    }
+                    else {
+                        moveableComponent.positionComponent.position.y -= 1;
+                    }
+                }
+                moveableComponent.leftoverYMovement = ymovement - Math.ceil(ymovement);
             }
             if (movement.x > 0) {
                 var xmovement = movement.x + moveableComponent.leftoverXMovement;
@@ -749,7 +771,7 @@ class MovingSystem extends System {
                         moveableComponent.positionComponent.position.x -= 1;
                     }
                 }
-                moveableComponent.leftoverXMovement = xmovement - Math.floor(xmovement);
+                moveableComponent.leftoverXMovement = xmovement - Math.ceil(xmovement);
             }
         }
     }

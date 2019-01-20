@@ -61,9 +61,12 @@
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
 
         this.engine.AddEntity(EntityHelper.CreateGameMap(3000, 1080, this.animations.get('gamemap')));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
+        this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
         this.engine.AddEntity(EntityHelper.CreatePaintPickupComponent(1710, 603, PaintType.HighJump));
         this.engine.AddEntity(EntityHelper.CreateCamera());
 
