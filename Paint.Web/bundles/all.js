@@ -613,8 +613,32 @@ class InputHandlingSystem extends System {
         this.HandleKeyUp = (ev) => {
             this.HandleKey(ev, false);
         };
+        this.addedDebug = false;
         document.body.addEventListener("keydown", this.HandleKeyDown);
         document.body.addEventListener("keyup", this.HandleKeyUp);
+    }
+    AddDebug() {
+        var platforms = this.engine.GetEntities([PlatformComponent.name]);
+        var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
+        for (var i = 0; i < platforms.length; ++i) {
+            console.log('platform');
+            var positionComponent = platforms[i].GetComponent(PositionComponent.name);
+            platforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00'));
+        }
+        for (var i = 0; i < solidPlatforms.length; ++i) {
+            var positionComponent = solidPlatforms[i].GetComponent(PositionComponent.name);
+            solidPlatforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ff0000'));
+        }
+    }
+    RemoveDebug() {
+        var platforms = this.engine.GetEntities([PlatformComponent.name]);
+        var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
+        for (var i = 0; i < platforms.length; ++i) {
+            platforms[i].RemoveComponent(RenderableComponent.name);
+        }
+        for (var i = 0; i < solidPlatforms.length; ++i) {
+            solidPlatforms[i].RemoveComponent(RenderableComponent.name);
+        }
     }
     HandleKey(ev, active) {
         if (ev.repeat) {
@@ -642,6 +666,20 @@ class InputHandlingSystem extends System {
                 }
                 case inputComponent.paintKey: {
                     inputComponent.paintActive = active;
+                    break;
+                }
+                case ',': {
+                    if (!this.addedDebug) {
+                        this.addedDebug = true;
+                        this.AddDebug();
+                    }
+                    break;
+                }
+                case '.': {
+                    if (this.addedDebug) {
+                        this.addedDebug = false;
+                        this.RemoveDebug();
+                    }
                     break;
                 }
             }
