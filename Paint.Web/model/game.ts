@@ -68,6 +68,7 @@
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(1148, 219, 297, 323));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(1445, 219, 610, 170));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
+        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 1065, 640, 20)); //platform where character lands
         this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
         this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
         this.engine.AddEntity(EntityHelper.CreatePaintPickupComponent(1710, 603, PaintType.HighJump));
