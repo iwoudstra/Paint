@@ -40,5 +40,18 @@ class RenderingSystem extends System {
                 context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y - camera.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
             }
         }
+
+        var texts = this.engine.GetEntities([TextComponent.name]);
+        for (var i = 0; i < texts.length; ++i) {
+            var text = <TextComponent>texts[i].GetComponent(TextComponent.name);
+            context.fillStyle = '#ffffff';
+            context.strokeStyle = '#000000';
+            context.font = '30pt mono-space';
+            context.fillText(text.text, text.positionComponent.position.x - camera.positionComponent.position.x, text.positionComponent.position.y - camera.positionComponent.position.y);
+            context.strokeText(text.text, text.positionComponent.position.x - camera.positionComponent.position.x, text.positionComponent.position.y - camera.positionComponent.position.y);
+
+            context.fill();
+            context.stroke();
+        }
     }
 }

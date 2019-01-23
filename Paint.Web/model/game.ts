@@ -49,17 +49,6 @@
 
         this.InitSprites();
 
-        var player = new Entity("player");
-        var inputComponent = new InputComponent()
-        player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent(0, 600, 130, 120);
-        player.AddComponent(positionComponent);
-        var moveableComponent = new MoveableComponent(positionComponent);
-        player.AddComponent(moveableComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '#ff00ff', this.animations.get('playerwalking'));
-        player.AddComponent(renderableComponent);
-        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
-
         this.engine.AddEntity(EntityHelper.CreateGameMap(3000, 1080, this.animations.get('gamemap')));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
@@ -71,10 +60,21 @@
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 1065, 640, 20)); //platform where character lands
         this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
         this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
-        this.engine.AddEntity(EntityHelper.CreatePaintPickupComponent(1710, 603, PaintType.HighJump));
+        //this.engine.AddEntity(EntityHelper.CreatePaintPickupEntity(1710, 603, PaintType.HighJump));
         this.engine.AddEntity(EntityHelper.CreateCamera());
 
-        this.engine.AddEntity(player);
+        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, 'I am granting you your first paint, it is blue paint and you can use it to jump higher.', function (self:Entity) {
+            var player = Game.Instance.engine.GetEntityByName("player");
+            var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
+            playerComponent.HasBluePaint = true;
+
+            var npcComponent = <NPCComponent>self.GetComponent(NPCComponent.name);
+            npcComponent.interactable = false;
+            self.RemoveComponent(TextComponent.name);
+            self.AddComponent(new TextComponent(npcComponent.positionComponent, npcComponent.text));
+        }));
+
+        this.engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 600));
 
         this.lastTime = performance.now();
         this.Handle(this.lastTime);

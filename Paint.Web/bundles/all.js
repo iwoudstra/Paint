@@ -26,16 +26,6 @@ class Game {
     Init() {
         this.engine = new Engine();
         this.InitSprites();
-        var player = new Entity("player");
-        var inputComponent = new InputComponent();
-        player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent(0, 600, 130, 120);
-        player.AddComponent(positionComponent);
-        var moveableComponent = new MoveableComponent(positionComponent);
-        player.AddComponent(moveableComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '#ff00ff', this.animations.get('playerwalking'));
-        player.AddComponent(renderableComponent);
-        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         this.engine.AddEntity(EntityHelper.CreateGameMap(3000, 1080, this.animations.get('gamemap')));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
@@ -47,9 +37,17 @@ class Game {
         this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 1065, 640, 20));
         this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
         this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
-        this.engine.AddEntity(EntityHelper.CreatePaintPickupComponent(1710, 603, PaintType.HighJump));
         this.engine.AddEntity(EntityHelper.CreateCamera());
-        this.engine.AddEntity(player);
+        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, 'I am granting you your first paint, it is blue paint and you can use it to jump higher.', function (self) {
+            var player = Game.Instance.engine.GetEntityByName("player");
+            var playerComponent = player.GetComponent(PlayerComponent.name);
+            playerComponent.HasBluePaint = true;
+            var npcComponent = self.GetComponent(NPCComponent.name);
+            npcComponent.interactable = false;
+            self.RemoveComponent(TextComponent.name);
+            self.AddComponent(new TextComponent(npcComponent.positionComponent, npcComponent.text));
+        }));
+        this.engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 600));
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
@@ -87,6 +85,7 @@ class InputComponent extends Component {
         this.jumpKey = 'W';
         this.downKey = 'S';
         this.paintKey = ' ';
+        this.interactionKey = 'E';
     }
 }
 class MoveableComponent extends Component {
@@ -96,6 +95,17 @@ class MoveableComponent extends Component {
         this.leftoverXMovement = 0;
         this.leftoverYMovement = 0;
         this.positionComponent = positionComponent;
+    }
+}
+class NPCComponent extends Component {
+    constructor(positionComponent, interactionPosition, text, interactionAction) {
+        super();
+        this.interactable = true;
+        this.interacting = false;
+        this.positionComponent = positionComponent;
+        this.interactionPosition = interactionPosition;
+        this.text = text;
+        this.interactionAction = interactionAction;
     }
 }
 var PaintType;
@@ -169,6 +179,13 @@ class SolidPlatformComponent extends Component {
         this.positionComponent = positionComponent;
     }
 }
+class TextComponent extends Component {
+    constructor(positionComponent, text) {
+        super();
+        this.positionComponent = positionComponent;
+        this.text = text;
+    }
+}
 class Engine {
     constructor() {
         this.entities = [];
@@ -206,6 +223,9 @@ class Engine {
             }
         }
         return result;
+    }
+    GetEntityByName(name) {
+        return this.entityNames.get(name);
     }
     Update(deltaTime) {
         this.updating = true;
@@ -308,7 +328,7 @@ class EntityHelper {
         paint.AddComponent(paintComponent);
         return paint;
     }
-    static CreatePaintPickupComponent(x, y, paintType) {
+    static CreatePaintPickupEntity(x, y, paintType) {
         var paintPickup = new Entity();
         var positionComponent = new PositionComponent(x, y, 50, 50);
         paintPickup.AddComponent(positionComponent);
@@ -317,6 +337,29 @@ class EntityHelper {
         var paintComponent = new PaintPickupComponent(positionComponent, renderableComponent, PaintType.HighJump);
         paintPickup.AddComponent(paintComponent);
         return paintPickup;
+    }
+    static CreatePlayerEntity(x, y) {
+        var player = new Entity("player");
+        var inputComponent = new InputComponent();
+        player.AddComponent(inputComponent);
+        var positionComponent = new PositionComponent(x, y, 130, 120);
+        player.AddComponent(positionComponent);
+        var moveableComponent = new MoveableComponent(positionComponent);
+        player.AddComponent(moveableComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', Game.Instance.animations.get('playerwalking'));
+        player.AddComponent(renderableComponent);
+        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
+        return player;
+    }
+    static CreateNpcEntity(x, y, width, height, interactionX, interactionY, interactionWidth, interactionHeight, text, interactionAction) {
+        var npc = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        npc.AddComponent(positionComponent);
+        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), text, interactionAction);
+        npc.AddComponent(npcComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#3389A3');
+        npc.AddComponent(renderableComponent);
+        return npc;
     }
 }
 class GameAnimation {
@@ -672,6 +715,10 @@ class InputHandlingSystem extends System {
                     inputComponent.paintActive = active;
                     break;
                 }
+                case inputComponent.interactionKey: {
+                    inputComponent.interactionActive = active;
+                    break;
+                }
                 case ',': {
                     if (!this.addedDebug) {
                         this.addedDebug = true;
@@ -694,6 +741,7 @@ class InputHandlingSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var inputComponent = entities[i].GetComponent(InputComponent.name);
             inputComponent.paintActivePrevious = inputComponent.paintActive;
+            inputComponent.interactionActivePrevious = inputComponent.interactionActive;
         }
     }
 }
@@ -870,6 +918,17 @@ class PlayerSystem extends System {
         }
         return false;
     }
+    static CanInteractWithNPC(engine, playerComponent) {
+        var npcs = engine.GetEntities([NPCComponent.name]);
+        for (var i = 0; i < npcs.length; ++i) {
+            var npcComponent = npcs[i].GetComponent(NPCComponent.name);
+            if ((playerComponent.positionComponent.position.x <= npcComponent.interactionPosition.position.x + npcComponent.interactionPosition.width && playerComponent.positionComponent.position.x + playerComponent.positionComponent.width > npcComponent.interactionPosition.position.x)
+                && (playerComponent.positionComponent.position.y <= npcComponent.interactionPosition.position.y + npcComponent.interactionPosition.height && playerComponent.positionComponent.position.y + playerComponent.positionComponent.height > npcComponent.interactionPosition.position.y)) {
+                return npcs[i];
+            }
+        }
+        return null;
+    }
     HandleMovement(playerComponent) {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
@@ -900,6 +959,20 @@ class PlayerSystem extends System {
     HandleOnGroundState(entity, playerComponent, deltaTime) {
         this.HandleMovement(playerComponent);
         PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
+        var npc = PlayerSystem.CanInteractWithNPC(this.engine, playerComponent);
+        if (npc) {
+            var npcComponent = npc.GetComponent(NPCComponent.name);
+            if (npcComponent.interactable) {
+                if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
+                    npcComponent.interactionAction(npc);
+                }
+                else if (!npcComponent.interacting) {
+                    console.log('test1');
+                    npcComponent.interacting = true;
+                    npc.AddComponent(new TextComponent(npcComponent.positionComponent, "Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
+                }
+            }
+        }
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
             if (playerComponent.renderableComponent.frameTimer >= 0.1) {
@@ -973,6 +1046,17 @@ class RenderingSystem extends System {
                 context.strokeStyle = renderableComponent.color;
                 context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y - camera.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
             }
+        }
+        var texts = this.engine.GetEntities([TextComponent.name]);
+        for (var i = 0; i < texts.length; ++i) {
+            var text = texts[i].GetComponent(TextComponent.name);
+            context.fillStyle = '#ffffff';
+            context.strokeStyle = '#000000';
+            context.font = '30pt mono-space';
+            context.fillText(text.text, text.positionComponent.position.x - camera.positionComponent.position.x, text.positionComponent.position.y - camera.positionComponent.position.y);
+            context.strokeText(text.text, text.positionComponent.position.x - camera.positionComponent.position.x, text.positionComponent.position.y - camera.positionComponent.position.y);
+            context.fill();
+            context.stroke();
         }
     }
 }

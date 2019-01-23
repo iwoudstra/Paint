@@ -79,6 +79,10 @@ class InputHandlingSystem extends System {
                     inputComponent.paintActive = active;
                     break;
                 }
+                case inputComponent.interactionKey: {
+                    inputComponent.interactionActive = active;
+                    break;
+                }
                 case ',': {
                     if (!this.addedDebug) {
                         this.addedDebug = true;
@@ -103,6 +107,7 @@ class InputHandlingSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var inputComponent: InputComponent = <InputComponent>entities[i].GetComponent(InputComponent.name);
             inputComponent.paintActivePrevious = inputComponent.paintActive;
+            inputComponent.interactionActivePrevious = inputComponent.interactionActive;
         }
     }
 }

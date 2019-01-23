@@ -56,6 +56,19 @@ class PlayerSystem extends System {
         return false;
     }
 
+    public static CanInteractWithNPC(engine: Engine, playerComponent: PlayerComponent): Entity {
+        var npcs = engine.GetEntities([NPCComponent.name]);
+        for (var i = 0; i < npcs.length; ++i) {
+            var npcComponent = <NPCComponent>npcs[i].GetComponent(NPCComponent.name);
+            if ((playerComponent.positionComponent.position.x <= npcComponent.interactionPosition.position.x + npcComponent.interactionPosition.width && playerComponent.positionComponent.position.x + playerComponent.positionComponent.width > npcComponent.interactionPosition.position.x)
+                && (playerComponent.positionComponent.position.y <= npcComponent.interactionPosition.position.y + npcComponent.interactionPosition.height && playerComponent.positionComponent.position.y + playerComponent.positionComponent.height > npcComponent.interactionPosition.position.y)) {
+                return npcs[i];
+            }
+        }
+
+        return null;
+    }
+
     private HandleMovement(playerComponent: PlayerComponent): void {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
@@ -84,6 +97,19 @@ class PlayerSystem extends System {
     private HandleOnGroundState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
         this.HandleMovement(playerComponent);
         PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
+        var npc = PlayerSystem.CanInteractWithNPC(this.engine, playerComponent);
+        if (npc) {
+            var npcComponent = <NPCComponent>npc.GetComponent(NPCComponent.name);
+            if (npcComponent.interactable) {
+                if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
+                    npcComponent.interactionAction(npc);
+                } else if (!npcComponent.interacting) {
+                    console.log('test1');
+                    npcComponent.interacting = true;
+                    npc.AddComponent(new TextComponent(npcComponent.positionComponent, "Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
+                }
+            }
+        }
         
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;

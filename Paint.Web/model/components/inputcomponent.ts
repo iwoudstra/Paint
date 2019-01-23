@@ -1,6 +1,6 @@
 ﻿/// <reference path="../core/component.ts" />
 
-class InputComponent extends Component{
+class InputComponent extends Component {
     moveLeftKey: string = 'A';
     moveLeftActive: boolean;
 
@@ -16,4 +16,8 @@ class InputComponent extends Component{
     paintKey: string = ' ';
     paintActive: boolean;
     paintActivePrevious: boolean;
+
+    interactionKey: string = 'E';
+    interactionActive: boolean;
+    interactionActivePrevious: boolean;
 }

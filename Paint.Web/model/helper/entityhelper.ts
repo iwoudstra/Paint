@@ -3,7 +3,6 @@
         var platform = new Entity();
         var positionComponent = new PositionComponent(x, y, width, height);
         platform.AddComponent(positionComponent);
-        //platform.AddComponent(new RenderableComponent(positionComponent, width, height, ''));
         platform.AddComponent(new PlatformComponent(positionComponent));
         return platform;
     }
@@ -12,7 +11,6 @@
         var platform = new Entity();
         var positionComponent = new PositionComponent(x, y, width, height);
         platform.AddComponent(positionComponent);
-        //platform.AddComponent(new RenderableComponent(positionComponent, width, height, ''));
         platform.AddComponent(new SolidPlatformComponent(positionComponent));
         return platform;
     }
@@ -45,7 +43,7 @@
         return paint;
     }
 
-    public static CreatePaintPickupComponent(x: number, y: number, paintType: PaintType): Entity {
+    public static CreatePaintPickupEntity(x: number, y: number, paintType: PaintType): Entity {
         var paintPickup = new Entity();
         var positionComponent = new PositionComponent(x, y, 50, 50);
         paintPickup.AddComponent(positionComponent);
@@ -55,5 +53,32 @@
         paintPickup.AddComponent(paintComponent);
 
         return paintPickup;
+    }
+
+    public static CreatePlayerEntity(x: number, y: number): Entity {
+        var player = new Entity("player");
+        var inputComponent = new InputComponent()
+        player.AddComponent(inputComponent);
+        var positionComponent = new PositionComponent(x, y, 130, 120);
+        player.AddComponent(positionComponent);
+        var moveableComponent = new MoveableComponent(positionComponent);
+        player.AddComponent(moveableComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', Game.Instance.animations.get('playerwalking'));
+        player.AddComponent(renderableComponent);
+        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
+
+        return player;
+    }
+
+    public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, text: string, interactionAction: (self: Entity) => void): Entity {
+        var npc = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        npc.AddComponent(positionComponent);
+        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), text, interactionAction);
+        npc.AddComponent(npcComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#3389A3');
+        npc.AddComponent(renderableComponent);
+
+        return npc;
     }
 }

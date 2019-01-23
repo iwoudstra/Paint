@@ -46,6 +46,10 @@
         return result;
     }
 
+    public GetEntityByName(name: string): Entity {
+        return this.entityNames.get(name);
+    }
+
     public Update(deltaTime: number): void {
         this.updating = true;
 
