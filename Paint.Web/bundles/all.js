@@ -38,14 +38,15 @@ class Game {
         this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
         this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
         this.engine.AddEntity(EntityHelper.CreateCamera());
-        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, 'I am granting you your first paint, it is blue paint and you can use it to jump higher.', function (self) {
+        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, '', function (self) {
             var player = Game.Instance.engine.GetEntityByName("player");
             var playerComponent = player.GetComponent(PlayerComponent.name);
             playerComponent.HasBluePaint = true;
             var npcComponent = self.GetComponent(NPCComponent.name);
             npcComponent.interactable = false;
             self.RemoveComponent(TextComponent.name);
-            self.AddComponent(new TextComponent(npcComponent.positionComponent, npcComponent.text));
+            var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
+            player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
         }));
         this.engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 600));
         this.lastTime = performance.now();
@@ -183,6 +184,12 @@ class TextComponent extends Component {
     constructor(positionComponent, text) {
         super();
         this.positionComponent = positionComponent;
+        this.text = text;
+    }
+}
+class TopTextComponent extends Component {
+    constructor(text) {
+        super();
         this.text = text;
     }
 }
@@ -967,7 +974,6 @@ class PlayerSystem extends System {
                     npcComponent.interactionAction(npc);
                 }
                 else if (!npcComponent.interacting) {
-                    console.log('test1');
                     npcComponent.interacting = true;
                     npc.AddComponent(new TextComponent(npcComponent.positionComponent, "Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
                 }
@@ -1052,9 +1058,26 @@ class RenderingSystem extends System {
             var text = texts[i].GetComponent(TextComponent.name);
             context.fillStyle = '#ffffff';
             context.strokeStyle = '#000000';
-            context.font = '30pt mono-space';
+            context.textAlign = 'center';
+            context.font = '30pt Calibri';
             context.fillText(text.text, text.positionComponent.position.x - camera.positionComponent.position.x, text.positionComponent.position.y - camera.positionComponent.position.y);
             context.strokeText(text.text, text.positionComponent.position.x - camera.positionComponent.position.x, text.positionComponent.position.y - camera.positionComponent.position.y);
+            context.fill();
+            context.stroke();
+        }
+        var texts = this.engine.GetEntities([TopTextComponent.name]);
+        for (var i = 0; i < texts.length; ++i) {
+            var topText = texts[i].GetComponent(TopTextComponent.name);
+            context.fillStyle = '#ffffff';
+            context.strokeStyle = '#000000';
+            context.textAlign = 'center';
+            context.textBaseline = 'top';
+            context.font = '20pt Calibri';
+            var splitText = topText.text.split('\n');
+            for (var j = 0; j < splitText.length; ++j) {
+                context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
+                context.strokeText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
+            }
             context.fill();
             context.stroke();
         }

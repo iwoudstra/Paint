@@ -46,9 +46,29 @@ class RenderingSystem extends System {
             var text = <TextComponent>texts[i].GetComponent(TextComponent.name);
             context.fillStyle = '#ffffff';
             context.strokeStyle = '#000000';
-            context.font = '30pt mono-space';
+            context.textAlign = 'center';
+            context.font = '30pt Calibri';
             context.fillText(text.text, text.positionComponent.position.x - camera.positionComponent.position.x, text.positionComponent.position.y - camera.positionComponent.position.y);
             context.strokeText(text.text, text.positionComponent.position.x - camera.positionComponent.position.x, text.positionComponent.position.y - camera.positionComponent.position.y);
+
+            context.fill();
+            context.stroke();
+        }
+
+        var texts = this.engine.GetEntities([TopTextComponent.name]);
+        for (var i = 0; i < texts.length; ++i) {
+            var topText = <TopTextComponent>texts[i].GetComponent(TopTextComponent.name);
+            context.fillStyle = '#ffffff';
+            context.strokeStyle = '#000000';
+            context.textAlign = 'center';
+            context.textBaseline = 'top';
+            context.font = '20pt Calibri';
+
+            var splitText = topText.text.split('\n');
+            for (var j = 0; j < splitText.length; ++j) {
+                context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35*j));
+                context.strokeText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
+            }
 
             context.fill();
             context.stroke();

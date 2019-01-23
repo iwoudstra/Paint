@@ -104,7 +104,6 @@ class PlayerSystem extends System {
                 if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
                     npcComponent.interactionAction(npc);
                 } else if (!npcComponent.interacting) {
-                    console.log('test1');
                     npcComponent.interacting = true;
                     npc.AddComponent(new TextComponent(npcComponent.positionComponent, "Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
                 }

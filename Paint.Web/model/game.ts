@@ -63,7 +63,7 @@
         //this.engine.AddEntity(EntityHelper.CreatePaintPickupEntity(1710, 603, PaintType.HighJump));
         this.engine.AddEntity(EntityHelper.CreateCamera());
 
-        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, 'I am granting you your first paint, it is blue paint and you can use it to jump higher.', function (self:Entity) {
+        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, '', function (self: Entity) {
             var player = Game.Instance.engine.GetEntityByName("player");
             var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
             playerComponent.HasBluePaint = true;
@@ -71,7 +71,9 @@
             var npcComponent = <NPCComponent>self.GetComponent(NPCComponent.name);
             npcComponent.interactable = false;
             self.RemoveComponent(TextComponent.name);
-            self.AddComponent(new TextComponent(npcComponent.positionComponent, npcComponent.text));
+
+            var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
+            player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
         }));
 
         this.engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 600));
