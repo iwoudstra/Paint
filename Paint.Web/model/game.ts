@@ -63,7 +63,9 @@
         //this.engine.AddEntity(EntityHelper.CreatePaintPickupEntity(1710, 603, PaintType.HighJump));
         this.engine.AddEntity(EntityHelper.CreateCamera());
 
-        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, '', function (self: Entity) {
+        this.engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(400, 0), new Vector2d(39, 115), new Vector2d(1222, 155), 10));
+
+        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, function (self: Entity) {
             var player = Game.Instance.engine.GetEntityByName("player");
             var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
             playerComponent.HasBluePaint = true;

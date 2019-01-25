@@ -70,15 +70,42 @@
         return player;
     }
 
-    public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, text: string, interactionAction: (self: Entity) => void): Entity {
+    public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, interactionAction: (self: Entity) => void): Entity {
         var npc = new Entity();
         var positionComponent = new PositionComponent(x, y, width, height);
         npc.AddComponent(positionComponent);
-        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), text, interactionAction);
+        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), interactionAction);
         npc.AddComponent(npcComponent);
         var renderableComponent = new RenderableComponent(positionComponent, width, height, '#3389A3');
         npc.AddComponent(renderableComponent);
 
         return npc;
+    }
+
+    public static CreateSpawnedEntity(x: number, y: number, width: number, height: number, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d): Entity {
+        var spawnedEntity = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        spawnedEntity.AddComponent(positionComponent);
+        var moveableComponent = new MoveableComponent(positionComponent);
+        moveableComponent.velocity = spawnVelocity;
+        spawnedEntity.AddComponent(moveableComponent);
+        var spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
+        spawnedEntity.AddComponent(spawnedComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff');
+        spawnedEntity.AddComponent(renderableComponent);
+
+        return spawnedEntity;
+    }
+
+    public static CreateSpawningEntity(x: number, y: number, width: number, height: number, spawnLocation: Vector2d, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d, spawnTime: number): Entity {
+        var spawningEntity = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        spawningEntity.AddComponent(positionComponent);
+        var spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
+        spawningEntity.AddComponent(spawnComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff');
+        spawningEntity.AddComponent(renderableComponent);
+
+        return spawningEntity;
     }
 }

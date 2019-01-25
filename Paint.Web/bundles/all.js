@@ -38,7 +38,8 @@ class Game {
         this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
         this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
         this.engine.AddEntity(EntityHelper.CreateCamera());
-        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, '', function (self) {
+        this.engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(400, 0), new Vector2d(39, 115), new Vector2d(1222, 155), 10));
+        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, function (self) {
             var player = Game.Instance.engine.GetEntityByName("player");
             var playerComponent = player.GetComponent(PlayerComponent.name);
             playerComponent.HasBluePaint = true;
@@ -99,13 +100,12 @@ class MoveableComponent extends Component {
     }
 }
 class NPCComponent extends Component {
-    constructor(positionComponent, interactionPosition, text, interactionAction) {
+    constructor(positionComponent, interactionPosition, interactionAction) {
         super();
         this.interactable = true;
         this.interacting = false;
         this.positionComponent = positionComponent;
         this.interactionPosition = interactionPosition;
-        this.text = text;
         this.interactionAction = interactionAction;
     }
 }
@@ -140,6 +140,7 @@ var PlayerState;
     PlayerState[PlayerState["OnGround"] = 0] = "OnGround";
     PlayerState[PlayerState["Jumping"] = 1] = "Jumping";
     PlayerState[PlayerState["Falling"] = 2] = "Falling";
+    PlayerState[PlayerState["Respawing"] = 3] = "Respawing";
 })(PlayerState || (PlayerState = {}));
 class PlayerComponent extends Component {
     constructor(positionComponent, moveableComponent, inputComponent, renderableComponent) {
@@ -180,6 +181,27 @@ class SolidPlatformComponent extends Component {
         this.positionComponent = positionComponent;
     }
 }
+class SpawnComponent extends Component {
+    constructor(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime) {
+        super();
+        this.spawnTimer = 0;
+        this.positionComponent = positionComponent;
+        this.spawnLocation = spawnLocation;
+        this.spawnVelocity = spawnVelocity;
+        this.spawnMaxPosition = spawnMaxPosition;
+        this.spawnMinPosition = spawnMinPosition;
+        this.spawnTime = spawnTime;
+    }
+}
+class SpawnedComponent extends Component {
+    constructor(positionComponent, moveableComponent, minPosition, maxPosition) {
+        super();
+        this.positionComponent = positionComponent;
+        this.moveableComponent = moveableComponent;
+        this.minPosition = minPosition;
+        this.maxPosition = maxPosition;
+    }
+}
 class TextComponent extends Component {
     constructor(positionComponent, text) {
         super();
@@ -202,6 +224,8 @@ class Engine {
         this.systems.push(new MovingSystem(this));
         this.systems.push(new PlayerSystem(this));
         this.systems.push(new InputHandlingSystem(this));
+        this.systems.push(new SpawningSystem(this));
+        this.systems.push(new SpawnedSystem(this));
         this.systems.push(new CameraSystem(this));
         this.systems.push(new RenderingSystem(this));
     }
@@ -358,15 +382,38 @@ class EntityHelper {
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         return player;
     }
-    static CreateNpcEntity(x, y, width, height, interactionX, interactionY, interactionWidth, interactionHeight, text, interactionAction) {
+    static CreateNpcEntity(x, y, width, height, interactionX, interactionY, interactionWidth, interactionHeight, interactionAction) {
         var npc = new Entity();
         var positionComponent = new PositionComponent(x, y, width, height);
         npc.AddComponent(positionComponent);
-        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), text, interactionAction);
+        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), interactionAction);
         npc.AddComponent(npcComponent);
         var renderableComponent = new RenderableComponent(positionComponent, width, height, '#3389A3');
         npc.AddComponent(renderableComponent);
         return npc;
+    }
+    static CreateSpawnedEntity(x, y, width, height, spawnVelocity, spawnMinPosition, spawnMaxPosition) {
+        var spawnedEntity = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        spawnedEntity.AddComponent(positionComponent);
+        var moveableComponent = new MoveableComponent(positionComponent);
+        moveableComponent.velocity = spawnVelocity;
+        spawnedEntity.AddComponent(moveableComponent);
+        var spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
+        spawnedEntity.AddComponent(spawnedComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff');
+        spawnedEntity.AddComponent(renderableComponent);
+        return spawnedEntity;
+    }
+    static CreateSpawningEntity(x, y, width, height, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime) {
+        var spawningEntity = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        spawningEntity.AddComponent(positionComponent);
+        var spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
+        spawningEntity.AddComponent(spawnComponent);
+        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff');
+        spawningEntity.AddComponent(renderableComponent);
+        return spawningEntity;
     }
 }
 class GameAnimation {
@@ -894,7 +941,11 @@ class PlayerSystem extends System {
                     break;
                 }
                 case PlayerState.Falling: {
-                    this.HandleFallingState(entities[i], playerComponent);
+                    this.HandleFallingState(entities[i], playerComponent, deltaTime);
+                    break;
+                }
+                case PlayerState.Respawing: {
+                    this.HandleRespawningState(entities[i], playerComponent, deltaTime);
                     break;
                 }
             }
@@ -936,7 +987,7 @@ class PlayerSystem extends System {
         }
         return null;
     }
-    HandleMovement(playerComponent) {
+    HandleMovement(playerComponent, allowJump) {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = true;
@@ -948,7 +999,7 @@ class PlayerSystem extends System {
         else {
             playerComponent.moveableComponent.velocity.x = 0;
         }
-        if (playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
+        if (allowJump && playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
             }
@@ -964,7 +1015,7 @@ class PlayerSystem extends System {
         }
     }
     HandleOnGroundState(entity, playerComponent, deltaTime) {
-        this.HandleMovement(playerComponent);
+        this.HandleMovement(playerComponent, true);
         PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
         var npc = PlayerSystem.CanInteractWithNPC(this.engine, playerComponent);
         if (npc) {
@@ -999,7 +1050,7 @@ class PlayerSystem extends System {
         }
     }
     HandleJumpingState(entity, playerComponent, deltaTime) {
-        this.HandleMovement(playerComponent);
+        this.HandleMovement(playerComponent, false);
         PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
@@ -1007,8 +1058,8 @@ class PlayerSystem extends System {
             playerComponent.renderableComponent.frame = 2;
         }
     }
-    HandleFallingState(entity, playerComponent) {
-        this.HandleMovement(playerComponent);
+    HandleFallingState(entity, playerComponent, deltaTime) {
+        this.HandleMovement(playerComponent, false);
         PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
@@ -1019,6 +1070,15 @@ class PlayerSystem extends System {
         }
         else {
             playerComponent.moveableComponent.velocity.y = ((playerComponent.moveableComponent.velocity.y * 7.0) + this.fallSpeed) / 8.0;
+        }
+    }
+    HandleRespawningState(entity, playerComponent, deltaTime) {
+        playerComponent.renderableComponent.frameTimer += deltaTime;
+        if (playerComponent.renderableComponent.frameTimer > 1) {
+            playerComponent.currentState = PlayerState.OnGround;
+            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+            playerComponent.renderableComponent.frame = 0;
+            playerComponent.renderableComponent.frameTimer = 0;
         }
     }
 }
@@ -1080,6 +1140,56 @@ class RenderingSystem extends System {
             }
             context.fill();
             context.stroke();
+        }
+    }
+}
+class SpawnedSystem extends System {
+    constructor() {
+        super(...arguments);
+        this.requiredComponents = [SpawnedComponent.name];
+    }
+    CollisionWithPlayer(playerComponent, spawnedComponent) {
+        if ((playerComponent.positionComponent.position.x <= spawnedComponent.positionComponent.position.x + spawnedComponent.positionComponent.width && playerComponent.positionComponent.position.x + playerComponent.positionComponent.width > spawnedComponent.positionComponent.position.x)
+            && (playerComponent.positionComponent.position.y <= spawnedComponent.positionComponent.position.y + spawnedComponent.positionComponent.height && playerComponent.positionComponent.position.y + playerComponent.positionComponent.height > spawnedComponent.positionComponent.position.y)) {
+            return true;
+        }
+        return false;
+    }
+    Update(deltaTime) {
+        var entities = this.engine.GetEntities(this.requiredComponents);
+        var player = this.engine.GetEntityByName('player');
+        var playerComponent = player.GetComponent(PlayerComponent.name);
+        for (var i = 0; i < entities.length; ++i) {
+            var spawnComponent = entities[i].GetComponent(SpawnedComponent.name);
+            if (spawnComponent.moveableComponent.positionComponent.position.x > spawnComponent.maxPosition.x || spawnComponent.moveableComponent.positionComponent.position.x < spawnComponent.minPosition.x
+                || spawnComponent.moveableComponent.positionComponent.position.y > spawnComponent.maxPosition.y || spawnComponent.moveableComponent.positionComponent.position.y < spawnComponent.minPosition.y) {
+                this.engine.RemoveEntity(entities[i]);
+            }
+            else if (this.CollisionWithPlayer(playerComponent, spawnComponent)) {
+                playerComponent.currentState = PlayerState.Respawing;
+                playerComponent.positionComponent.position.x = 0;
+                playerComponent.positionComponent.position.y = 600;
+                playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+                playerComponent.renderableComponent.frame = 0;
+                playerComponent.renderableComponent.frameTimer = 0;
+            }
+        }
+    }
+}
+class SpawningSystem extends System {
+    constructor() {
+        super(...arguments);
+        this.requiredComponents = [SpawnComponent.name];
+    }
+    Update(deltaTime) {
+        var entities = this.engine.GetEntities(this.requiredComponents);
+        for (var i = 0; i < entities.length; ++i) {
+            var spawnComponent = entities[i].GetComponent(SpawnComponent.name);
+            spawnComponent.spawnTimer += deltaTime;
+            if (spawnComponent.spawnTimer >= spawnComponent.spawnTime) {
+                spawnComponent.spawnTimer = 0;
+                this.engine.AddEntity(EntityHelper.CreateSpawnedEntity(spawnComponent.spawnLocation.x, spawnComponent.spawnLocation.y, 10, 10, spawnComponent.spawnVelocity, spawnComponent.spawnMinPosition, spawnComponent.spawnMaxPosition));
+            }
         }
     }
 }

@@ -8,6 +8,8 @@
         this.systems.push(new MovingSystem(this));
         this.systems.push(new PlayerSystem(this));
         this.systems.push(new InputHandlingSystem(this));
+        this.systems.push(new SpawningSystem(this));
+        this.systems.push(new SpawnedSystem(this));
         this.systems.push(new CameraSystem(this));
         this.systems.push(new RenderingSystem(this));
     }

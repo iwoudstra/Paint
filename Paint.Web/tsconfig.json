@@ -5,6 +5,7 @@
         "noEmitOnError": true,
         "removeComments": true,
         "preserveConstEnums": true,
+        "noFallthroughCasesInSwitch":  true,
         "sourceMap": true,
         "target": "es6",
         "outFile": "bundles/all.js"

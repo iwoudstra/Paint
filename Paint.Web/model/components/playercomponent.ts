@@ -3,7 +3,8 @@
 enum PlayerState {
     OnGround,
     Jumping,
-    Falling
+    Falling,
+    Respawing
 }
 
 class PlayerComponent extends Component {

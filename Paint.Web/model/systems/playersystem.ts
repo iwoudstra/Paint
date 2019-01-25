@@ -20,7 +20,11 @@ class PlayerSystem extends System {
                     break;
                 }
                 case PlayerState.Falling: {
-                    this.HandleFallingState(entities[i], playerComponent);
+                    this.HandleFallingState(entities[i], playerComponent, deltaTime);
+                    break;
+                }
+                case PlayerState.Respawing: {
+                    this.HandleRespawningState(entities[i], playerComponent, deltaTime);
                     break;
                 }
             }
@@ -69,7 +73,7 @@ class PlayerSystem extends System {
         return null;
     }
 
-    private HandleMovement(playerComponent: PlayerComponent): void {
+    private HandleMovement(playerComponent: PlayerComponent, allowJump: boolean): void {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = true;
@@ -80,7 +84,7 @@ class PlayerSystem extends System {
             playerComponent.moveableComponent.velocity.x = 0;
         }
 
-        if (playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
+        if (allowJump && playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
             } else {
@@ -95,7 +99,7 @@ class PlayerSystem extends System {
     }
 
     private HandleOnGroundState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
-        this.HandleMovement(playerComponent);
+        this.HandleMovement(playerComponent, true);
         PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
         var npc = PlayerSystem.CanInteractWithNPC(this.engine, playerComponent);
         if (npc) {
@@ -131,7 +135,7 @@ class PlayerSystem extends System {
     }
 
     private HandleJumpingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
-        this.HandleMovement(playerComponent);
+        this.HandleMovement(playerComponent, false);
         PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
 
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
@@ -141,8 +145,8 @@ class PlayerSystem extends System {
         }
     }
 
-    private HandleFallingState(entity: Entity, playerComponent: PlayerComponent): void {
-        this.HandleMovement(playerComponent);
+    private HandleFallingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
+        this.HandleMovement(playerComponent, false);
         PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
 
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
@@ -153,6 +157,16 @@ class PlayerSystem extends System {
             playerComponent.renderableComponent.frameTimer = 0;
         } else {
             playerComponent.moveableComponent.velocity.y = ((playerComponent.moveableComponent.velocity.y * 7.0) + this.fallSpeed) / 8.0;
+        }
+    }
+
+    private HandleRespawningState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
+        playerComponent.renderableComponent.frameTimer += deltaTime;
+        if (playerComponent.renderableComponent.frameTimer > 1) {
+            playerComponent.currentState = PlayerState.OnGround;
+            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+            playerComponent.renderableComponent.frame = 0;
+            playerComponent.renderableComponent.frameTimer = 0;
         }
     }
 }
