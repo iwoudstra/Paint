@@ -63,7 +63,7 @@
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', Game.Instance.animations.get('playerwalking'));
+        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', SpriteHelper.playerWalking);
         player.AddComponent(renderableComponent);
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
 

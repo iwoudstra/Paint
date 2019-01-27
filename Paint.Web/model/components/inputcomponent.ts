@@ -20,4 +20,7 @@ class InputComponent extends Component {
     interactionKey: string = 'E';
     interactionActive: boolean;
     interactionActivePrevious: boolean;
+
+    cancelInteractionKey: string = 'Q';
+    cancelInteractionActive: boolean;
 }

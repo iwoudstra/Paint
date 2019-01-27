@@ -1,7 +1,6 @@
 class Game {
     constructor() {
         this.requestAnimFrame = window.requestAnimationFrame;
-        this.animations = new Map();
         this.canvas = document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
     }
@@ -11,45 +10,11 @@ class Game {
     AddEntity(entity) {
         this.engine.AddEntity(entity);
     }
-    InitSprites() {
-        var characterspritesheet = new Image();
-        characterspritesheet.src = 'assets/sprites/characterspritesheet.png';
-        this.animations.set('playerwalking', new GameAnimation(characterspritesheet, 0, 361, 391, 361, 6, 'playerwalking'));
-        this.animations.set('playerjumping', new GameAnimation(characterspritesheet, 0, 0, 391, 361, 3, 'playerjumping'));
-        var rockplatform = new Image();
-        rockplatform.src = 'assets/sprites/rockplatform.png';
-        this.animations.set('rockplatform', new GameAnimation(rockplatform, 0, 0, 580, 540, 1, 'rockplatform'));
-        var gamemap = new Image();
-        gamemap.src = 'assets/sprites/level.png';
-        this.animations.set('gamemap', new GameAnimation(gamemap, 0, 0, 3000, 1080, 1, 'gamemap'));
-    }
     Init() {
         this.engine = new Engine();
-        this.InitSprites();
-        this.engine.AddEntity(EntityHelper.CreateGameMap(3000, 1080, this.animations.get('gamemap')));
-        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
-        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
-        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
-        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
-        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(1148, 219, 297, 323));
-        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(1445, 219, 610, 170));
-        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
-        this.engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 1065, 640, 20));
-        this.engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
-        this.engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
-        this.engine.AddEntity(EntityHelper.CreateCamera());
-        this.engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(400, 0), new Vector2d(39, 115), new Vector2d(1222, 155), 10));
-        this.engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, function (self) {
-            var player = Game.Instance.engine.GetEntityByName("player");
-            var playerComponent = player.GetComponent(PlayerComponent.name);
-            playerComponent.HasBluePaint = true;
-            var npcComponent = self.GetComponent(NPCComponent.name);
-            npcComponent.interactable = false;
-            self.RemoveComponent(TextComponent.name);
-            var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
-            player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
-        }));
-        this.engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 600));
+        SpriteHelper.InitSprites();
+        this.currentLevel = new Level1();
+        this.currentLevel.Init(this.engine);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
@@ -88,6 +53,7 @@ class InputComponent extends Component {
         this.downKey = 'S';
         this.paintKey = ' ';
         this.interactionKey = 'E';
+        this.cancelInteractionKey = 'Q';
     }
 }
 class MoveableComponent extends Component {
@@ -314,6 +280,14 @@ class Entity {
     }
 }
 Entity.nameCounter = 0;
+class Level {
+    constructor(width, height, loadScreen, mapLayout) {
+        this.Width = width;
+        this.Height = height;
+        this.LoadScreen = loadScreen;
+        this.MapLayout = mapLayout;
+    }
+}
 class System {
     constructor(engine) {
         this.priority = 0;
@@ -377,7 +351,7 @@ class EntityHelper {
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', Game.Instance.animations.get('playerwalking'));
+        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', SpriteHelper.playerWalking);
         player.AddComponent(renderableComponent);
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         return player;
@@ -427,6 +401,20 @@ class GameAnimation {
         this.name = name;
     }
 }
+class SpriteHelper {
+    static InitSprites() {
+        this.characterSpriteSheet.src = 'assets/sprites/characterspritesheet.png';
+        this.rockPlatform.src = 'assets/sprites/rockplatform.png';
+        this.level1.src = 'assets/sprites/level.png';
+        this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
+        this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
+        this.rockPlatformAnimation = new GameAnimation(this.rockPlatform, 0, 0, 580, 540, 1, 'rockplatform');
+        this.level1Animation = new GameAnimation(this.level1, 0, 0, 3000, 1080, 1, 'gamemap');
+    }
+}
+SpriteHelper.characterSpriteSheet = new Image();
+SpriteHelper.rockPlatform = new Image();
+SpriteHelper.level1 = new Image();
 const precision = [
     1,
     10,
@@ -583,6 +571,38 @@ class Vector2d {
     }
     clone() {
         return new Vector2d(this.x, this.y);
+    }
+}
+class Level1 extends Level {
+    constructor() {
+        super(3000, 1080, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
+    }
+    Init(engine) {
+        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1148, 219, 297, 323));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1445, 219, 610, 170));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 1065, 640, 20));
+        engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
+        engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
+        engine.AddEntity(EntityHelper.CreateCamera());
+        engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(500, 0), new Vector2d(39, 115), new Vector2d(2018, 155), 6));
+        engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 569, 38, 77, new Vector2d(39, 601), new Vector2d(500, 0), new Vector2d(39, 601), new Vector2d(1960, 601), 5));
+        engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, function (self) {
+            var player = engine.GetEntityByName("player");
+            var playerComponent = player.GetComponent(PlayerComponent.name);
+            playerComponent.HasBluePaint = true;
+            var npcComponent = self.GetComponent(NPCComponent.name);
+            npcComponent.interactable = false;
+            self.RemoveComponent(TextComponent.name);
+            var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
+            player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
+        }));
+        engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 600));
     }
 }
 class CameraSystem extends System {
@@ -771,6 +791,10 @@ class InputHandlingSystem extends System {
                 }
                 case inputComponent.interactionKey: {
                     inputComponent.interactionActive = active;
+                    break;
+                }
+                case inputComponent.cancelInteractionKey: {
+                    inputComponent.cancelInteractionActive = active;
                     break;
                 }
                 case ',': {
@@ -1006,7 +1030,7 @@ class PlayerSystem extends System {
             else {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
             }
-            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
             playerComponent.renderableComponent.frame = 1;
             playerComponent.currentState = PlayerState.Jumping;
         }
@@ -1042,7 +1066,7 @@ class PlayerSystem extends System {
         }
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
-            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
             playerComponent.renderableComponent.frame = 2;
         }
         else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.HasBluePaint) {
@@ -1064,7 +1088,7 @@ class PlayerSystem extends System {
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
             playerComponent.currentState = PlayerState.OnGround;
-            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
             playerComponent.renderableComponent.frame = 0;
             playerComponent.renderableComponent.frameTimer = 0;
         }
@@ -1076,7 +1100,7 @@ class PlayerSystem extends System {
         playerComponent.renderableComponent.frameTimer += deltaTime;
         if (playerComponent.renderableComponent.frameTimer > 1) {
             playerComponent.currentState = PlayerState.OnGround;
-            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
             playerComponent.renderableComponent.frame = 0;
             playerComponent.renderableComponent.frameTimer = 0;
         }
@@ -1161,7 +1185,10 @@ class SpawnedSystem extends System {
         var playerComponent = player.GetComponent(PlayerComponent.name);
         for (var i = 0; i < entities.length; ++i) {
             var spawnComponent = entities[i].GetComponent(SpawnedComponent.name);
-            if (spawnComponent.moveableComponent.positionComponent.position.x > spawnComponent.maxPosition.x || spawnComponent.moveableComponent.positionComponent.position.x < spawnComponent.minPosition.x
+            if (spawnComponent.moveableComponent.velocity.x === 0 && spawnComponent.moveableComponent.velocity.y === 0) {
+                this.engine.RemoveEntity(entities[i]);
+            }
+            else if (spawnComponent.moveableComponent.positionComponent.position.x > spawnComponent.maxPosition.x || spawnComponent.moveableComponent.positionComponent.position.x < spawnComponent.minPosition.x
                 || spawnComponent.moveableComponent.positionComponent.position.y > spawnComponent.maxPosition.y || spawnComponent.moveableComponent.positionComponent.position.y < spawnComponent.minPosition.y) {
                 this.engine.RemoveEntity(entities[i]);
             }
@@ -1169,7 +1196,9 @@ class SpawnedSystem extends System {
                 playerComponent.currentState = PlayerState.Respawing;
                 playerComponent.positionComponent.position.x = 0;
                 playerComponent.positionComponent.position.y = 600;
-                playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+                playerComponent.moveableComponent.velocity.x = 0;
+                playerComponent.moveableComponent.velocity.y = 0;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
             }

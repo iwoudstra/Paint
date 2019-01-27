@@ -90,7 +90,7 @@ class PlayerSystem extends System {
             } else {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
             }
-            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
             playerComponent.renderableComponent.frame = 1;
             playerComponent.currentState = PlayerState.Jumping;
         } else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent, false)) {
@@ -127,7 +127,7 @@ class PlayerSystem extends System {
 
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
-            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerjumping');
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
             playerComponent.renderableComponent.frame = 2;
         } else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.HasBluePaint) {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
@@ -152,7 +152,7 @@ class PlayerSystem extends System {
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
             playerComponent.currentState = PlayerState.OnGround;
-            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
             playerComponent.renderableComponent.frame = 0;
             playerComponent.renderableComponent.frameTimer = 0;
         } else {
@@ -164,7 +164,7 @@ class PlayerSystem extends System {
         playerComponent.renderableComponent.frameTimer += deltaTime;
         if (playerComponent.renderableComponent.frameTimer > 1) {
             playerComponent.currentState = PlayerState.OnGround;
-            playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
             playerComponent.renderableComponent.frame = 0;
             playerComponent.renderableComponent.frameTimer = 0;
         }

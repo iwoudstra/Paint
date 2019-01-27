@@ -18,15 +18,19 @@ class SpawnedSystem extends System {
 
         for (var i = 0; i < entities.length; ++i) {
             var spawnComponent: SpawnedComponent = <SpawnedComponent>entities[i].GetComponent(SpawnedComponent.name);
-            if (spawnComponent.moveableComponent.positionComponent.position.x > spawnComponent.maxPosition.x || spawnComponent.moveableComponent.positionComponent.position.x < spawnComponent.minPosition.x
+
+            if (spawnComponent.moveableComponent.velocity.x === 0 && spawnComponent.moveableComponent.velocity.y === 0) {
+                this.engine.RemoveEntity(entities[i]);
+            } else if (spawnComponent.moveableComponent.positionComponent.position.x > spawnComponent.maxPosition.x || spawnComponent.moveableComponent.positionComponent.position.x < spawnComponent.minPosition.x
                 || spawnComponent.moveableComponent.positionComponent.position.y > spawnComponent.maxPosition.y || spawnComponent.moveableComponent.positionComponent.position.y < spawnComponent.minPosition.y) {
                 this.engine.RemoveEntity(entities[i]);
-            }
-            else if(this.CollisionWithPlayer(playerComponent, spawnComponent)) {
+            } else if(this.CollisionWithPlayer(playerComponent, spawnComponent)) {
                 playerComponent.currentState = PlayerState.Respawing;
                 playerComponent.positionComponent.position.x = 0;
                 playerComponent.positionComponent.position.y = 600;
-                playerComponent.renderableComponent.gameAnimation = Game.Instance.animations.get('playerwalking');
+                playerComponent.moveableComponent.velocity.x = 0;
+                playerComponent.moveableComponent.velocity.y = 0;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
             }

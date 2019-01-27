@@ -83,6 +83,10 @@ class InputHandlingSystem extends System {
                     inputComponent.interactionActive = active;
                     break;
                 }
+                case inputComponent.cancelInteractionKey: {
+                    inputComponent.cancelInteractionActive = active;
+                    break;
+                }
                 case ',': {
                     if (!this.addedDebug) {
                         this.addedDebug = true;

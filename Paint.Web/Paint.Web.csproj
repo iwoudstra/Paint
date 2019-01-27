@@ -113,7 +113,10 @@
     <TypeScriptCompile Include="model\game.ts" />
     <TypeScriptCompile Include="model\helper\gameanimation.ts" />
     <TypeScriptCompile Include="model\helper\entityhelper.ts" />
+    <TypeScriptCompile Include="model\helper\spritehelper.ts" />
     <TypeScriptCompile Include="model\helper\vector2d.ts" />
+    <TypeScriptCompile Include="model\core\level.ts" />
+    <TypeScriptCompile Include="model\levels\level1.ts" />
     <TypeScriptCompile Include="model\systems\camerasystem.ts" />
     <TypeScriptCompile Include="model\systems\inputhandlingsystem.ts" />
     <TypeScriptCompile Include="model\systems\movingsystem.ts" />
