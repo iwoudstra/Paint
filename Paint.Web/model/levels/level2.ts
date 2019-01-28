@@ -1,6 +1,6 @@
 ﻿/// <reference path="../core/system.ts" />
 
-class Level1 extends Level {
+class Level2 extends Level {
     constructor() {
         super(3000, 1080, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
@@ -24,20 +24,7 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(500, 0), new Vector2d(39, 115), new Vector2d(2018, 155), 6));
         engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 569, 38, 77, new Vector2d(39, 601), new Vector2d(500, 0), new Vector2d(39, 601), new Vector2d(1960, 601), 5));
 
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, function (self: Entity) {
-            var player = engine.GetEntityByName("player");
-            var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
-            playerComponent.HasBluePaint = true;
-
-            var npcComponent = <NPCComponent>self.GetComponent(NPCComponent.name);
-            npcComponent.interactable = false;
-            self.RemoveComponent(TextComponent.name);
-
-            var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
-            player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
-        }));
-
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1843, 43, 1, 175, new Level2(), 24, 960));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1, 565, 1, 494, new Level1(), 1700, 43));
 
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }

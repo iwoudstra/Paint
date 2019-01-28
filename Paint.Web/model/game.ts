@@ -31,11 +31,17 @@
         this.engine = new Engine();
 
         SpriteHelper.InitSprites();
-        this.currentLevel = new Level1();
-        this.currentLevel.Init(this.engine);
+        this.ChangeLevel(new Level1(), 10, 600);
 
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
+    }
+
+    public ChangeLevel(level: Level, playerX: number, playerY: number): void {
+        this.engine.RemoveAllEntities();
+
+        this.currentLevel = level;
+        this.currentLevel.Init(this.engine, playerX, playerY);
     }
 
     public Handle(timestamp: number): void {

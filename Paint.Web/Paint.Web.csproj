@@ -93,6 +93,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="model\components\cameracomponent.ts" />
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
+    <TypeScriptCompile Include="model\components\leveltriggercomponent.ts" />
     <TypeScriptCompile Include="model\components\movablecomponent.ts" />
     <TypeScriptCompile Include="model\components\npccomponent.ts" />
     <TypeScriptCompile Include="model\components\paintcomponent.ts" />
@@ -116,6 +117,7 @@
     <TypeScriptCompile Include="model\helper\spritehelper.ts" />
     <TypeScriptCompile Include="model\helper\vector2d.ts" />
     <TypeScriptCompile Include="model\core\level.ts" />
+    <TypeScriptCompile Include="model\levels\level2.ts" />
     <TypeScriptCompile Include="model\levels\level1.ts" />
     <TypeScriptCompile Include="model\systems\camerasystem.ts" />
     <TypeScriptCompile Include="model\systems\inputhandlingsystem.ts" />
@@ -124,6 +126,7 @@
     <TypeScriptCompile Include="model\systems\renderingsystem.ts" />
     <TypeScriptCompile Include="model\systems\spawnedsystem.ts" />
     <TypeScriptCompile Include="model\systems\spawningsystem.ts" />
+    <TypeScriptCompile Include="model\systems\triggersystem.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

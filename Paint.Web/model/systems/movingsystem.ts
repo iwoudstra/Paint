@@ -4,7 +4,7 @@ class MovingSystem extends System {
     private requiredComponents: string[] = [MoveableComponent.name];
 
     public static IsOnGround(engine: Engine, moveableComponent: MoveableComponent): boolean {
-        return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.MapHeight;
+        return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.Instance.currentLevel.Height;
     }
 
     public static HorizontalBounds(engine: Engine, moveableComponent: MoveableComponent, movement: number): boolean {

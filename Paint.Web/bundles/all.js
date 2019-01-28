@@ -13,10 +13,14 @@ class Game {
     Init() {
         this.engine = new Engine();
         SpriteHelper.InitSprites();
-        this.currentLevel = new Level1();
-        this.currentLevel.Init(this.engine);
+        this.ChangeLevel(new Level1(), 10, 600);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
+    }
+    ChangeLevel(level, playerX, playerY) {
+        this.engine.RemoveAllEntities();
+        this.currentLevel = level;
+        this.currentLevel.Init(this.engine, playerX, playerY);
     }
     Handle(timestamp) {
         this.now = timestamp;
@@ -54,6 +58,15 @@ class InputComponent extends Component {
         this.paintKey = ' ';
         this.interactionKey = 'E';
         this.cancelInteractionKey = 'Q';
+    }
+}
+class LevelTriggerComponent extends Component {
+    constructor(positionComponent, playerX, playerY, level) {
+        super();
+        this.positionComponent = positionComponent;
+        this.playerX = playerX;
+        this.playerY = playerY;
+        this.level = level;
     }
 }
 class MoveableComponent extends Component {
@@ -192,6 +205,7 @@ class Engine {
         this.systems.push(new InputHandlingSystem(this));
         this.systems.push(new SpawningSystem(this));
         this.systems.push(new SpawnedSystem(this));
+        this.systems.push(new TriggerSystem(this));
         this.systems.push(new CameraSystem(this));
         this.systems.push(new RenderingSystem(this));
     }
@@ -211,6 +225,10 @@ class Engine {
             return entity;
         }
         return null;
+    }
+    RemoveAllEntities() {
+        this.entities.splice(0, this.entities.length);
+        this.entityNames.clear();
     }
     GetEntities(componentTypes) {
         var result = [];
@@ -388,6 +406,14 @@ class EntityHelper {
         var renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff');
         spawningEntity.AddComponent(renderableComponent);
         return spawningEntity;
+    }
+    static CreateLevelTriggerEntity(x, y, width, height, newLevel, playerX, playerY) {
+        var levelTrigger = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        levelTrigger.AddComponent(positionComponent);
+        var levelTriggerComponent = new LevelTriggerComponent(positionComponent, playerX, playerY, newLevel);
+        levelTrigger.AddComponent(levelTriggerComponent);
+        return levelTrigger;
     }
 }
 class GameAnimation {
@@ -577,7 +603,8 @@ class Level1 extends Level {
     constructor() {
         super(3000, 1080, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
-    Init(engine) {
+    Init(engine, playerX, playerY) {
+        engine.RemoveAllEntities();
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
@@ -602,7 +629,32 @@ class Level1 extends Level {
             var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
             player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
         }));
-        engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 600));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1843, 43, 1, 175, new Level2(), 24, 960));
+        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
+    }
+}
+class Level2 extends Level {
+    constructor() {
+        super(3000, 1080, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
+    }
+    Init(engine, playerX, playerY) {
+        engine.RemoveAllEntities();
+        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1148, 219, 297, 323));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1445, 219, 610, 170));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 1065, 640, 20));
+        engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
+        engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
+        engine.AddEntity(EntityHelper.CreateCamera());
+        engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(500, 0), new Vector2d(39, 115), new Vector2d(2018, 155), 6));
+        engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 569, 38, 77, new Vector2d(39, 601), new Vector2d(500, 0), new Vector2d(39, 601), new Vector2d(1960, 601), 5));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1, 565, 1, 494, new Level1(), 1700, 43));
+        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
 class CameraSystem extends System {
@@ -829,7 +881,7 @@ class MovingSystem extends System {
         this.requiredComponents = [MoveableComponent.name];
     }
     static IsOnGround(engine, moveableComponent) {
-        return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.MapHeight;
+        return moveableComponent.positionComponent.position.y + moveableComponent.positionComponent.height >= Game.Instance.currentLevel.Height;
     }
     static HorizontalBounds(engine, moveableComponent, movement) {
         return moveableComponent.positionComponent.position.x + movement <= 0;
@@ -1218,6 +1270,26 @@ class SpawningSystem extends System {
             if (spawnComponent.spawnTimer >= spawnComponent.spawnTime) {
                 spawnComponent.spawnTimer = 0;
                 this.engine.AddEntity(EntityHelper.CreateSpawnedEntity(spawnComponent.spawnLocation.x, spawnComponent.spawnLocation.y, 10, 10, spawnComponent.spawnVelocity, spawnComponent.spawnMinPosition, spawnComponent.spawnMaxPosition));
+            }
+        }
+    }
+}
+class TriggerSystem extends System {
+    static CollisionWithPlayer(engine, positionComponent) {
+        var playerEntity = engine.GetEntityByName('player');
+        var player = playerEntity.GetComponent(PlayerComponent.name);
+        if ((positionComponent.position.x <= player.positionComponent.position.x + player.positionComponent.width && positionComponent.position.x + positionComponent.width > player.positionComponent.position.x)
+            && (positionComponent.position.y <= player.positionComponent.position.y + player.positionComponent.height && positionComponent.position.y + positionComponent.height > player.positionComponent.position.y)) {
+            return true;
+        }
+        return false;
+    }
+    Update(deltaTime) {
+        var levelTriggers = this.engine.GetEntities([LevelTriggerComponent.name]);
+        for (var i = 0; i < levelTriggers.length; ++i) {
+            var levelTrigger = levelTriggers[i].GetComponent(LevelTriggerComponent.name);
+            if (TriggerSystem.CollisionWithPlayer(this.engine, levelTrigger.positionComponent)) {
+                Game.Instance.ChangeLevel(levelTrigger.level, levelTrigger.playerX, levelTrigger.playerY);
             }
         }
     }

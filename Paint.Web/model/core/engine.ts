@@ -10,6 +10,7 @@
         this.systems.push(new InputHandlingSystem(this));
         this.systems.push(new SpawningSystem(this));
         this.systems.push(new SpawnedSystem(this));
+        this.systems.push(new TriggerSystem(this));
         this.systems.push(new CameraSystem(this));
         this.systems.push(new RenderingSystem(this));
     }
@@ -34,6 +35,11 @@
         }
 
         return null;
+    }
+
+    public RemoveAllEntities(): void {
+        this.entities.splice(0, this.entities.length);
+        this.entityNames.clear();
     }
 
     public GetEntities(componentTypes: string[]): Entity[] {

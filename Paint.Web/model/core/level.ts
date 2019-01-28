@@ -11,5 +11,5 @@
         this.MapLayout = mapLayout;
     }
 
-    public abstract Init(engine: Engine): void;
+    public abstract Init(engine: Engine, playerX: number, playerY: number): void;
 }

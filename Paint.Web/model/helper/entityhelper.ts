@@ -108,4 +108,14 @@
 
         return spawningEntity;
     }
+
+    public static CreateLevelTriggerEntity(x: number, y: number, width: number, height: number, newLevel: Level, playerX: number, playerY: number): Entity {
+        var levelTrigger = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        levelTrigger.AddComponent(positionComponent);
+        var levelTriggerComponent = new LevelTriggerComponent(positionComponent, playerX, playerY, newLevel);
+        levelTrigger.AddComponent(levelTriggerComponent);
+
+        return levelTrigger;
+    }
 }
