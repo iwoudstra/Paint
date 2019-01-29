@@ -34,8 +34,6 @@ class Game {
 }
 Game.ResolutionWidth = 1280;
 Game.ResolutionHeight = 720;
-Game.MapWidth = 3000;
-Game.MapHeight = 1080;
 class Component {
 }
 class CameraComponent extends Component {
@@ -790,8 +788,8 @@ class InputHandlingSystem extends System {
     AddDebug() {
         var platforms = this.engine.GetEntities([PlatformComponent.name]);
         var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
+        var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
-            console.log('platform');
             var positionComponent = platforms[i].GetComponent(PositionComponent.name);
             platforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00'));
         }
@@ -799,15 +797,23 @@ class InputHandlingSystem extends System {
             var positionComponent = solidPlatforms[i].GetComponent(PositionComponent.name);
             solidPlatforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ff0000'));
         }
+        for (var i = 0; i < triggers.length; ++i) {
+            var positionComponent = triggers[i].GetComponent(PositionComponent.name);
+            triggers[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00'));
+        }
     }
     RemoveDebug() {
         var platforms = this.engine.GetEntities([PlatformComponent.name]);
         var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
+        var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
             platforms[i].RemoveComponent(RenderableComponent.name);
         }
         for (var i = 0; i < solidPlatforms.length; ++i) {
             solidPlatforms[i].RemoveComponent(RenderableComponent.name);
+        }
+        for (var i = 0; i < triggers.length; ++i) {
+            triggers[i].RemoveComponent(RenderableComponent.name);
         }
     }
     HandleKey(ev, active) {

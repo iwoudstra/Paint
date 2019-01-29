@@ -11,8 +11,6 @@
 
     public static ResolutionWidth: number = 1280;
     public static ResolutionHeight: number = 720;
-    public static MapWidth: number = 3000;
-    public static MapHeight: number = 1080;
 
     private constructor() {
         this.canvas = <HTMLCanvasElement>document.getElementById('canvas');

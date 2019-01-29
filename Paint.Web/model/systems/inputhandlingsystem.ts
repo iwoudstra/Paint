@@ -21,9 +21,9 @@ class InputHandlingSystem extends System {
     private AddDebug(): void {
         var platforms = this.engine.GetEntities([PlatformComponent.name]);
         var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
+        var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
 
         for (var i = 0; i < platforms.length; ++i) {
-            console.log('platform');
             var positionComponent = <PositionComponent>platforms[i].GetComponent(PositionComponent.name);
             platforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00'));
         }
@@ -32,11 +32,17 @@ class InputHandlingSystem extends System {
             var positionComponent = <PositionComponent>solidPlatforms[i].GetComponent(PositionComponent.name);
             solidPlatforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ff0000'));
         }
+
+        for (var i = 0; i < triggers.length; ++i) {
+            var positionComponent = <PositionComponent>triggers[i].GetComponent(PositionComponent.name);
+            triggers[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00'));
+        }
     }
 
     private RemoveDebug(): void {
         var platforms = this.engine.GetEntities([PlatformComponent.name]);
         var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
+        var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
 
         for (var i = 0; i < platforms.length; ++i) {
             platforms[i].RemoveComponent(RenderableComponent.name);
@@ -44,6 +50,10 @@ class InputHandlingSystem extends System {
 
         for (var i = 0; i < solidPlatforms.length; ++i) {
             solidPlatforms[i].RemoveComponent(RenderableComponent.name);
+        }
+
+        for (var i = 0; i < triggers.length; ++i) {
+            triggers[i].RemoveComponent(RenderableComponent.name);
         }
     }
 
