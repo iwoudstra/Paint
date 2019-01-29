@@ -38,6 +38,6 @@ class Level2 extends Level {
 
         //engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1, 565, 1, 494, new Level1(), 1700, 43));
 
-        engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 300));
+        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
