@@ -34,7 +34,7 @@ class Level1 extends Level {
             player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
         }));
 
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1843, 43, 1, 175, new Level2(), 24, 960));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1730, 570, 1, 175, new Level2(), 0, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }

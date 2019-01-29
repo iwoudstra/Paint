@@ -624,7 +624,7 @@ class Level1 extends Level {
             var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
             player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
         }));
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1843, 43, 1, 175, new Level2(), 24, 960));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1730, 570, 1, 175, new Level2(), 0, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -651,7 +651,7 @@ class Level2 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1790, 1665, 320, 130));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(510, 1790, 1300, 130));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 300));
+        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
 class CameraSystem extends System {
