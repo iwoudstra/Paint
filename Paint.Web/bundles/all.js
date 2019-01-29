@@ -13,7 +13,7 @@ class Game {
     Init() {
         this.engine = new Engine();
         SpriteHelper.InitSprites();
-        this.ChangeLevel(new Level1(), 10, 600);
+        this.ChangeLevel(new Level1(), 600, 600);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
@@ -436,7 +436,7 @@ class SpriteHelper {
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
         this.rockPlatformAnimation = new GameAnimation(this.rockPlatform, 0, 0, 580, 540, 1, 'rockplatform');
-        this.level1Animation = new GameAnimation(this.level1, 0, 0, 3000, 1080, 1, 'gamemap');
+        this.level1Animation = new GameAnimation(this.level1, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level2Animation = new GameAnimation(this.level2, 0, 0, 2074, 1920, 1, 'gamemap');
     }
 }
@@ -604,25 +604,17 @@ class Vector2d {
 }
 class Level1 extends Level {
     constructor() {
-        super(3000, 1080, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
+        super(3071, 2944, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
     Init(engine, playerX, playerY) {
         engine.RemoveAllEntities();
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1148, 219, 297, 323));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1445, 219, 610, 170));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 1065, 640, 20));
-        engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
-        engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(450, 895, 650, 260));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 770, 195, 130));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 640, 650, 130));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 640, 325, 260));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(500, 0), new Vector2d(39, 115), new Vector2d(2018, 155), 6));
-        engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 569, 38, 77, new Vector2d(39, 601), new Vector2d(500, 0), new Vector2d(39, 601), new Vector2d(1960, 601), 5));
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1718, 608, 95, 144, 1163, 406, 857, 375, function (self) {
+        engine.AddEntity(EntityHelper.CreateNpcEntity(1345, 640, 95, 144, 1163, 406, 857, 375, function (self) {
             var player = engine.GetEntityByName("player");
             var playerComponent = player.GetComponent(PlayerComponent.name);
             playerComponent.HasBluePaint = true;
