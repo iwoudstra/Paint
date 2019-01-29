@@ -612,7 +612,7 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 640, 650, 130));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 640, 325, 260));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1345, 640, 95, 144, 1163, 406, 857, 375, function (self) {
+        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 498, 95, 144, 1163, 406, 857, 375, function (self) {
             var player = engine.GetEntityByName("player");
             var playerComponent = player.GetComponent(PlayerComponent.name);
             playerComponent.HasBluePaint = true;
@@ -622,7 +622,7 @@ class Level1 extends Level {
             var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
             player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
         }));
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1730, 570, 1, 175, new Level2(), 0, 300));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
