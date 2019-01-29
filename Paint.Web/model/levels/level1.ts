@@ -14,6 +14,9 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 770, 195, 130));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 640, 650, 130));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 640, 325, 260));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 0, 325, 455));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 0, 520, 390));
+
 
         //engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
         engine.AddEntity(EntityHelper.CreateCamera());
