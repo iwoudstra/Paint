@@ -432,15 +432,18 @@ class SpriteHelper {
         this.characterSpriteSheet.src = 'assets/sprites/characterspritesheet.png';
         this.rockPlatform.src = 'assets/sprites/rockplatform.png';
         this.level1.src = 'assets/sprites/level.png';
+        this.level2.src = 'assets/sprites/level-2.png';
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
         this.rockPlatformAnimation = new GameAnimation(this.rockPlatform, 0, 0, 580, 540, 1, 'rockplatform');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 3000, 1080, 1, 'gamemap');
+        this.level2Animation = new GameAnimation(this.level2, 0, 0, 2074, 1920, 1, 'gamemap');
     }
 }
 SpriteHelper.characterSpriteSheet = new Image();
 SpriteHelper.rockPlatform = new Image();
 SpriteHelper.level1 = new Image();
+SpriteHelper.level2 = new Image();
 const precision = [
     1,
     10,
@@ -635,26 +638,28 @@ class Level1 extends Level {
 }
 class Level2 extends Level {
     constructor() {
-        super(3000, 1080, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
+        super(2074, 1920, SpriteHelper.level2Animation, SpriteHelper.level2Animation);
     }
     Init(engine, playerX, playerY) {
         engine.RemoveAllEntities();
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 2029, 42));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 233, 514, 332));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(629, 921, 232, 143));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(930, 784, 1090, 296));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1148, 219, 297, 323));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1445, 219, 610, 170));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2007, 234, 113, 549));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 1065, 640, 20));
-        engine.AddEntity(EntityHelper.CreatePlatform(513, 531, 259, 16));
-        engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 450, 320, 255));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(320, 700, 255, 50));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(575, 575, 385, 700));
+        engine.AddEntity(EntityHelper.CreatePlatform(960, 705, 130, 15));
+        engine.AddEntity(EntityHelper.CreatePlatform(960, 830, 130, 15));
+        engine.AddEntity(EntityHelper.CreatePlatform(960, 955, 130, 15));
+        engine.AddEntity(EntityHelper.CreatePlatform(960, 1080, 130, 15));
+        engine.AddEntity(EntityHelper.CreatePlatform(960, 1205, 130, 15));
+        engine.AddEntity(EntityHelper.CreatePlatform(960, 1405, 130, 15));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(960, 1600, 195, 195));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 1665, 320, 130));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(640, 1470, 260, 130));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(380, 1275, 130, 520));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1790, 1665, 320, 130));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(510, 1790, 1300, 130));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(500, 0), new Vector2d(39, 115), new Vector2d(2018, 155), 6));
-        engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 569, 38, 77, new Vector2d(39, 601), new Vector2d(500, 0), new Vector2d(39, 601), new Vector2d(1960, 601), 5));
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1, 565, 1, 494, new Level1(), 1700, 43));
-        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
+        engine.AddEntity(EntityHelper.CreatePlayerEntity(0, 300));
     }
 }
 class CameraSystem extends System {
