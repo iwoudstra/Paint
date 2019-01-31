@@ -3,15 +3,18 @@
 class NPCComponent extends Component {
     positionComponent: PositionComponent;
     interactionPosition: PositionComponent;
-    interactionAction: (self: Entity) => void;
+    name: string;
+    interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => void;
+    interactingState: number = 0;
     interactable: boolean = true;
     interacting: boolean = false;
 
-    constructor(positionComponent: PositionComponent, interactionPosition: PositionComponent, interactionAction: (self: Entity) => void) {
+    constructor(positionComponent: PositionComponent, interactionPosition: PositionComponent, name: string, interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => void) {
         super();
 
         this.positionComponent = positionComponent;
         this.interactionPosition = interactionPosition;
+        this.name = name;
         this.interactionAction = interactionAction;
     }
 }

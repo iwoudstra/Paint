@@ -9,9 +9,11 @@ class InputComponent extends Component {
 
     jumpKey: string = 'W';
     jumpActive: boolean;
+    jumpActivePrevious: boolean;
 
     downKey: string = 'S';
     downActive: boolean;
+    downActivePrevious: boolean;
 
     paintKey: string = ' ';
     paintActive: boolean;

@@ -1,4 +1,8 @@
 ﻿class EntityHelper {
+    public static Player: string = 'player';
+    public static Camera: string = 'camera';
+    public static TopText: string = 'toptext';
+
     public static CreatePlatform(x: number, y: number, width: number, height: number): Entity {
         var platform = new Entity();
         var positionComponent = new PositionComponent(x, y, width, height);
@@ -43,18 +47,6 @@
         return paint;
     }
 
-    public static CreatePaintPickupEntity(x: number, y: number, paintType: PaintType): Entity {
-        var paintPickup = new Entity();
-        var positionComponent = new PositionComponent(x, y, 50, 50);
-        paintPickup.AddComponent(positionComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 50, 50, '#0077ff');
-        paintPickup.AddComponent(renderableComponent);
-        var paintComponent = new PaintPickupComponent(positionComponent, renderableComponent, PaintType.HighJump);
-        paintPickup.AddComponent(paintComponent);
-
-        return paintPickup;
-    }
-
     public static CreatePlayerEntity(x: number, y: number): Entity {
         var player = new Entity("player");
         var inputComponent = new InputComponent()
@@ -70,11 +62,12 @@
         return player;
     }
 
-    public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, interactionAction: (self: Entity) => void): Entity {
+    public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, name: string
+        , interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => void): Entity {
         var npc = new Entity();
         var positionComponent = new PositionComponent(x, y, width, height);
         npc.AddComponent(positionComponent);
-        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), interactionAction);
+        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
         npc.AddComponent(npcComponent);
         var renderableComponent = new RenderableComponent(positionComponent, width, height, '#3389A3');
         npc.AddComponent(renderableComponent);

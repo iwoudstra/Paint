@@ -16,28 +16,52 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 640, 325, 260));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 0, 325, 455));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 0, 520, 390));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1802, 374, 115, 275));
 
-
-        //engine.AddEntity(EntityHelper.CreatePlatform(860, 378, 289, 27));
         engine.AddEntity(EntityHelper.CreateCamera());
 
-        //engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 83, 38, 77, new Vector2d(39, 115), new Vector2d(500, 0), new Vector2d(39, 115), new Vector2d(2018, 155), 6));
-        //engine.AddEntity(EntityHelper.CreateSpawningEntity(0, 569, 38, 77, new Vector2d(39, 601), new Vector2d(500, 0), new Vector2d(39, 601), new Vector2d(1960, 601), 5));
+        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 498, 95, 144, 1163, 406, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean) {
+            if (!self.interactable) {
+                return;
+            }
 
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 498, 95, 144, 1163, 406, 857, 375, function (self: Entity) {
             var player = engine.GetEntityByName("player");
-            var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
-            playerComponent.HasBluePaint = true;
+            if (!initialInteraction) {
+                ++self.interactingState;
+            }
 
-            var npcComponent = <NPCComponent>self.GetComponent(NPCComponent.name);
-            npcComponent.interactable = false;
-            self.RemoveComponent(TextComponent.name);
+            switch (self.interactingState) {
+                case 0: {
+                    player.RemoveComponent(TopTextComponent.name);
+                    player.AddComponent(new TopTextComponent("You should follow me, i will lead you to the cookies.", ['I love cookies.', 'I hate cookies but will follow you anyway.']));
 
-            var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
-            player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
+                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
+                    break;
+                }
+                case 1: {
+                    player.RemoveComponent(TopTextComponent.name);
+
+                    if (option == 0) {
+                        player.AddComponent(new TopTextComponent("We have a winner."));
+                    } else {
+                        player.AddComponent(new TopTextComponent("Game over."));
+                    }
+
+                    break;
+                }
+                case 2: {
+                    player.RemoveComponent(TopTextComponent.name);
+
+                    self.interactable = false;
+                    var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
+                    playerComponent.interactingWith = null;
+                    playerComponent.currentState = PlayerState.OnGround;
+
+                    break;
+                }
+            }
         }));
 
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }

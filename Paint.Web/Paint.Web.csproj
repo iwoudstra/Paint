@@ -98,7 +98,6 @@
     <TypeScriptCompile Include="model\components\movablecomponent.ts" />
     <TypeScriptCompile Include="model\components\npccomponent.ts" />
     <TypeScriptCompile Include="model\components\paintcomponent.ts" />
-    <TypeScriptCompile Include="model\components\paintpickupcomponent.ts" />
     <TypeScriptCompile Include="model\components\platformcomponent.ts" />
     <TypeScriptCompile Include="model\components\playercomponent.ts" />
     <TypeScriptCompile Include="model\components\positioncomponent.ts" />

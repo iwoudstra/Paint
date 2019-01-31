@@ -113,7 +113,6 @@ class InputHandlingSystem extends System {
                 }
             }
         }
-
     }
 
     public Update(deltaTime: number): void {
@@ -122,6 +121,8 @@ class InputHandlingSystem extends System {
             var inputComponent: InputComponent = <InputComponent>entities[i].GetComponent(InputComponent.name);
             inputComponent.paintActivePrevious = inputComponent.paintActive;
             inputComponent.interactionActivePrevious = inputComponent.interactionActive;
+            inputComponent.jumpActivePrevious = inputComponent.jumpActive;
+            inputComponent.downActivePrevious = inputComponent.downActive;
         }
     }
 }

@@ -77,12 +77,14 @@ class MoveableComponent extends Component {
     }
 }
 class NPCComponent extends Component {
-    constructor(positionComponent, interactionPosition, interactionAction) {
+    constructor(positionComponent, interactionPosition, name, interactionAction) {
         super();
+        this.interactingState = 0;
         this.interactable = true;
         this.interacting = false;
         this.positionComponent = positionComponent;
         this.interactionPosition = interactionPosition;
+        this.name = name;
         this.interactionAction = interactionAction;
     }
 }
@@ -91,14 +93,6 @@ var PaintType;
     PaintType[PaintType["HighJump"] = 0] = "HighJump";
 })(PaintType || (PaintType = {}));
 class PaintComponent extends Component {
-    constructor(positionComponent, renderableComponent, paintType) {
-        super();
-        this.positionComponent = positionComponent;
-        this.paintType = paintType;
-        this.renderableComponent = renderableComponent;
-    }
-}
-class PaintPickupComponent extends Component {
     constructor(positionComponent, renderableComponent, paintType) {
         super();
         this.positionComponent = positionComponent;
@@ -118,11 +112,13 @@ var PlayerState;
     PlayerState[PlayerState["Jumping"] = 1] = "Jumping";
     PlayerState[PlayerState["Falling"] = 2] = "Falling";
     PlayerState[PlayerState["Respawing"] = 3] = "Respawing";
+    PlayerState[PlayerState["Interacting"] = 4] = "Interacting";
 })(PlayerState || (PlayerState = {}));
 class PlayerComponent extends Component {
     constructor(positionComponent, moveableComponent, inputComponent, renderableComponent) {
         super();
         this.currentState = PlayerState.OnGround;
+        this.interactingWith = null;
         this.positionComponent = positionComponent;
         this.moveableComponent = moveableComponent;
         this.inputComponent = inputComponent;
@@ -187,9 +183,11 @@ class TextComponent extends Component {
     }
 }
 class TopTextComponent extends Component {
-    constructor(text) {
+    constructor(text, options = []) {
         super();
+        this.chosenOption = 0;
         this.text = text;
+        this.options = options;
     }
 }
 class Engine {
@@ -349,16 +347,6 @@ class EntityHelper {
         paint.AddComponent(paintComponent);
         return paint;
     }
-    static CreatePaintPickupEntity(x, y, paintType) {
-        var paintPickup = new Entity();
-        var positionComponent = new PositionComponent(x, y, 50, 50);
-        paintPickup.AddComponent(positionComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 50, 50, '#0077ff');
-        paintPickup.AddComponent(renderableComponent);
-        var paintComponent = new PaintPickupComponent(positionComponent, renderableComponent, PaintType.HighJump);
-        paintPickup.AddComponent(paintComponent);
-        return paintPickup;
-    }
     static CreatePlayerEntity(x, y) {
         var player = new Entity("player");
         var inputComponent = new InputComponent();
@@ -372,11 +360,11 @@ class EntityHelper {
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         return player;
     }
-    static CreateNpcEntity(x, y, width, height, interactionX, interactionY, interactionWidth, interactionHeight, interactionAction) {
+    static CreateNpcEntity(x, y, width, height, interactionX, interactionY, interactionWidth, interactionHeight, name, interactionAction) {
         var npc = new Entity();
         var positionComponent = new PositionComponent(x, y, width, height);
         npc.AddComponent(positionComponent);
-        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), interactionAction);
+        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
         npc.AddComponent(npcComponent);
         var renderableComponent = new RenderableComponent(positionComponent, width, height, '#3389A3');
         npc.AddComponent(renderableComponent);
@@ -414,6 +402,9 @@ class EntityHelper {
         return levelTrigger;
     }
 }
+EntityHelper.Player = 'player';
+EntityHelper.Camera = 'camera';
+EntityHelper.TopText = 'toptext';
 class GameAnimation {
     constructor(imageFile, sourceX, sourceY, width, height, frames, name) {
         this.imageFile = imageFile;
@@ -613,18 +604,43 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 640, 325, 260));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 0, 325, 455));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 0, 520, 390));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1802, 374, 115, 275));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 498, 95, 144, 1163, 406, 857, 375, function (self) {
+        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 498, 95, 144, 1163, 406, 857, 375, 'John', function (self, option, initialInteraction) {
+            if (!self.interactable) {
+                return;
+            }
             var player = engine.GetEntityByName("player");
-            var playerComponent = player.GetComponent(PlayerComponent.name);
-            playerComponent.HasBluePaint = true;
-            var npcComponent = self.GetComponent(NPCComponent.name);
-            npcComponent.interactable = false;
-            self.RemoveComponent(TextComponent.name);
-            var paintKey = playerComponent.inputComponent.paintKey === ' ' ? 'spacebar' : playerComponent.inputComponent.paintKey;
-            player.AddComponent(new TopTextComponent("I am granting you your first paint, it is blue paint and you can use it to jump higher.\nPress '" + paintKey + "' to paint the ground."));
+            if (!initialInteraction) {
+                ++self.interactingState;
+            }
+            switch (self.interactingState) {
+                case 0: {
+                    player.RemoveComponent(TopTextComponent.name);
+                    player.AddComponent(new TopTextComponent("You should follow me, i will lead you to the cookies.", ['I love cookies.', 'I hate cookies but will follow you anyway.']));
+                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
+                    break;
+                }
+                case 1: {
+                    player.RemoveComponent(TopTextComponent.name);
+                    if (option == 0) {
+                        player.AddComponent(new TopTextComponent("We have a winner."));
+                    }
+                    else {
+                        player.AddComponent(new TopTextComponent("Game over."));
+                    }
+                    break;
+                }
+                case 2: {
+                    player.RemoveComponent(TopTextComponent.name);
+                    self.interactable = false;
+                    var playerComponent = player.GetComponent(PlayerComponent.name);
+                    playerComponent.interactingWith = null;
+                    playerComponent.currentState = PlayerState.OnGround;
+                    break;
+                }
+            }
         }));
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -877,6 +893,8 @@ class InputHandlingSystem extends System {
             var inputComponent = entities[i].GetComponent(InputComponent.name);
             inputComponent.paintActivePrevious = inputComponent.paintActive;
             inputComponent.interactionActivePrevious = inputComponent.interactionActive;
+            inputComponent.jumpActivePrevious = inputComponent.jumpActive;
+            inputComponent.downActivePrevious = inputComponent.downActive;
         }
     }
 }
@@ -1029,6 +1047,10 @@ class PlayerSystem extends System {
                     this.HandleRespawningState(entities[i], playerComponent, deltaTime);
                     break;
                 }
+                case PlayerState.Interacting: {
+                    this.HandleInteractingState(entities[i], playerComponent, deltaTime);
+                    break;
+                }
             }
         }
     }
@@ -1039,19 +1061,6 @@ class PlayerSystem extends System {
             if (paintComponent.paintType == paintType
                 && (positionComponent.position.x <= paintComponent.positionComponent.position.x + paintComponent.positionComponent.width && positionComponent.position.x + positionComponent.width > paintComponent.positionComponent.position.x)
                 && (positionComponent.position.y <= paintComponent.positionComponent.position.y + paintComponent.positionComponent.height && positionComponent.position.y + positionComponent.height > paintComponent.positionComponent.position.y)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    static CollisionWithPickup(engine, positionComponent, playerComponent) {
-        var paints = engine.GetEntities([PaintPickupComponent.name]);
-        for (var i = 0; i < paints.length; ++i) {
-            var paintComponent = paints[i].GetComponent(PaintPickupComponent.name);
-            if ((positionComponent.position.x <= paintComponent.positionComponent.position.x + paintComponent.positionComponent.width && positionComponent.position.x + positionComponent.width > paintComponent.positionComponent.position.x)
-                && (positionComponent.position.y <= paintComponent.positionComponent.position.y + paintComponent.positionComponent.height && positionComponent.position.y + positionComponent.height > paintComponent.positionComponent.position.y)) {
-                playerComponent.HasBluePaint = true;
-                engine.RemoveEntity(paints[i]);
                 return true;
             }
         }
@@ -1097,19 +1106,24 @@ class PlayerSystem extends System {
     }
     HandleOnGroundState(entity, playerComponent, deltaTime) {
         this.HandleMovement(playerComponent, true);
-        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
         var npc = PlayerSystem.CanInteractWithNPC(this.engine, playerComponent);
         if (npc) {
             var npcComponent = npc.GetComponent(NPCComponent.name);
             if (npcComponent.interactable) {
                 if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
-                    npcComponent.interactionAction(npc);
+                    playerComponent.interactingWith = npcComponent;
+                    playerComponent.currentState = PlayerState.Interacting;
+                    npcComponent.interactionAction(npcComponent, 0, true);
                 }
-                else if (!npcComponent.interacting) {
-                    npcComponent.interacting = true;
-                    npc.AddComponent(new TextComponent(npcComponent.positionComponent, "Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
+                else if (playerComponent.interactingWith === null) {
+                    playerComponent.interactingWith = npcComponent;
+                    entity.AddComponent(new TopTextComponent("Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
                 }
             }
+        }
+        if ((npc === null && playerComponent.interactingWith !== null) || (npc !== null && npc.GetComponent(NPCComponent.name) !== playerComponent.interactingWith)) {
+            entity.RemoveComponent(TopTextComponent.name);
+            playerComponent.interactingWith = null;
         }
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
@@ -1132,7 +1146,6 @@ class PlayerSystem extends System {
     }
     HandleJumpingState(entity, playerComponent, deltaTime) {
         this.HandleMovement(playerComponent, false);
-        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
             playerComponent.currentState = PlayerState.Falling;
@@ -1141,7 +1154,6 @@ class PlayerSystem extends System {
     }
     HandleFallingState(entity, playerComponent, deltaTime) {
         this.HandleMovement(playerComponent, false);
-        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
             playerComponent.currentState = PlayerState.OnGround;
@@ -1160,6 +1172,33 @@ class PlayerSystem extends System {
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
             playerComponent.renderableComponent.frame = 0;
             playerComponent.renderableComponent.frameTimer = 0;
+        }
+    }
+    HandleInteractingState(entity, playerComponent, deltaTime) {
+        var topText = entity.GetComponent(TopTextComponent.name);
+        if (playerComponent.inputComponent.cancelInteractionActive) {
+            playerComponent.currentState = PlayerState.OnGround;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
+            playerComponent.renderableComponent.frame = 0;
+            playerComponent.renderableComponent.frameTimer = 0;
+            entity.RemoveComponent(TopTextComponent.name);
+        }
+        else if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
+            playerComponent.interactingWith.interactionAction(playerComponent.interactingWith, topText.chosenOption, false);
+        }
+        if (topText.options.length > 0) {
+            if (playerComponent.inputComponent.downActive && !playerComponent.inputComponent.downActivePrevious) {
+                ++topText.chosenOption;
+                if (topText.chosenOption >= topText.options.length) {
+                    topText.chosenOption = 0;
+                }
+            }
+            else if (playerComponent.inputComponent.jumpActive && !playerComponent.inputComponent.jumpActivePrevious) {
+                --topText.chosenOption;
+                if (topText.chosenOption < 0) {
+                    topText.chosenOption = topText.options.length - 1;
+                }
+            }
         }
     }
 }
@@ -1218,6 +1257,24 @@ class RenderingSystem extends System {
             for (var j = 0; j < splitText.length; ++j) {
                 context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
                 context.strokeText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
+            }
+            context.textAlign = 'left';
+            context.font = '16pt Calibri';
+            var startY = 35 * j + 10;
+            for (var k = 0; k < topText.options.length; ++k) {
+                if (topText.chosenOption == k) {
+                    context.lineWidth = 4;
+                    context.beginPath();
+                    context.moveTo(15, startY + (30 * k));
+                    context.lineTo(15, startY + (30 * k) + 20);
+                    context.lineTo(35, startY + (30 * k) + 10);
+                    context.closePath();
+                    context.stroke();
+                    context.fill();
+                }
+                context.lineWidth = 1;
+                context.fillText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
+                context.strokeText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
             }
             context.fill();
             context.stroke();

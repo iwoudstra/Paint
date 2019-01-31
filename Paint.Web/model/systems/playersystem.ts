@@ -27,6 +27,10 @@ class PlayerSystem extends System {
                     this.HandleRespawningState(entities[i], playerComponent, deltaTime);
                     break;
                 }
+                case PlayerState.Interacting: {
+                    this.HandleInteractingState(entities[i], playerComponent, deltaTime);
+                    break;
+                }
             }
         }
     }
@@ -38,21 +42,6 @@ class PlayerSystem extends System {
             if (paintComponent.paintType == paintType
                 && (positionComponent.position.x <= paintComponent.positionComponent.position.x + paintComponent.positionComponent.width && positionComponent.position.x + positionComponent.width > paintComponent.positionComponent.position.x)
                 && (positionComponent.position.y <= paintComponent.positionComponent.position.y + paintComponent.positionComponent.height && positionComponent.position.y + positionComponent.height > paintComponent.positionComponent.position.y)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static CollisionWithPickup(engine: Engine, positionComponent: PositionComponent, playerComponent: PlayerComponent): boolean {
-        var paints = engine.GetEntities([PaintPickupComponent.name]);
-        for (var i = 0; i < paints.length; ++i) {
-            var paintComponent = <PaintPickupComponent>paints[i].GetComponent(PaintPickupComponent.name);
-            if ((positionComponent.position.x <= paintComponent.positionComponent.position.x + paintComponent.positionComponent.width && positionComponent.position.x + positionComponent.width > paintComponent.positionComponent.position.x)
-                && (positionComponent.position.y <= paintComponent.positionComponent.position.y + paintComponent.positionComponent.height && positionComponent.position.y + positionComponent.height > paintComponent.positionComponent.position.y)) {
-                playerComponent.HasBluePaint = true;
-                engine.RemoveEntity(paints[i]);
                 return true;
             }
         }
@@ -100,20 +89,27 @@ class PlayerSystem extends System {
 
     private HandleOnGroundState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
         this.HandleMovement(playerComponent, true);
-        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
+
         var npc = PlayerSystem.CanInteractWithNPC(this.engine, playerComponent);
         if (npc) {
             var npcComponent = <NPCComponent>npc.GetComponent(NPCComponent.name);
             if (npcComponent.interactable) {
                 if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
-                    npcComponent.interactionAction(npc);
-                } else if (!npcComponent.interacting) {
-                    npcComponent.interacting = true;
-                    npc.AddComponent(new TextComponent(npcComponent.positionComponent, "Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
+                    playerComponent.interactingWith = npcComponent;
+                    playerComponent.currentState = PlayerState.Interacting;
+                    npcComponent.interactionAction(npcComponent, 0, true);
+                } else if (playerComponent.interactingWith === null) {
+                    playerComponent.interactingWith = npcComponent;
+                    entity.AddComponent(new TopTextComponent("Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
                 }
             }
         }
-        
+
+        if ((npc === null && playerComponent.interactingWith !== null) || (npc !== null && <NPCComponent>npc.GetComponent(NPCComponent.name) !== playerComponent.interactingWith)) {
+            entity.RemoveComponent(TopTextComponent.name);
+            playerComponent.interactingWith = null;
+        }
+
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
             if (playerComponent.renderableComponent.frameTimer >= 0.1) {
@@ -136,7 +132,6 @@ class PlayerSystem extends System {
 
     private HandleJumpingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
         this.HandleMovement(playerComponent, false);
-        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
 
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
@@ -147,7 +142,6 @@ class PlayerSystem extends System {
 
     private HandleFallingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
         this.HandleMovement(playerComponent, false);
-        PlayerSystem.CollisionWithPickup(this.engine, playerComponent.positionComponent, playerComponent);
 
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.moveableComponent.velocity.y = 0;
@@ -167,6 +161,34 @@ class PlayerSystem extends System {
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
             playerComponent.renderableComponent.frame = 0;
             playerComponent.renderableComponent.frameTimer = 0;
+        }
+    }
+
+    private HandleInteractingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
+        var topText = <TopTextComponent>entity.GetComponent(TopTextComponent.name);
+
+        if (playerComponent.inputComponent.cancelInteractionActive) {
+            playerComponent.currentState = PlayerState.OnGround;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
+            playerComponent.renderableComponent.frame = 0;
+            playerComponent.renderableComponent.frameTimer = 0;
+            entity.RemoveComponent(TopTextComponent.name);
+        } else if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
+            playerComponent.interactingWith.interactionAction(playerComponent.interactingWith, topText.chosenOption, false);
+        }
+
+        if (topText.options.length > 0) {
+            if (playerComponent.inputComponent.downActive && !playerComponent.inputComponent.downActivePrevious) {
+                ++topText.chosenOption;
+                if (topText.chosenOption >= topText.options.length) {
+                    topText.chosenOption = 0;
+                }
+            } else if (playerComponent.inputComponent.jumpActive && !playerComponent.inputComponent.jumpActivePrevious) {
+                --topText.chosenOption;
+                if (topText.chosenOption < 0) {
+                    topText.chosenOption = topText.options.length - 1;
+                }
+            }
         }
     }
 }

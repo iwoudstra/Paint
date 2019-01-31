@@ -66,8 +66,28 @@ class RenderingSystem extends System {
 
             var splitText = topText.text.split('\n');
             for (var j = 0; j < splitText.length; ++j) {
-                context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35*j));
+                context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
                 context.strokeText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
+            }
+
+            context.textAlign = 'left';
+            context.font = '16pt Calibri';
+            var startY = 35 * j + 10;
+            for (var k = 0; k < topText.options.length; ++k) {
+                if (topText.chosenOption == k) {
+                    context.lineWidth = 4;
+                    context.beginPath();
+                    context.moveTo(15, startY + (30 * k));
+                    context.lineTo(15, startY + (30 * k) + 20);
+                    context.lineTo(35, startY + (30 * k) + 10);
+                    context.closePath();
+                    context.stroke();
+                    context.fill();
+                }
+
+                context.lineWidth = 1;
+                context.fillText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
+                context.strokeText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
             }
 
             context.fill();

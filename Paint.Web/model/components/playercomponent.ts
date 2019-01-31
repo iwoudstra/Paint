@@ -4,7 +4,8 @@ enum PlayerState {
     OnGround,
     Jumping,
     Falling,
-    Respawing
+    Respawing,
+    Interacting
 }
 
 class PlayerComponent extends Component {
@@ -13,7 +14,8 @@ class PlayerComponent extends Component {
     moveableComponent: MoveableComponent;
     inputComponent: InputComponent;
     renderableComponent: RenderableComponent;
-
+    interactingWith: NPCComponent = null;
+    
     HasBluePaint: boolean;
 
     constructor(positionComponent: PositionComponent, moveableComponent: MoveableComponent, inputComponent: InputComponent, renderableComponent: RenderableComponent) {
