@@ -428,22 +428,28 @@ class GameAnimation {
 class SpriteHelper {
     static InitSprites() {
         this.characterSpriteSheet.src = 'assets/sprites/characterspritesheet.png';
-        this.level1.src = 'assets/sprites/level.png';
-        this.level1f.src = 'assets/sprites/level-1-f.png';
-        this.level2.src = 'assets/sprites/level-2.png';
         this.npcwip.src = 'assets/sprites/npc.png';
+        this.level1.src = 'assets/sprites/level.png';
+        this.level1fg.src = 'assets/sprites/level-1-fg.png';
+        this.level1f.src = 'assets/sprites/level-1-f.png';
+        this.level1bg.src = 'assets/sprites/level-1-bg.png';
+        this.level2.src = 'assets/sprites/level-2.png';
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
+        this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 3071, 2944, 1, 'gamemap');
+        this.level1bgAnimation = new GameAnimation(this.level1bg, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level2Animation = new GameAnimation(this.level2, 0, 0, 2074, 1920, 1, 'gamemap');
     }
 }
 SpriteHelper.characterSpriteSheet = new Image();
 SpriteHelper.rockPlatform = new Image();
 SpriteHelper.level1 = new Image();
+SpriteHelper.level1fg = new Image();
 SpriteHelper.level1f = new Image();
+SpriteHelper.level1bg = new Image();
 SpriteHelper.level2 = new Image();
 SpriteHelper.npcwip = new Image();
 const precision = [
@@ -612,6 +618,8 @@ class Level1 extends Level {
         engine.RemoveAllEntities();
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
         engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
+        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1bgAnimation.width, SpriteHelper.level1bgAnimation.height, SpriteHelper.level1bgAnimation, RenderLayer.Background));
+        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fgAnimation.width, SpriteHelper.level1fgAnimation.height, SpriteHelper.level1fgAnimation, RenderLayer.ForegroundPlayer));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(450, 895, 650, 260));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 770, 195, 130));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 640, 650, 130));
@@ -1245,7 +1253,7 @@ class RenderingSystem extends System {
         });
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent = entities[i].GetComponent(RenderableComponent.name);
-            var cameraSpeedModifier = renderableComponent.renderLayer == RenderLayer.Background ? 0.5 : (renderableComponent.renderLayer == RenderLayer.Foreground ? 2 : 1);
+            var cameraSpeedModifier = renderableComponent.renderLayer == RenderLayer.Background ? 0.5 : (renderableComponent.renderLayer == RenderLayer.Foreground ? 1.2 : 1);
             if (renderableComponent.gameAnimation) {
                 var extra = renderableComponent.orientationLeft ? renderableComponent.width : 0;
                 context.translate(renderableComponent.positionComponent.position.x - (camera.positionComponent.position.x * cameraSpeedModifier) + extra, renderableComponent.positionComponent.position.y - camera.positionComponent.position.y);

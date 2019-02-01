@@ -29,7 +29,7 @@ class RenderingSystem extends System {
         });
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent: RenderableComponent = <RenderableComponent>entities[i].GetComponent(RenderableComponent.name);
-            var cameraSpeedModifier = renderableComponent.renderLayer == RenderLayer.Background ? 0.5 : (renderableComponent.renderLayer == RenderLayer.Foreground ? 2 : 1);
+            var cameraSpeedModifier = renderableComponent.renderLayer == RenderLayer.Background ? 0.5 : (renderableComponent.renderLayer == RenderLayer.Foreground ? 1.2 : 1);
 
             if (renderableComponent.gameAnimation) {
                 var extra = renderableComponent.orientationLeft ? renderableComponent.width : 0;
