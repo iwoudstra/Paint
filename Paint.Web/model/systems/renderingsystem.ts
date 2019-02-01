@@ -9,12 +9,32 @@ class RenderingSystem extends System {
         context.clearRect(0, 0, Game.ResolutionWidth, Game.ResolutionHeight);
 
         var entities = this.engine.GetEntities(this.requiredComponents);
+        entities.sort(function (a, b) {
+            var renderA = <RenderableComponent>a.GetComponent(RenderableComponent.name);
+            var renderB = <RenderableComponent>b.GetComponent(RenderableComponent.name);
+            if (renderA.renderLayer < renderB.renderLayer) {
+                return -1;
+            }
+            if (renderB.renderLayer < renderA.renderLayer) {
+                return 1;
+            }
+
+            if (renderA.renderPriority < renderB.renderPriority) {
+                return -1;
+            }
+            if (renderB.renderPriority < renderA.renderPriority) {
+                return 1;
+            }
+            return 0;
+        });
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent: RenderableComponent = <RenderableComponent>entities[i].GetComponent(RenderableComponent.name);
+            var cameraSpeedModifier = renderableComponent.renderLayer == RenderLayer.Background ? 0.5 : (renderableComponent.renderLayer == RenderLayer.Foreground ? 2 : 1);
+
             if (renderableComponent.gameAnimation) {
                 var extra = renderableComponent.orientationLeft ? renderableComponent.width : 0;
 
-                context.translate(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra, renderableComponent.positionComponent.position.y - camera.positionComponent.position.y);
+                context.translate(renderableComponent.positionComponent.position.x - (camera.positionComponent.position.x * cameraSpeedModifier) + extra, renderableComponent.positionComponent.position.y - camera.positionComponent.position.y);
 
                 if (renderableComponent.orientationLeft) {
                     context.scale(-1, 1);
@@ -32,12 +52,12 @@ class RenderingSystem extends System {
                     context.scale(-1, 1);
                 }
 
-                context.translate(-(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x + extra), -(renderableComponent.positionComponent.position.y - camera.positionComponent.position.y));
+                context.translate(-(renderableComponent.positionComponent.position.x - (camera.positionComponent.position.x * cameraSpeedModifier) + extra), -(renderableComponent.positionComponent.position.y - camera.positionComponent.position.y));
             } else {
                 context.beginPath();
                 context.fillStyle = renderableComponent.color;
                 context.strokeStyle = renderableComponent.color;
-                context.fillRect(renderableComponent.positionComponent.position.x - camera.positionComponent.position.x, renderableComponent.positionComponent.position.y - camera.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
+                context.fillRect(renderableComponent.positionComponent.position.x - (camera.positionComponent.position.x * cameraSpeedModifier), renderableComponent.positionComponent.position.y - camera.positionComponent.position.y, renderableComponent.width, renderableComponent.height);
             }
         }
 

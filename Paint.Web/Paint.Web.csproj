@@ -70,9 +70,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\sprites\characterspritesheet.png" />
+    <Content Include="assets\sprites\level-1-f.png" />
     <Content Include="assets\sprites\level-2.png" />
     <Content Include="assets\sprites\level.png" />
-    <Content Include="assets\sprites\rockplatform.png" />
+    <Content Include="assets\sprites\npc.png" />
     <Content Include="bundles\all.js" />
     <Content Include="index.html" />
     <Content Include="Web.config" />

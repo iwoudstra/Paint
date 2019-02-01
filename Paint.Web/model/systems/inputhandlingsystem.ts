@@ -25,17 +25,17 @@ class InputHandlingSystem extends System {
 
         for (var i = 0; i < platforms.length; ++i) {
             var positionComponent = <PositionComponent>platforms[i].GetComponent(PositionComponent.name);
-            platforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00'));
+            platforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00', RenderLayer.ForegroundPlayer));
         }
 
         for (var i = 0; i < solidPlatforms.length; ++i) {
             var positionComponent = <PositionComponent>solidPlatforms[i].GetComponent(PositionComponent.name);
-            solidPlatforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ff0000'));
+            solidPlatforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ff0000', RenderLayer.ForegroundPlayer));
         }
 
         for (var i = 0; i < triggers.length; ++i) {
             var positionComponent = <PositionComponent>triggers[i].GetComponent(PositionComponent.name);
-            triggers[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00'));
+            triggers[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00', RenderLayer.ForegroundPlayer));
         }
     }
 

@@ -8,7 +8,7 @@ class Level2 extends Level {
     public Init(engine: Engine, playerX: number, playerY: number): void {
         engine.RemoveAllEntities();
 
-        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout));
+        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
 
 
         //solidplatforms topleft spawnarea

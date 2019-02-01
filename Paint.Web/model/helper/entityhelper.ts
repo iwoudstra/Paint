@@ -19,11 +19,11 @@
         return platform;
     }
 
-    public static CreateGameMap(width: number, height: number, gameAnimation: GameAnimation): Entity {
+    public static CreateGameMap(width: number, height: number, gameAnimation: GameAnimation, renderLayer: RenderLayer): Entity {
         var gamemap = new Entity();
         var positionComponent = new PositionComponent(0, 0, width, height);
         gamemap.AddComponent(positionComponent);
-        gamemap.AddComponent(new RenderableComponent(positionComponent, width, height, '', gameAnimation));
+        gamemap.AddComponent(new RenderableComponent(positionComponent, width, height, '', renderLayer, gameAnimation));
         return gamemap;
     }
 
@@ -39,7 +39,7 @@
         var paint = new Entity();
         var positionComponent = new PositionComponent(x, y, 100, 5);
         paint.AddComponent(positionComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 100, 5, '#0077ff');
+        var renderableComponent = new RenderableComponent(positionComponent, 100, 5, '#0077ff', RenderLayer.ForegroundPlayer);
         paint.AddComponent(renderableComponent);
         var paintComponent = new PaintComponent(positionComponent, renderableComponent, PaintType.HighJump);
         paint.AddComponent(paintComponent);
@@ -55,7 +55,7 @@
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', SpriteHelper.playerWalking);
+        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
         player.AddComponent(renderableComponent);
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
 
@@ -69,7 +69,7 @@
         npc.AddComponent(positionComponent);
         var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
         npc.AddComponent(npcComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 195, '', SpriteHelper.npcwipAnimation);
+        var renderableComponent = new RenderableComponent(positionComponent, 130, 195, '', RenderLayer.Player, SpriteHelper.npcwipAnimation);
         npc.AddComponent(renderableComponent);
 
         return npc;
@@ -84,7 +84,7 @@
         spawnedEntity.AddComponent(moveableComponent);
         var spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
         spawnedEntity.AddComponent(spawnedComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff');
+        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
         spawnedEntity.AddComponent(renderableComponent);
 
         return spawnedEntity;
@@ -96,7 +96,7 @@
         spawningEntity.AddComponent(positionComponent);
         var spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
         spawningEntity.AddComponent(spawnComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff');
+        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff', RenderLayer.Player);
         spawningEntity.AddComponent(renderableComponent);
 
         return spawningEntity;

@@ -8,7 +8,8 @@ class Level1 extends Level {
     public Init(engine: Engine, playerX: number, playerY: number): void {
         engine.RemoveAllEntities();
 
-        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout));
+        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
+        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
 
         engine.AddEntity(EntityHelper.CreateSolidPlatform(450, 895, 650, 260));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 770, 195, 130));
