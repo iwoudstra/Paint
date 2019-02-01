@@ -69,7 +69,7 @@
         npc.AddComponent(positionComponent);
         var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
         npc.AddComponent(npcComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#3389A3');
+        var renderableComponent = new RenderableComponent(positionComponent, 130, 195, '', SpriteHelper.npcwipAnimation);
         npc.AddComponent(renderableComponent);
 
         return npc;

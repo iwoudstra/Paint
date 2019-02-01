@@ -20,7 +20,7 @@ class Level1 extends Level {
 
         engine.AddEntity(EntityHelper.CreateCamera());
 
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 498, 95, 144, 1163, 406, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean) {
+        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 445, 95, 144, 1163, 406, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean) {
             if (!self.interactable) {
                 return;
             }

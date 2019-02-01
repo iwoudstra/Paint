@@ -366,7 +366,7 @@ class EntityHelper {
         npc.AddComponent(positionComponent);
         var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
         npc.AddComponent(npcComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#3389A3');
+        var renderableComponent = new RenderableComponent(positionComponent, 130, 195, '', SpriteHelper.npcwipAnimation);
         npc.AddComponent(renderableComponent);
         return npc;
     }
@@ -419,12 +419,12 @@ class GameAnimation {
 class SpriteHelper {
     static InitSprites() {
         this.characterSpriteSheet.src = 'assets/sprites/characterspritesheet.png';
-        this.rockPlatform.src = 'assets/sprites/rockplatform.png';
         this.level1.src = 'assets/sprites/level.png';
         this.level2.src = 'assets/sprites/level-2.png';
+        this.npcwip.src = 'assets/sprites/npc.png';
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
-        this.rockPlatformAnimation = new GameAnimation(this.rockPlatform, 0, 0, 580, 540, 1, 'rockplatform');
+        this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level2Animation = new GameAnimation(this.level2, 0, 0, 2074, 1920, 1, 'gamemap');
     }
@@ -433,6 +433,7 @@ SpriteHelper.characterSpriteSheet = new Image();
 SpriteHelper.rockPlatform = new Image();
 SpriteHelper.level1 = new Image();
 SpriteHelper.level2 = new Image();
+SpriteHelper.npcwip = new Image();
 const precision = [
     1,
     10,
@@ -606,7 +607,7 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 0, 520, 390));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1802, 374, 115, 275));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 498, 95, 144, 1163, 406, 857, 375, 'John', function (self, option, initialInteraction) {
+        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 445, 95, 144, 1163, 406, 857, 375, 'John', function (self, option, initialInteraction) {
             if (!self.interactable) {
                 return;
             }

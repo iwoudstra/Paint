@@ -3,6 +3,7 @@
     static rockPlatform: HTMLImageElement = new Image();
     static level1: HTMLImageElement = new Image();
     static level2: HTMLImageElement = new Image();
+    static npcwip: HTMLImageElement = new Image();
 
 
 
@@ -11,17 +12,18 @@
     static rockPlatformAnimation: GameAnimation;
     static level1Animation: GameAnimation;
     static level2Animation: GameAnimation;
+    static npcwipAnimation: GameAnimation;
 
 
     public static InitSprites(): void {
         this.characterSpriteSheet.src = 'assets/sprites/characterspritesheet.png';
-        this.rockPlatform.src = 'assets/sprites/rockplatform.png';
         this.level1.src = 'assets/sprites/level.png';
         this.level2.src = 'assets/sprites/level-2.png';
+        this.npcwip.src = 'assets/sprites/npc.png';
 
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
-        this.rockPlatformAnimation = new GameAnimation(this.rockPlatform, 0, 0, 580, 540, 1, 'rockplatform');
+        this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level2Animation = new GameAnimation(this.level2, 0, 0, 2074, 1920, 1, 'gamemap');
     }
