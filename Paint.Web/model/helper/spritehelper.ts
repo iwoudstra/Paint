@@ -22,13 +22,13 @@
 
 
     public static InitSprites(): void {
-        this.characterSpriteSheet.src = 'assets/sprites/characterspritesheet.png';
-        this.npcwip.src = 'assets/sprites/npc.png';
-        this.level1.src = 'assets/sprites/level.png';
-        this.level1fg.src = 'assets/sprites/level-1-fg.png'
-        this.level1f.src = 'assets/sprites/level-1-f.png';
-        this.level1bg.src = 'assets/sprites/level-1-bg.png';
-        this.level2.src = 'assets/sprites/level-2.png';
+        this.characterSpriteSheet.src = 'assets/sprites/player/characterspritesheet.png';
+        this.npcwip.src = 'assets/sprites/npc/npc.png';
+        this.level1.src = 'assets/sprites/level-1/level.png';
+        this.level1fg.src = 'assets/sprites/level-1/level-1-fg.png'
+        this.level1f.src = 'assets/sprites/level-1/level-1-f.png';
+        this.level1bg.src = 'assets/sprites/level-1/level-1-bg.png';
+        this.level2.src = 'assets/sprites/level-2/level-2.png';
 
 
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
