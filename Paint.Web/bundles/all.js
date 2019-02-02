@@ -434,6 +434,7 @@ class SpriteHelper {
         this.level1f.src = 'assets/sprites/level-1/level-1-f.png';
         this.level1bg.src = 'assets/sprites/level-1/level-1-bg.png';
         this.level2.src = 'assets/sprites/level-2/level-2.png';
+        this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
@@ -441,7 +442,8 @@ class SpriteHelper {
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level1bgAnimation = new GameAnimation(this.level1bg, 0, 0, 3071, 2944, 1, 'gamemap');
-        this.level2Animation = new GameAnimation(this.level2, 0, 0, 2074, 1920, 1, 'gamemap');
+        this.level2Animation = new GameAnimation(this.level2, 0, 0, 2495, 1920, 1, 'gamemap');
+        this.level3Animation = new GameAnimation(this.level3, 0, 0, 2047, 1920, 1, 'gamemap');
     }
 }
 SpriteHelper.characterSpriteSheet = new Image();
@@ -451,6 +453,7 @@ SpriteHelper.level1fg = new Image();
 SpriteHelper.level1f = new Image();
 SpriteHelper.level1bg = new Image();
 SpriteHelper.level2 = new Image();
+SpriteHelper.level3 = new Image();
 SpriteHelper.npcwip = new Image();
 const precision = [
     1,
@@ -668,7 +671,7 @@ class Level1 extends Level {
 }
 class Level2 extends Level {
     constructor() {
-        super(2074, 1920, SpriteHelper.level2Animation, SpriteHelper.level2Animation);
+        super(2495, 1920, SpriteHelper.level2Animation, SpriteHelper.level2Animation);
     }
     Init(engine, playerX, playerY) {
         engine.RemoveAllEntities();
@@ -676,6 +679,9 @@ class Level2 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 450, 320, 255));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(320, 700, 255, 50));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(575, 575, 385, 700));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1730, 575, 780, 715));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1790, 1280, 130, 195));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1920, 1470, 130, 195));
         engine.AddEntity(EntityHelper.CreatePlatform(960, 705, 130, 15));
         engine.AddEntity(EntityHelper.CreatePlatform(960, 830, 130, 15));
         engine.AddEntity(EntityHelper.CreatePlatform(960, 955, 130, 15));
@@ -689,6 +695,7 @@ class Level2 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1790, 1665, 320, 130));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(510, 1790, 1300, 130));
         engine.AddEntity(EntityHelper.CreateCamera());
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, new Level3(), 0, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -1394,6 +1401,18 @@ class TriggerSystem extends System {
                 Game.Instance.ChangeLevel(levelTrigger.level, levelTrigger.playerX, levelTrigger.playerY);
             }
         }
+    }
+}
+class Level3 extends Level {
+    constructor() {
+        super(2047, 1920, SpriteHelper.level3Animation, SpriteHelper.level3Animation);
+    }
+    Init(engine, playerX, playerY) {
+        engine.RemoveAllEntities();
+        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 450, 320, 255));
+        engine.AddEntity(EntityHelper.CreateCamera());
+        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
 //# sourceMappingURL=all.js.map
