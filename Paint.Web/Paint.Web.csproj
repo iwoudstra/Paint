@@ -69,11 +69,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\sprites\characterspritesheet.png" />
-    <Content Include="assets\sprites\level-1-f.png" />
-    <Content Include="assets\sprites\level-2.png" />
-    <Content Include="assets\sprites\level.png" />
-    <Content Include="assets\sprites\npc.png" />
     <Content Include="bundles\all.js" />
     <Content Include="index.html" />
     <Content Include="Web.config" />
@@ -93,6 +88,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="model\components\actioncomponent.ts" />
     <TypeScriptCompile Include="model\components\cameracomponent.ts" />
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
     <TypeScriptCompile Include="model\components\leveltriggercomponent.ts" />
@@ -120,6 +116,8 @@
     <TypeScriptCompile Include="model\core\level.ts" />
     <TypeScriptCompile Include="model\levels\level2.ts" />
     <TypeScriptCompile Include="model\levels\level1.ts" />
+    <TypeScriptCompile Include="model\levels\level3.ts" />
+    <TypeScriptCompile Include="model\systems\actionsystem.ts" />
     <TypeScriptCompile Include="model\systems\camerasystem.ts" />
     <TypeScriptCompile Include="model\systems\inputhandlingsystem.ts" />
     <TypeScriptCompile Include="model\systems\movingsystem.ts" />
@@ -132,7 +130,9 @@
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="assets\**\*.*" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

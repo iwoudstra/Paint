@@ -36,6 +36,13 @@ Game.ResolutionWidth = 1280;
 Game.ResolutionHeight = 720;
 class Component {
 }
+class ActionComponent extends Component {
+    constructor(action) {
+        super();
+        this.timerHelper = 0;
+        this.action = action;
+    }
+}
 class CameraComponent extends Component {
     constructor(positionComponent) {
         super();
@@ -145,6 +152,7 @@ var RenderLayer;
 class RenderableComponent extends Component {
     constructor(positionComponent, width, height, color, renderLayer, gameAnimation = null, renderPriority = 0) {
         super();
+        this.visible = true;
         this.frame = 0;
         this.frameTimer = 0;
         this.orientationLeft = false;
@@ -208,6 +216,7 @@ class Engine {
         this.systems.push(new MovingSystem(this));
         this.systems.push(new PlayerSystem(this));
         this.systems.push(new InputHandlingSystem(this));
+        this.systems.push(new ActionSystem(this));
         this.systems.push(new SpawningSystem(this));
         this.systems.push(new SpawnedSystem(this));
         this.systems.push(new TriggerSystem(this));
@@ -438,6 +447,8 @@ class SpriteHelper {
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
+        this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
+        this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 3071, 2944, 1, 'gamemap');
@@ -631,7 +642,7 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 0, 520, 390));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1802, 374, 115, 275));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 445, 95, 144, 1163, 406, 857, 375, 'John', function (self, option, initialInteraction) {
+        var npc = EntityHelper.CreateNpcEntity(1400, 445, 130, 195, 1163, 406, 857, 375, 'John', function (self, option, initialInteraction) {
             if (!self.interactable) {
                 return;
             }
@@ -643,29 +654,45 @@ class Level1 extends Level {
                 case 0: {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("You should follow me, i will lead you to the cookies.", ['I love cookies.', 'I hate cookies but will follow you anyway.']));
-                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
                     break;
                 }
                 case 1: {
                     player.RemoveComponent(TopTextComponent.name);
-                    if (option == 0) {
-                        player.AddComponent(new TopTextComponent("We have a winner."));
-                    }
-                    else {
-                        player.AddComponent(new TopTextComponent("Game over."));
-                    }
-                    break;
-                }
-                case 2: {
-                    player.RemoveComponent(TopTextComponent.name);
-                    self.interactable = false;
-                    var playerComponent = player.GetComponent(PlayerComponent.name);
-                    playerComponent.interactingWith = null;
-                    playerComponent.currentState = PlayerState.OnGround;
+                    player.AddComponent(new TopTextComponent("Come on hurry and follow me into the darkness."));
+                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
+                    var npcMoveableComponent = new MoveableComponent(self.positionComponent);
+                    npcMoveableComponent.velocity = new Vector2d(200, 0);
+                    npc.AddComponent(npcMoveableComponent);
+                    var npcEyeLeft = new Entity('npcEyeLeft');
+                    var npcEyeLeftPosition = new PositionComponent(self.positionComponent.position.x + 60, self.positionComponent.position.y + 58);
+                    npcEyeLeft.AddComponent(npcEyeLeftPosition);
+                    npcEyeLeft.AddComponent(new RenderableComponent(npcEyeLeftPosition, 5, 6, '', RenderLayer.ForegroundPlayer, SpriteHelper.npcLeftEyeAnimation, 999));
+                    var npcEyeRight = new Entity('npcEyeRight');
+                    var npcEyeRightPosition = new PositionComponent(self.positionComponent.position.x + 75, self.positionComponent.position.y + 58);
+                    npcEyeRight.AddComponent(npcEyeRightPosition);
+                    npcEyeRight.AddComponent(new RenderableComponent(npcEyeRightPosition, 5, 8, '', RenderLayer.ForegroundPlayer, SpriteHelper.npcRightEyeAnimation, 999));
+                    npc.AddComponent(new ActionComponent(function (deltaTime, self, actionComponent) {
+                        var npcComponent = self.GetComponent(NPCComponent.name);
+                        npcEyeLeftPosition.position.x = npcComponent.positionComponent.position.x + 60;
+                        npcEyeLeftPosition.position.y = npcComponent.positionComponent.position.y + 58;
+                        npcEyeRightPosition.position.x = npcComponent.positionComponent.position.x + 75;
+                        npcEyeRightPosition.position.y = npcComponent.positionComponent.position.y + 57;
+                        actionComponent.timerHelper += deltaTime;
+                        if (actionComponent.timerHelper >= 1) {
+                            actionComponent.timerHelper = 0;
+                            var npcEyeLeftRender = npcEyeLeft.GetComponent(RenderableComponent.name);
+                            var npcEyeRightRender = npcEyeRight.GetComponent(RenderableComponent.name);
+                            npcEyeLeftRender.visible = !npcEyeLeftRender.visible;
+                            npcEyeRightRender.visible = !npcEyeRightRender.visible;
+                        }
+                    }));
+                    engine.AddEntity(npcEyeLeft);
+                    engine.AddEntity(npcEyeRight);
                     break;
                 }
             }
-        }));
+        });
+        engine.AddEntity(npc);
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -697,6 +724,31 @@ class Level2 extends Level {
         engine.AddEntity(EntityHelper.CreateCamera());
         engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, new Level3(), 0, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
+    }
+}
+class Level3 extends Level {
+    constructor() {
+        super(2047, 1920, SpriteHelper.level3Animation, SpriteHelper.level3Animation);
+    }
+    Init(engine, playerX, playerY) {
+        engine.RemoveAllEntities();
+        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 450, 320, 255));
+        engine.AddEntity(EntityHelper.CreateCamera());
+        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
+    }
+}
+class ActionSystem extends System {
+    constructor() {
+        super(...arguments);
+        this.requiredComponents = [ActionComponent.name];
+    }
+    Update(deltaTime) {
+        var actions = this.engine.GetEntities(this.requiredComponents);
+        for (var i = 0; i < actions.length; ++i) {
+            var actionComponent = actions[i].GetComponent(ActionComponent.name);
+            actionComponent.action(deltaTime, actions[i], actionComponent);
+        }
     }
 }
 class CameraSystem extends System {
@@ -1055,6 +1107,26 @@ class PlayerSystem extends System {
         this.movementSpeed = 400;
         this.fallSpeed = 800;
     }
+    ChangeState(playerState, playerComponent) {
+        switch (playerState) {
+            case PlayerState.OnGround: {
+                break;
+            }
+            case PlayerState.Jumping: {
+                break;
+            }
+            case PlayerState.Falling: {
+                break;
+            }
+            case PlayerState.Respawing: {
+                break;
+            }
+            case PlayerState.Interacting: {
+                break;
+            }
+        }
+        playerComponent.currentState = playerState;
+    }
     Update(deltaTime) {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
@@ -1260,6 +1332,9 @@ class RenderingSystem extends System {
         });
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent = entities[i].GetComponent(RenderableComponent.name);
+            if (!renderableComponent.visible) {
+                continue;
+            }
             var cameraSpeedModifier = renderableComponent.renderLayer == RenderLayer.Background ? 0.5 : (renderableComponent.renderLayer == RenderLayer.Foreground ? 1.2 : 1);
             if (renderableComponent.gameAnimation) {
                 var extra = renderableComponent.orientationLeft ? renderableComponent.width : 0;
@@ -1401,18 +1476,6 @@ class TriggerSystem extends System {
                 Game.Instance.ChangeLevel(levelTrigger.level, levelTrigger.playerX, levelTrigger.playerY);
             }
         }
-    }
-}
-class Level3 extends Level {
-    constructor() {
-        super(2047, 1920, SpriteHelper.level3Animation, SpriteHelper.level3Animation);
-    }
-    Init(engine, playerX, playerY) {
-        engine.RemoveAllEntities();
-        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 450, 320, 255));
-        engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
 //# sourceMappingURL=all.js.map

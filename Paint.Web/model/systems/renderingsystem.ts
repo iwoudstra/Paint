@@ -29,6 +29,10 @@ class RenderingSystem extends System {
         });
         for (var i = 0; i < entities.length; ++i) {
             var renderableComponent: RenderableComponent = <RenderableComponent>entities[i].GetComponent(RenderableComponent.name);
+            if (!renderableComponent.visible) {
+                continue;
+            }
+
             var cameraSpeedModifier = renderableComponent.renderLayer == RenderLayer.Background ? 0.5 : (renderableComponent.renderLayer == RenderLayer.Foreground ? 1.2 : 1);
 
             if (renderableComponent.gameAnimation) {

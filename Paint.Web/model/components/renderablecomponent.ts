@@ -15,6 +15,7 @@ class RenderableComponent extends Component {
     gameAnimation: GameAnimation;
     renderLayer: RenderLayer;
     renderPriority: number;
+    visible: boolean = true;
 
     public frame: number = 0;
     public frameTimer: number = 0;

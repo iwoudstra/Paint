@@ -12,7 +12,6 @@
 
     static playerWalking: GameAnimation;
     static playerJumping: GameAnimation;
-    static rockPlatformAnimation: GameAnimation;
     static level1Animation: GameAnimation;
     static level1fAnimation: GameAnimation;
     static level1fgAnimation: GameAnimation;
@@ -20,6 +19,8 @@
     static level2Animation: GameAnimation;
     static level3Animation: GameAnimation;
     static npcwipAnimation: GameAnimation;
+    static npcLeftEyeAnimation: GameAnimation;
+    static npcRightEyeAnimation: GameAnimation;
 
 
     public static InitSprites(): void {
@@ -35,6 +36,8 @@
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
+        this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
+        this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 3071, 2944, 1, 'gamemap');

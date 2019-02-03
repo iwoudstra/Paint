@@ -5,6 +5,33 @@ class PlayerSystem extends System {
     private movementSpeed: number = 400;
     private fallSpeed: number = 800;
 
+    public ChangeState(playerState: PlayerState, playerComponent: PlayerComponent): void {
+        switch (playerState) {
+            case PlayerState.OnGround: {
+
+                break;
+            }
+            case PlayerState.Jumping: {
+
+                break;
+            }
+            case PlayerState.Falling: {
+
+                break;
+            }
+            case PlayerState.Respawing: {
+
+                break;
+            }
+            case PlayerState.Interacting: {
+
+                break;
+            }
+        }
+
+        playerComponent.currentState = playerState;
+    }
+
     public Update(deltaTime: number): void {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {

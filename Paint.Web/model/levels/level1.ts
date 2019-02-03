@@ -11,7 +11,7 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
         engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
         engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1bgAnimation.width, SpriteHelper.level1bgAnimation.height, SpriteHelper.level1bgAnimation, RenderLayer.Background));
-            engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fgAnimation.width, SpriteHelper.level1fgAnimation.height, SpriteHelper.level1fgAnimation, RenderLayer.ForegroundPlayer));
+        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fgAnimation.width, SpriteHelper.level1fgAnimation.height, SpriteHelper.level1fgAnimation, RenderLayer.ForegroundPlayer));
 
         engine.AddEntity(EntityHelper.CreateSolidPlatform(450, 895, 650, 260));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 770, 195, 130));
@@ -23,7 +23,7 @@ class Level1 extends Level {
 
         engine.AddEntity(EntityHelper.CreateCamera());
 
-        engine.AddEntity(EntityHelper.CreateNpcEntity(1400, 445, 95, 144, 1163, 406, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean) {
+        var npc = EntityHelper.CreateNpcEntity(1400, 445, 130, 195, 1163, 406, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean) {
             if (!self.interactable) {
                 return;
             }
@@ -38,32 +38,52 @@ class Level1 extends Level {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("You should follow me, i will lead you to the cookies.", ['I love cookies.', 'I hate cookies but will follow you anyway.']));
 
-                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
                     break;
                 }
                 case 1: {
                     player.RemoveComponent(TopTextComponent.name);
+                    player.AddComponent(new TopTextComponent("Come on hurry and follow me into the darkness."));
 
-                    if (option == 0) {
-                        player.AddComponent(new TopTextComponent("We have a winner."));
-                    } else {
-                        player.AddComponent(new TopTextComponent("Game over."));
-                    }
+                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
 
-                    break;
-                }
-                case 2: {
-                    player.RemoveComponent(TopTextComponent.name);
+                    var npcMoveableComponent = new MoveableComponent(self.positionComponent);
+                    npcMoveableComponent.velocity = new Vector2d(200, 0);
+                    npc.AddComponent(npcMoveableComponent);
 
-                    self.interactable = false;
-                    var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
-                    playerComponent.interactingWith = null;
-                    playerComponent.currentState = PlayerState.OnGround;
+                    var npcEyeLeft = new Entity('npcEyeLeft');
+                    var npcEyeLeftPosition = new PositionComponent(self.positionComponent.position.x + 60, self.positionComponent.position.y + 58);
+                    npcEyeLeft.AddComponent(npcEyeLeftPosition);
+                    npcEyeLeft.AddComponent(new RenderableComponent(npcEyeLeftPosition, 5, 6, '', RenderLayer.ForegroundPlayer, SpriteHelper.npcLeftEyeAnimation, 999));
+                    var npcEyeRight = new Entity('npcEyeRight');
+                    var npcEyeRightPosition = new PositionComponent(self.positionComponent.position.x + 75, self.positionComponent.position.y + 58);
+                    npcEyeRight.AddComponent(npcEyeRightPosition);
+                    npcEyeRight.AddComponent(new RenderableComponent(npcEyeRightPosition, 5, 8, '', RenderLayer.ForegroundPlayer, SpriteHelper.npcRightEyeAnimation, 999));
+                    npc.AddComponent(new ActionComponent(function (deltaTime: number, self: Entity, actionComponent: ActionComponent) {
+                        var npcComponent = <NPCComponent>self.GetComponent(NPCComponent.name);
+                        npcEyeLeftPosition.position.x = npcComponent.positionComponent.position.x + 60;
+                        npcEyeLeftPosition.position.y = npcComponent.positionComponent.position.y + 58;
+                        npcEyeRightPosition.position.x = npcComponent.positionComponent.position.x + 75;
+                        npcEyeRightPosition.position.y = npcComponent.positionComponent.position.y + 57;
+
+                        actionComponent.timerHelper += deltaTime;
+                        if (actionComponent.timerHelper >= 1) {
+                            actionComponent.timerHelper = 0;
+                            var npcEyeLeftRender = <RenderableComponent>npcEyeLeft.GetComponent(RenderableComponent.name);
+                            var npcEyeRightRender = <RenderableComponent>npcEyeRight.GetComponent(RenderableComponent.name);
+
+                            npcEyeLeftRender.visible = !npcEyeLeftRender.visible;
+                            npcEyeRightRender.visible = !npcEyeRightRender.visible;
+                        }
+                    }));
+
+                    engine.AddEntity(npcEyeLeft);
+                    engine.AddEntity(npcEyeRight);
 
                     break;
                 }
             }
-        }));
+        });
+        engine.AddEntity(npc);
 
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
