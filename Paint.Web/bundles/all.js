@@ -13,7 +13,7 @@ class Game {
     Init() {
         this.engine = new Engine();
         SpriteHelper.InitSprites();
-        this.ChangeLevel(new Level1(), 600, 600);
+        this.ChangeLevel(new Level3(), 20, 20);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
@@ -444,6 +444,7 @@ class SpriteHelper {
         this.level1bg.src = 'assets/sprites/level-1/level-1-bg.png';
         this.level2.src = 'assets/sprites/level-2/level-2.png';
         this.level3.src = 'assets/sprites/level-3/level-3.png';
+        this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
@@ -454,7 +455,8 @@ class SpriteHelper {
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level1bgAnimation = new GameAnimation(this.level1bg, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level2Animation = new GameAnimation(this.level2, 0, 0, 2495, 1920, 1, 'gamemap');
-        this.level3Animation = new GameAnimation(this.level3, 0, 0, 2047, 1920, 1, 'gamemap');
+        this.level3Animation = new GameAnimation(this.level3, 0, 0, 2950, 1855, 1, 'gamemap');
+        this.level3bgAnimation = new GameAnimation(this.level3bg, 0, 0, 2950, 1855, 1, 'gamemap');
     }
 }
 SpriteHelper.characterSpriteSheet = new Image();
@@ -465,6 +467,7 @@ SpriteHelper.level1f = new Image();
 SpriteHelper.level1bg = new Image();
 SpriteHelper.level2 = new Image();
 SpriteHelper.level3 = new Image();
+SpriteHelper.level3bg = new Image();
 SpriteHelper.npcwip = new Image();
 const precision = [
     1,
@@ -736,12 +739,18 @@ class Level2 extends Level {
 }
 class Level3 extends Level {
     constructor() {
-        super(2047, 1920, SpriteHelper.level3Animation, SpriteHelper.level3Animation);
+        super(2950, 1855, SpriteHelper.level3Animation, SpriteHelper.level3Animation);
     }
     Init(engine, playerX, playerY) {
         engine.RemoveAllEntities();
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 450, 320, 255));
+        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level3bgAnimation.width, SpriteHelper.level3bgAnimation.height, SpriteHelper.level3bgAnimation, RenderLayer.Background));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 65, 260));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 250, 390, 1105));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(635, 250, 1495, 455));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(635, 700, 910, 65));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(380, 1340, 715, 65));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 1099, 195, 520));
         engine.AddEntity(EntityHelper.CreateCamera());
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
