@@ -201,7 +201,12 @@ class PlayerSystem extends System {
             playerComponent.renderableComponent.frameTimer = 0;
             entity.RemoveComponent(TopTextComponent.name);
         } else if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
-            playerComponent.interactingWith.interactionAction(playerComponent.interactingWith, topText.chosenOption, false);
+            if (playerComponent.interactingWith.interactionAction(playerComponent.interactingWith, topText.chosenOption, false)) {
+                playerComponent.currentState = PlayerState.OnGround;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
+                playerComponent.renderableComponent.frame = 0;
+                playerComponent.renderableComponent.frameTimer = 0;
+            }
         }
 
         if (topText.options.length > 0) {

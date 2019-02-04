@@ -654,7 +654,7 @@ class Level1 extends Level {
                 case 0: {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("You should follow me, i will lead you to the cookies.", ['I love cookies.', 'I hate cookies but will follow you anyway.']));
-                    break;
+                    return false;
                 }
                 case 1: {
                     player.RemoveComponent(TopTextComponent.name);
@@ -688,7 +688,15 @@ class Level1 extends Level {
                     }));
                     engine.AddEntity(npcEyeLeft);
                     engine.AddEntity(npcEyeRight);
-                    break;
+                    self.interactingState = 2;
+                    return true;
+                }
+                case 2:
+                case 3: {
+                    self.interactingState = 2;
+                    player.RemoveComponent(TopTextComponent.name);
+                    player.AddComponent(new TopTextComponent("Why haven't you followed me into the darkness, are you scared?"));
+                    return true;
                 }
             }
         });
@@ -1285,7 +1293,12 @@ class PlayerSystem extends System {
             entity.RemoveComponent(TopTextComponent.name);
         }
         else if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
-            playerComponent.interactingWith.interactionAction(playerComponent.interactingWith, topText.chosenOption, false);
+            if (playerComponent.interactingWith.interactionAction(playerComponent.interactingWith, topText.chosenOption, false)) {
+                playerComponent.currentState = PlayerState.OnGround;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
+                playerComponent.renderableComponent.frame = 0;
+                playerComponent.renderableComponent.frameTimer = 0;
+            }
         }
         if (topText.options.length > 0) {
             if (playerComponent.inputComponent.downActive && !playerComponent.inputComponent.downActivePrevious) {
@@ -1312,6 +1325,7 @@ class RenderingSystem extends System {
         var camera = this.engine.GetEntities([CameraComponent.name])[0].GetComponent(CameraComponent.name);
         var context = Game.Instance.context;
         context.clearRect(0, 0, Game.ResolutionWidth, Game.ResolutionHeight);
+        context.beginPath();
         var entities = this.engine.GetEntities(this.requiredComponents);
         entities.sort(function (a, b) {
             var renderA = a.GetComponent(RenderableComponent.name);
@@ -1343,10 +1357,7 @@ class RenderingSystem extends System {
                     context.scale(-1, 1);
                 }
                 context.drawImage(renderableComponent.gameAnimation.imageFile, renderableComponent.gameAnimation.sourceX + (renderableComponent.gameAnimation.width * renderableComponent.frame), renderableComponent.gameAnimation.sourceY, renderableComponent.gameAnimation.width, renderableComponent.gameAnimation.height, 0, 0, renderableComponent.width, renderableComponent.height);
-                if (renderableComponent.orientationLeft) {
-                    context.scale(-1, 1);
-                }
-                context.translate(-(renderableComponent.positionComponent.position.x - (camera.positionComponent.position.x * cameraSpeedModifier) + extra), -(renderableComponent.positionComponent.position.y - camera.positionComponent.position.y));
+                context.resetTransform();
             }
             else {
                 context.beginPath();
@@ -1384,15 +1395,13 @@ class RenderingSystem extends System {
             context.font = '16pt Calibri';
             var startY = 35 * j + 10;
             for (var k = 0; k < topText.options.length; ++k) {
-                if (topText.chosenOption == k) {
+                if (topText.chosenOption === k) {
                     context.lineWidth = 4;
                     context.beginPath();
                     context.moveTo(15, startY + (30 * k));
                     context.lineTo(15, startY + (30 * k) + 20);
                     context.lineTo(35, startY + (30 * k) + 10);
                     context.closePath();
-                    context.stroke();
-                    context.fill();
                 }
                 context.lineWidth = 1;
                 context.fillText(topText.options[k].toUpperCase(), 50, startY + (30 * k));

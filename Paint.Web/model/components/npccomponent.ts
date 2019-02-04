@@ -4,12 +4,12 @@ class NPCComponent extends Component {
     positionComponent: PositionComponent;
     interactionPosition: PositionComponent;
     name: string;
-    interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => void;
+    interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => boolean;
     interactingState: number = 0;
     interactable: boolean = true;
     interacting: boolean = false;
 
-    constructor(positionComponent: PositionComponent, interactionPosition: PositionComponent, name: string, interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => void) {
+    constructor(positionComponent: PositionComponent, interactionPosition: PositionComponent, name: string, interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => boolean) {
         super();
 
         this.positionComponent = positionComponent;

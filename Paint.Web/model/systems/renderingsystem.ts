@@ -7,6 +7,7 @@ class RenderingSystem extends System {
         var camera = <CameraComponent>this.engine.GetEntities([CameraComponent.name])[0].GetComponent(CameraComponent.name);
         var context = Game.Instance.context;
         context.clearRect(0, 0, Game.ResolutionWidth, Game.ResolutionHeight);
+        context.beginPath();
 
         var entities = this.engine.GetEntities(this.requiredComponents);
         entities.sort(function (a, b) {
@@ -52,11 +53,8 @@ class RenderingSystem extends System {
                     , renderableComponent.width
                     , renderableComponent.height
                 );
-                if (renderableComponent.orientationLeft) {
-                    context.scale(-1, 1);
-                }
 
-                context.translate(-(renderableComponent.positionComponent.position.x - (camera.positionComponent.position.x * cameraSpeedModifier) + extra), -(renderableComponent.positionComponent.position.y - camera.positionComponent.position.y));
+                context.resetTransform();
             } else {
                 context.beginPath();
                 context.fillStyle = renderableComponent.color;
@@ -98,15 +96,13 @@ class RenderingSystem extends System {
             context.font = '16pt Calibri';
             var startY = 35 * j + 10;
             for (var k = 0; k < topText.options.length; ++k) {
-                if (topText.chosenOption == k) {
+                if (topText.chosenOption === k) {
                     context.lineWidth = 4;
                     context.beginPath();
                     context.moveTo(15, startY + (30 * k));
                     context.lineTo(15, startY + (30 * k) + 20);
                     context.lineTo(35, startY + (30 * k) + 10);
                     context.closePath();
-                    context.stroke();
-                    context.fill();
                 }
 
                 context.lineWidth = 1;

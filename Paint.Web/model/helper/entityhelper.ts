@@ -63,7 +63,7 @@
     }
 
     public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, name: string
-        , interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => void): Entity {
+        , interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => boolean): Entity {
         var npc = new Entity();
         var positionComponent = new PositionComponent(x, y, width, height);
         npc.AddComponent(positionComponent);

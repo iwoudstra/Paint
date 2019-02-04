@@ -23,7 +23,7 @@ class Level1 extends Level {
 
         engine.AddEntity(EntityHelper.CreateCamera());
 
-        var npc = EntityHelper.CreateNpcEntity(1400, 445, 130, 195, 1163, 406, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean) {
+        var npc = EntityHelper.CreateNpcEntity(1400, 445, 130, 195, 1163, 406, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean): boolean {
             if (!self.interactable) {
                 return;
             }
@@ -38,7 +38,7 @@ class Level1 extends Level {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("You should follow me, i will lead you to the cookies.", ['I love cookies.', 'I hate cookies but will follow you anyway.']));
 
-                    break;
+                    return false;
                 }
                 case 1: {
                     player.RemoveComponent(TopTextComponent.name);
@@ -79,7 +79,19 @@ class Level1 extends Level {
                     engine.AddEntity(npcEyeLeft);
                     engine.AddEntity(npcEyeRight);
 
-                    break;
+                    self.interactingState = 2;
+
+                    return true;
+                }
+                case 2:
+                case 3: {
+                    self.interactingState = 2;
+
+                    player.RemoveComponent(TopTextComponent.name);
+                    player.AddComponent(new TopTextComponent("Why haven't you followed me into the darkness, are you scared?"));
+
+
+                    return true;
                 }
             }
         });
