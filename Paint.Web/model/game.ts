@@ -29,8 +29,8 @@
         this.engine = new Engine();
 
         SpriteHelper.InitSprites();
-        this.ChangeLevel(new Level1(), 600, 600);
-        
+      //  this.ChangeLevel(new Level1(), 600, 600);
+        this.ChangeLevel(new Level3(), 20, 20);
 
         this.lastTime = performance.now();
         this.Handle(this.lastTime);

@@ -7,6 +7,7 @@
     static level1bg: HTMLImageElement = new Image();
     static level2: HTMLImageElement = new Image();
     static level3: HTMLImageElement = new Image();
+      static level3bg: HTMLImageElement = new Image();
     static npcwip: HTMLImageElement = new Image();
 
 
@@ -18,6 +19,7 @@
     static level1bgAnimation: GameAnimation;
     static level2Animation: GameAnimation;
     static level3Animation: GameAnimation;
+    static level3bgAnimation: GameAnimation;
     static npcwipAnimation: GameAnimation;
     static npcLeftEyeAnimation: GameAnimation;
     static npcRightEyeAnimation: GameAnimation;
@@ -32,6 +34,7 @@
         this.level1bg.src = 'assets/sprites/level-1/level-1-bg.png';
         this.level2.src = 'assets/sprites/level-2/level-2.png';
         this.level3.src = 'assets/sprites/level-3/level-3.png';
+        this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
 
         this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
         this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
@@ -45,6 +48,7 @@
 
         this.level2Animation = new GameAnimation(this.level2, 0, 0, 2495, 1920, 1, 'gamemap');
 
-        this.level3Animation = new GameAnimation(this.level3, 0, 0, 2047, 1920, 1, 'gamemap');
+        this.level3Animation = new GameAnimation(this.level3, 0, 0, 2950, 1855, 1, 'gamemap');
+        this.level3bgAnimation = new GameAnimation(this.level3bg, 0, 0, 2950, 1855, 1, 'gamemap');
     }
 }
