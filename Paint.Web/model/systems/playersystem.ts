@@ -107,7 +107,7 @@ class PlayerSystem extends System {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
             }
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
-            playerComponent.renderableComponent.frame = 1;
+            playerComponent.renderableComponent.frame = 0;
             playerComponent.currentState = PlayerState.Jumping;
         } else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent, false)) {
             playerComponent.positionComponent.position.y += 1;
@@ -151,7 +151,7 @@ class PlayerSystem extends System {
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
-            playerComponent.renderableComponent.frame = 2;
+            playerComponent.renderableComponent.frame = 1;
         } else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.HasBluePaint) {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
         }
@@ -163,7 +163,7 @@ class PlayerSystem extends System {
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
             playerComponent.currentState = PlayerState.Falling;
-            playerComponent.renderableComponent.frame = 2;
+            playerComponent.renderableComponent.frame = 1;
         }
     }
 

@@ -13,7 +13,7 @@ class Game {
     Init() {
         this.engine = new Engine();
         SpriteHelper.InitSprites();
-        this.ChangeLevel(new Level3(), 2360, 255);
+        this.ChangeLevel(new Level1(), 600, 600);
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
     }
@@ -369,11 +369,11 @@ class EntityHelper {
         var player = new Entity("player");
         var inputComponent = new InputComponent();
         player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent(x, y, 130, 120);
+        var positionComponent = new PositionComponent(x, y, 65, 130);
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
+        var renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
         player.AddComponent(renderableComponent);
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         return player;
@@ -437,6 +437,7 @@ class GameAnimation {
 class SpriteHelper {
     static InitSprites() {
         this.characterSpriteSheet.src = 'assets/sprites/player/characterspritesheet.png';
+        this.playerSpriteSheet.src = 'assets/sprites/player/player.png';
         this.npcwip.src = 'assets/sprites/npc/npc.png';
         this.level1.src = 'assets/sprites/level-1/level.png';
         this.level1fg.src = 'assets/sprites/level-1/level-1-fg.png';
@@ -445,8 +446,8 @@ class SpriteHelper {
         this.level2.src = 'assets/sprites/level-2/level-2.png';
         this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
-        this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
-        this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
+        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 390, 650, 10, 'playerwalking');
+        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 650, 390, 650, 2, 'playerjumping');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
         this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
@@ -460,6 +461,7 @@ class SpriteHelper {
     }
 }
 SpriteHelper.characterSpriteSheet = new Image();
+SpriteHelper.playerSpriteSheet = new Image();
 SpriteHelper.rockPlatform = new Image();
 SpriteHelper.level1 = new Image();
 SpriteHelper.level1fg = new Image();
@@ -733,7 +735,7 @@ class Level2 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1790, 1665, 320, 130));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(510, 1790, 1300, 130));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, new Level3(), 0, 300));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, new Level3(), 2360, 255));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -779,6 +781,7 @@ class Level3 extends Level {
         engine.AddEntity(EntityHelper.CreatePlatform(510, 745, 130, 15));
         engine.AddEntity(EntityHelper.CreatePlatform(510, 380, 130, 15));
         engine.AddEntity(EntityHelper.CreateCamera());
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 2485, 130, 130, new Level2(), 980, 1470));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -1242,7 +1245,7 @@ class PlayerSystem extends System {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
             }
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
-            playerComponent.renderableComponent.frame = 1;
+            playerComponent.renderableComponent.frame = 0;
             playerComponent.currentState = PlayerState.Jumping;
         }
         else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent, false)) {
@@ -1283,7 +1286,7 @@ class PlayerSystem extends System {
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.currentState = PlayerState.Falling;
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
-            playerComponent.renderableComponent.frame = 2;
+            playerComponent.renderableComponent.frame = 1;
         }
         else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.HasBluePaint) {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
@@ -1294,7 +1297,7 @@ class PlayerSystem extends System {
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
             playerComponent.currentState = PlayerState.Falling;
-            playerComponent.renderableComponent.frame = 2;
+            playerComponent.renderableComponent.frame = 1;
         }
     }
     HandleFallingState(entity, playerComponent, deltaTime) {

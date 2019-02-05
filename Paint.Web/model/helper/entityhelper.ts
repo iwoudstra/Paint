@@ -51,11 +51,11 @@
         var player = new Entity("player");
         var inputComponent = new InputComponent()
         player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent(x, y, 130, 120);
+        var positionComponent = new PositionComponent(x, y, 65, 130);
         player.AddComponent(positionComponent);
         var moveableComponent = new MoveableComponent(positionComponent);
         player.AddComponent(moveableComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 120, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
+        var renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
         player.AddComponent(renderableComponent);
         player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
 

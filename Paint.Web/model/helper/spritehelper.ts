@@ -1,5 +1,6 @@
 ﻿class SpriteHelper {
     static characterSpriteSheet: HTMLImageElement = new Image();
+    static playerSpriteSheet: HTMLImageElement = new Image();
     static rockPlatform: HTMLImageElement = new Image();
     static level1: HTMLImageElement = new Image();
     static level1fg: HTMLImageElement = new Image();
@@ -27,6 +28,7 @@
 
     public static InitSprites(): void {
         this.characterSpriteSheet.src = 'assets/sprites/player/characterspritesheet.png';
+        this.playerSpriteSheet.src = 'assets/sprites/player/player.png';
         this.npcwip.src = 'assets/sprites/npc/npc.png';
         this.level1.src = 'assets/sprites/level-1/level.png';
         this.level1fg.src = 'assets/sprites/level-1/level-1-fg.png'
@@ -36,11 +38,13 @@
         this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
 
-        this.playerWalking = new GameAnimation(this.characterSpriteSheet, 0, 361, 391, 361, 6, 'playerwalking');
-        this.playerJumping = new GameAnimation(this.characterSpriteSheet, 0, 0, 391, 361, 3, 'playerjumping');
+        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 390, 650, 10, 'playerwalking');
+        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 650, 390, 650, 2, 'playerjumping');
+
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
         this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
+
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 3071, 2944, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 3071, 2944, 1, 'gamemap');

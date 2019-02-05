@@ -52,6 +52,7 @@ class Level3 extends Level {
 
 
         engine.AddEntity(EntityHelper.CreateCamera());
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 2485, 130, 130, new Level2(), 980, 1470));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
