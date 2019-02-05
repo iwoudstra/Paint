@@ -30,7 +30,7 @@
 
         SpriteHelper.InitSprites();
       //  this.ChangeLevel(new Level1(), 600, 600);
-        this.ChangeLevel(new Level3(), 20, 20);
+        this.ChangeLevel(new Level3(), 2360, 255);
 
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
