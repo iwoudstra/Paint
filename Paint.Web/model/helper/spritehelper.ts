@@ -8,12 +8,13 @@
     static level1bg: HTMLImageElement = new Image();
     static level2: HTMLImageElement = new Image();
     static level3: HTMLImageElement = new Image();
-      static level3bg: HTMLImageElement = new Image();
+    static level3bg: HTMLImageElement = new Image();
     static npcwip: HTMLImageElement = new Image();
 
 
     static playerWalking: GameAnimation;
     static playerJumping: GameAnimation;
+    static playerIdle: GameAnimation;
     static level1Animation: GameAnimation;
     static level1fAnimation: GameAnimation;
     static level1fgAnimation: GameAnimation;
@@ -40,6 +41,7 @@
 
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 390, 650, 10, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 650, 390, 650, 2, 'playerjumping');
+        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 830, 650, 390, 650, 4, 'playeridle');
 
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
