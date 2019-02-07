@@ -1,11 +1,54 @@
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 class Game {
     constructor() {
         this.requestAnimFrame = window.requestAnimationFrame;
+        this.serializationAttributes = new Map();
+        this.serializationState = new Map();
         this.canvas = document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
     }
     static get Instance() {
         return this._instance || (this._instance = new this());
+    }
+    AddSerializationAttribute(className, attributeName) {
+        if (!this.serializationAttributes.has(className)) {
+            this.serializationAttributes.set(className, new Set());
+        }
+        if (!this.serializationAttributes.get(className).has(attributeName)) {
+            this.serializationAttributes.get(className).add(attributeName);
+        }
+    }
+    GetSerializationAttributes(className) {
+        return this.serializationAttributes.has(className) ? this.serializationAttributes.get(className) : new Set();
+    }
+    HasSerializationAttribute(className, attributeName) {
+        return this.serializationAttributes.has(className) && this.serializationAttributes.get(className).has(attributeName);
+    }
+    SetSerializationState(entityName, className, attributeName, attributeValue) {
+        if (!this.serializationState.has(entityName)) {
+            this.serializationState.set(entityName, new Map());
+        }
+        if (!this.serializationState.get(entityName).has(className)) {
+            this.serializationState.get(entityName).set(className, new Map());
+        }
+        this.serializationState.get(entityName).get(className).set(attributeName, attributeValue);
+    }
+    GetSerializationState(entityName, className, attributeName) {
+        if (!this.serializationState.has(entityName)) {
+            return null;
+        }
+        if (!this.serializationState.get(entityName).has(className)) {
+            return null;
+        }
+        if (!this.serializationState.get(entityName).get(className).has(attributeName)) {
+            return null;
+        }
+        return this.serializationState.get(entityName).get(className).get(attributeName);
     }
     AddEntity(entity) {
         this.engine.AddEntity(entity);
@@ -18,9 +61,13 @@ class Game {
         this.Handle(this.lastTime);
     }
     ChangeLevel(level, playerX, playerY) {
+        if (this.currentLevel != null) {
+            this.currentLevel.SaveState(this.engine);
+        }
         this.engine.RemoveAllEntities();
         this.currentLevel = level;
         this.currentLevel.Init(this.engine, playerX, playerY);
+        this.currentLevel.InitState(this.engine);
     }
     Handle(timestamp) {
         this.now = timestamp;
@@ -126,12 +173,18 @@ class PlayerComponent extends Component {
         super();
         this.currentState = PlayerState.OnGround;
         this.interactingWith = null;
+        this._hasBluePaint = false;
         this.positionComponent = positionComponent;
         this.moveableComponent = moveableComponent;
         this.inputComponent = inputComponent;
         this.renderableComponent = renderableComponent;
     }
+    get HasBluePaint() { return this._hasBluePaint; }
+    set HasBluePaint(value) { this._hasBluePaint = value; }
 }
+__decorate([
+    serializeParameter(true)
+], PlayerComponent.prototype, "HasBluePaint", null);
 class PositionComponent extends Component {
     constructor(x = 0, y = 0, width = 50, height = 100) {
         super();
@@ -319,6 +372,38 @@ class Level {
         this.LoadScreen = loadScreen;
         this.MapLayout = mapLayout;
     }
+    SaveState(engine) {
+        var entities = engine.GetEntities([]);
+        for (var i = 0; i < entities.length; ++i) {
+            var components = entities[i].GetAllComponents();
+            for (var j = 0; j < components.length; ++j) {
+                var component = components[j];
+                Game.Instance.GetSerializationAttributes(component.constructor.name).forEach(function (property) {
+                    Game.Instance.SetSerializationState(entities[i].name, component.constructor.name, property, component[property]);
+                });
+            }
+        }
+    }
+    InitState(engine) {
+        var entities = engine.GetEntities([]);
+        for (var i = 0; i < entities.length; ++i) {
+            var components = entities[i].GetAllComponents();
+            for (var j = 0; j < components.length; ++j) {
+                var component = components[j];
+                Game.Instance.GetSerializationAttributes(component.constructor.name).forEach(function (property) {
+                    var propertyValue = Game.Instance.GetSerializationState(entities[i].name, component.constructor.name, property);
+                    if (propertyValue) {
+                        component[property] = propertyValue;
+                    }
+                });
+            }
+        }
+    }
+}
+function serializeParameter(saveState) {
+    return function (target, propertyKey, descriptor) {
+        Game.Instance.AddSerializationAttribute(target.constructor.name, propertyKey);
+    };
 }
 class System {
     constructor(engine) {
@@ -665,6 +750,8 @@ class Level1 extends Level {
                 case 1: {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("Come on hurry and follow me into the darkness."));
+                    var playerComponent = player.GetComponent(PlayerComponent.name);
+                    playerComponent.HasBluePaint = true;
                     engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
                     npcMoveableComponent.velocity = new Vector2d(200, 0);
@@ -695,7 +782,7 @@ class Level1 extends Level {
                     engine.AddEntity(npcEyeLeft);
                     engine.AddEntity(npcEyeRight);
                     self.interactingState = 2;
-                    return true;
+                    return false;
                 }
                 case 2:
                 case 3: {

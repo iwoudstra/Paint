@@ -44,6 +44,9 @@ class Level1 extends Level {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("Come on hurry and follow me into the darkness."));
 
+                    var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
+                    playerComponent.HasBluePaint = true;
+
                     engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
 
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
@@ -81,7 +84,7 @@ class Level1 extends Level {
 
                     self.interactingState = 2;
 
-                    return true;
+                    return false;
                 }
                 case 2:
                 case 3: {

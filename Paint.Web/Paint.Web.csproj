@@ -107,6 +107,7 @@
     <TypeScriptCompile Include="model\core\engine.ts" />
     <TypeScriptCompile Include="model\core\entity.ts" />
     <TypeScriptCompile Include="model\core\component.ts" />
+    <TypeScriptCompile Include="model\core\serialize.ts" />
     <TypeScriptCompile Include="model\core\system.ts" />
     <TypeScriptCompile Include="model\game.ts" />
     <TypeScriptCompile Include="model\helper\gameanimation.ts" />
