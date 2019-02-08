@@ -31,7 +31,6 @@ class Level3 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 1600, 780, 195));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(640, 1280, 195, 65));
 
-
         engine.AddEntity(EntityHelper.CreatePlatform(2240, 640, 130, 15));
         engine.AddEntity(EntityHelper.CreatePlatform(2115, 865, 130, 15));
         engine.AddEntity(EntityHelper.CreatePlatform(2620, 1215, 130, 15));
@@ -52,7 +51,7 @@ class Level3 extends Level {
 
 
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 2485, 130, 130, new Level2(), 980, 1470));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 380, 130, 130, new Level2(), 980, 1470));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }

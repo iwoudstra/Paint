@@ -400,11 +400,6 @@ class Level {
         }
     }
 }
-function serializeParameter(saveState) {
-    return function (target, propertyKey, descriptor) {
-        Game.Instance.AddSerializationAttribute(target.constructor.name, propertyKey);
-    };
-}
 class System {
     constructor(engine) {
         this.priority = 0;
@@ -869,7 +864,7 @@ class Level3 extends Level {
         engine.AddEntity(EntityHelper.CreatePlatform(510, 745, 130, 15));
         engine.AddEntity(EntityHelper.CreatePlatform(510, 380, 130, 15));
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 2485, 130, 130, new Level2(), 980, 1470));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 380, 130, 130, new Level2(), 980, 1470));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -1613,5 +1608,10 @@ class TriggerSystem extends System {
             }
         }
     }
+}
+function serializeParameter(saveState) {
+    return function (target, propertyKey, descriptor) {
+        Game.Instance.AddSerializationAttribute(target.constructor.name, propertyKey);
+    };
 }
 //# sourceMappingURL=all.js.map
