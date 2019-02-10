@@ -47,7 +47,7 @@ class Level1 extends Level {
                     var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
                     playerComponent.HasBluePaint = true;
 
-                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
+                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 250, 300));
 
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
                     npcMoveableComponent.velocity = new Vector2d(200, 0);

@@ -400,6 +400,11 @@ class Level {
         }
     }
 }
+function serializeParameter(saveState) {
+    return function (target, propertyKey, descriptor) {
+        Game.Instance.AddSerializationAttribute(target.constructor.name, propertyKey);
+    };
+}
 class System {
     constructor(engine) {
         this.priority = 0;
@@ -747,7 +752,7 @@ class Level1 extends Level {
                     player.AddComponent(new TopTextComponent("Come on hurry and follow me into the darkness."));
                     var playerComponent = player.GetComponent(PlayerComponent.name);
                     playerComponent.HasBluePaint = true;
-                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 0, 300));
+                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 250, 300));
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
                     npcMoveableComponent.velocity = new Vector2d(200, 0);
                     npc.AddComponent(npcMoveableComponent);
@@ -819,6 +824,7 @@ class Level2 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(510, 1790, 1300, 130));
         engine.AddEntity(EntityHelper.CreateCamera());
         engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, new Level3(), 2360, 255));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, new Level1(), 1630, 550));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -1608,10 +1614,5 @@ class TriggerSystem extends System {
             }
         }
     }
-}
-function serializeParameter(saveState) {
-    return function (target, propertyKey, descriptor) {
-        Game.Instance.AddSerializationAttribute(target.constructor.name, propertyKey);
-    };
 }
 //# sourceMappingURL=all.js.map
