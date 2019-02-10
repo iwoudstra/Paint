@@ -10,6 +10,7 @@ enum PlayerState {
 
 class PlayerComponent extends Component {
     currentState: PlayerState = PlayerState.OnGround;
+    newState: PlayerState = PlayerState.OnGround;
     positionComponent: PositionComponent;
     moveableComponent: MoveableComponent;
     inputComponent: InputComponent;

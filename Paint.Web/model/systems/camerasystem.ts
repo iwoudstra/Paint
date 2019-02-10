@@ -71,6 +71,8 @@ class CameraSystem extends System {
 
         if (preferredXPosition < 0) {
             preferredXPosition = 0;
+        } else if (preferredXPosition > Game.Instance.currentLevel.Width - Game.ResolutionWidth) {
+            preferredXPosition = Game.Instance.currentLevel.Width - Game.ResolutionWidth;
         }
 
         if (Math.abs(camera.positionComponent.position.x - preferredXPosition) < Math.abs(player.moveableComponent.velocity.x * 2 * deltaTime)) {
@@ -79,7 +81,7 @@ class CameraSystem extends System {
             camera.positionComponent.position.x = (camera.positionComponent.position.x * (speedFactor - 1) + preferredXPosition) / speedFactor;
         }
 
-        
+
         var preferredYPosition;
         if (camera.verticalDirection < 0) {
             if (camera.verticalTime > 0.5) {
@@ -99,6 +101,8 @@ class CameraSystem extends System {
 
         if (preferredYPosition < 0) {
             preferredYPosition = 0;
+        } else if (preferredYPosition > Game.Instance.currentLevel.Height - Game.ResolutionHeight) {
+            preferredYPosition = Game.Instance.currentLevel.Height - Game.ResolutionHeight;
         }
 
         if (Math.abs(camera.positionComponent.position.y - preferredYPosition) < Math.abs(player.moveableComponent.velocity.y * 2 * deltaTime)) {

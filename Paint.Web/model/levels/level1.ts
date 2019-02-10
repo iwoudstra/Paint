@@ -2,7 +2,7 @@
 
 class Level1 extends Level {
     constructor() {
-        super(3071, 2944, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
+        super(1917, 1147, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
 
     public Init(engine: Engine, playerX: number, playerY: number): void {
