@@ -6,6 +6,19 @@ class PlayerSystem extends System {
     private fallSpeed: number = 800;
 
     public ChangeState(entity: Entity, playerComponent: PlayerComponent): void {
+        switch (playerComponent.currentState) {
+            case PlayerState.OnGround: {
+                if (playerComponent.newState !== PlayerState.Interacting) {
+                    entity.RemoveComponent(TopTextComponent.name);
+                }
+                break;
+            }
+            default: {
+                //do nothing.
+                break;
+            }
+        }
+
         switch (playerComponent.newState) {
             case PlayerState.OnGround: {
                 playerComponent.moveableComponent.velocity.y = 0;
@@ -136,6 +149,8 @@ class PlayerSystem extends System {
                     npcComponent.interactionAction(npcComponent, 0, true);
                 } else if (playerComponent.interactingWith === null) {
                     playerComponent.interactingWith = npcComponent;
+                    entity.AddComponent(new TopTextComponent("Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
+                } else if (!entity.HasComponent(TopTextComponent.name)) {
                     entity.AddComponent(new TopTextComponent("Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
                 }
             }

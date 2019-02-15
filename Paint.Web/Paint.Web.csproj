@@ -110,6 +110,7 @@
     <TypeScriptCompile Include="model\core\serialize.ts" />
     <TypeScriptCompile Include="model\core\system.ts" />
     <TypeScriptCompile Include="model\game.ts" />
+    <TypeScriptCompile Include="model\helper\collisionhelper.ts" />
     <TypeScriptCompile Include="model\helper\gameanimation.ts" />
     <TypeScriptCompile Include="model\helper\entityhelper.ts" />
     <TypeScriptCompile Include="model\helper\spritehelper.ts" />

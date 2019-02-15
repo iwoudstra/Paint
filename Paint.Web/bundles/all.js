@@ -172,6 +172,7 @@ class PlayerComponent extends Component {
     constructor(positionComponent, moveableComponent, inputComponent, renderableComponent) {
         super();
         this.currentState = PlayerState.OnGround;
+        this.newState = PlayerState.OnGround;
         this.interactingWith = null;
         this._hasBluePaint = false;
         this.positionComponent = positionComponent;
@@ -537,10 +538,10 @@ class SpriteHelper {
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
         this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
-        this.level1Animation = new GameAnimation(this.level1, 0, 0, 3071, 2944, 1, 'gamemap');
+        this.level1Animation = new GameAnimation(this.level1, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
-        this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 3071, 2944, 1, 'gamemap');
-        this.level1bgAnimation = new GameAnimation(this.level1bg, 0, 0, 3071, 2944, 1, 'gamemap');
+        this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 1917, 1147, 1, 'gamemap');
+        this.level1bgAnimation = new GameAnimation(this.level1bg, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level2Animation = new GameAnimation(this.level2, 0, 0, 2495, 1920, 1, 'gamemap');
         this.level3Animation = new GameAnimation(this.level3, 0, 0, 2950, 1855, 1, 'gamemap');
         this.level3bgAnimation = new GameAnimation(this.level3bg, 0, 0, 2950, 1855, 1, 'gamemap');
@@ -717,7 +718,7 @@ class Vector2d {
 }
 class Level1 extends Level {
     constructor() {
-        super(3071, 2944, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
+        super(1917, 1147, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
     Init(engine, playerX, playerY) {
         engine.RemoveAllEntities();
@@ -969,6 +970,9 @@ class CameraSystem extends System {
         if (preferredXPosition < 0) {
             preferredXPosition = 0;
         }
+        else if (preferredXPosition > Game.Instance.currentLevel.Width - Game.ResolutionWidth) {
+            preferredXPosition = Game.Instance.currentLevel.Width - Game.ResolutionWidth;
+        }
         if (Math.abs(camera.positionComponent.position.x - preferredXPosition) < Math.abs(player.moveableComponent.velocity.x * 2 * deltaTime)) {
             camera.positionComponent.position.x = preferredXPosition;
         }
@@ -997,6 +1001,9 @@ class CameraSystem extends System {
         }
         if (preferredYPosition < 0) {
             preferredYPosition = 0;
+        }
+        else if (preferredYPosition > Game.Instance.currentLevel.Height - Game.ResolutionHeight) {
+            preferredYPosition = Game.Instance.currentLevel.Height - Game.ResolutionHeight;
         }
         if (Math.abs(camera.positionComponent.position.y - preferredYPosition) < Math.abs(player.moveableComponent.velocity.y * 2 * deltaTime)) {
             camera.positionComponent.position.y = preferredYPosition;
@@ -1243,15 +1250,35 @@ class PlayerSystem extends System {
         this.movementSpeed = 400;
         this.fallSpeed = 800;
     }
-    ChangeState(playerState, playerComponent) {
-        switch (playerState) {
+    ChangeState(entity, playerComponent) {
+        switch (playerComponent.currentState) {
             case PlayerState.OnGround: {
+                if (playerComponent.newState !== PlayerState.Interacting) {
+                    entity.RemoveComponent(TopTextComponent.name);
+                }
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+        switch (playerComponent.newState) {
+            case PlayerState.OnGround: {
+                playerComponent.moveableComponent.velocity.y = 0;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
+                playerComponent.renderableComponent.frame = 0;
+                playerComponent.renderableComponent.frameTimer = 0;
+                entity.RemoveComponent(TopTextComponent.name);
                 break;
             }
             case PlayerState.Jumping: {
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
+                playerComponent.renderableComponent.frame = 0;
                 break;
             }
             case PlayerState.Falling: {
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
+                playerComponent.renderableComponent.frame = 1;
                 break;
             }
             case PlayerState.Respawing: {
@@ -1261,12 +1288,15 @@ class PlayerSystem extends System {
                 break;
             }
         }
-        playerComponent.currentState = playerState;
+        playerComponent.currentState = playerComponent.newState;
     }
     Update(deltaTime) {
         var entities = this.engine.GetEntities(this.requiredComponents);
         for (var i = 0; i < entities.length; ++i) {
             var playerComponent = entities[i].GetComponent(PlayerComponent.name);
+            if (playerComponent.currentState != playerComponent.newState) {
+                this.ChangeState(entities[i], playerComponent);
+            }
             switch (playerComponent.currentState) {
                 case PlayerState.OnGround: {
                     this.HandleOnGroundState(entities[i], playerComponent, deltaTime);
@@ -1333,9 +1363,7 @@ class PlayerSystem extends System {
             else {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
             }
-            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
-            playerComponent.renderableComponent.frame = 0;
-            playerComponent.currentState = PlayerState.Jumping;
+            playerComponent.newState = PlayerState.Jumping;
         }
         else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent, false)) {
             playerComponent.positionComponent.position.y += 1;
@@ -1349,11 +1377,14 @@ class PlayerSystem extends System {
             if (npcComponent.interactable) {
                 if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
                     playerComponent.interactingWith = npcComponent;
-                    playerComponent.currentState = PlayerState.Interacting;
+                    playerComponent.newState = PlayerState.Interacting;
                     npcComponent.interactionAction(npcComponent, 0, true);
                 }
                 else if (playerComponent.interactingWith === null) {
                     playerComponent.interactingWith = npcComponent;
+                    entity.AddComponent(new TopTextComponent("Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
+                }
+                else if (!entity.HasComponent(TopTextComponent.name)) {
                     entity.AddComponent(new TopTextComponent("Press '" + playerComponent.inputComponent.interactionKey + "' to interact."));
                 }
             }
@@ -1373,9 +1404,7 @@ class PlayerSystem extends System {
             }
         }
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
-            playerComponent.currentState = PlayerState.Falling;
-            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
-            playerComponent.renderableComponent.frame = 1;
+            playerComponent.newState = PlayerState.Falling;
         }
         else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.HasBluePaint) {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
@@ -1385,18 +1414,13 @@ class PlayerSystem extends System {
         this.HandleMovement(playerComponent, false);
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
-            playerComponent.currentState = PlayerState.Falling;
-            playerComponent.renderableComponent.frame = 1;
+            playerComponent.newState = PlayerState.Falling;
         }
     }
     HandleFallingState(entity, playerComponent, deltaTime) {
         this.HandleMovement(playerComponent, false);
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
-            playerComponent.moveableComponent.velocity.y = 0;
-            playerComponent.currentState = PlayerState.OnGround;
-            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
-            playerComponent.renderableComponent.frame = 0;
-            playerComponent.renderableComponent.frameTimer = 0;
+            playerComponent.newState = PlayerState.OnGround;
         }
         else {
             playerComponent.moveableComponent.velocity.y = ((playerComponent.moveableComponent.velocity.y * 7.0) + this.fallSpeed) / 8.0;
@@ -1405,27 +1429,17 @@ class PlayerSystem extends System {
     HandleRespawningState(entity, playerComponent, deltaTime) {
         playerComponent.renderableComponent.frameTimer += deltaTime;
         if (playerComponent.renderableComponent.frameTimer > 1) {
-            playerComponent.currentState = PlayerState.OnGround;
-            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
-            playerComponent.renderableComponent.frame = 0;
-            playerComponent.renderableComponent.frameTimer = 0;
+            playerComponent.newState = PlayerState.OnGround;
         }
     }
     HandleInteractingState(entity, playerComponent, deltaTime) {
         var topText = entity.GetComponent(TopTextComponent.name);
         if (playerComponent.inputComponent.cancelInteractionActive) {
-            playerComponent.currentState = PlayerState.OnGround;
-            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
-            playerComponent.renderableComponent.frame = 0;
-            playerComponent.renderableComponent.frameTimer = 0;
-            entity.RemoveComponent(TopTextComponent.name);
+            playerComponent.newState = PlayerState.OnGround;
         }
         else if (playerComponent.inputComponent.interactionActive && !playerComponent.inputComponent.interactionActivePrevious) {
             if (playerComponent.interactingWith.interactionAction(playerComponent.interactingWith, topText.chosenOption, false)) {
-                playerComponent.currentState = PlayerState.OnGround;
-                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
-                playerComponent.renderableComponent.frame = 0;
-                playerComponent.renderableComponent.frameTimer = 0;
+                playerComponent.newState = PlayerState.OnGround;
             }
         }
         if (topText.options.length > 0) {
