@@ -163,7 +163,7 @@ class PlayerSystem extends System {
 
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
-            if (playerComponent.renderableComponent.frameTimer >= 0.085) {
+            if (playerComponent.renderableComponent.frameTimer >= 0.025) {
                 playerComponent.renderableComponent.frameTimer = 0;
                 playerComponent.renderableComponent.frame++;
                 if (playerComponent.renderableComponent.frame >= playerComponent.renderableComponent.gameAnimation.frames) {

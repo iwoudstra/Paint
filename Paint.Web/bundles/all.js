@@ -532,9 +532,9 @@ class SpriteHelper {
         this.level2.src = 'assets/sprites/level-2/level-2.png';
         this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
-        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 390, 650, 10, 'playerwalking');
-        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 650, 390, 650, 2, 'playerjumping');
-        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 830, 650, 390, 650, 4, 'playeridle');
+        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 23, 'playerwalking');
+        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 2, 'playerjumping');
+        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 4, 'playeridle');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
         this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
@@ -1395,7 +1395,7 @@ class PlayerSystem extends System {
         }
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
-            if (playerComponent.renderableComponent.frameTimer >= 0.085) {
+            if (playerComponent.renderableComponent.frameTimer >= 0.025) {
                 playerComponent.renderableComponent.frameTimer = 0;
                 playerComponent.renderableComponent.frame++;
                 if (playerComponent.renderableComponent.frame >= playerComponent.renderableComponent.gameAnimation.frames) {
