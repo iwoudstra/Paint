@@ -533,7 +533,7 @@ class SpriteHelper {
         this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 23, 'playerwalking');
-        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 2, 'playerjumping');
+        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 2990, 0, 130, 260, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 4, 'playeridle');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
