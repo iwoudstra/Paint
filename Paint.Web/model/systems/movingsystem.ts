@@ -118,7 +118,6 @@ class MovingSystem extends System {
                 var xmovement = movement.x + moveableComponent.leftoverXMovement;
                 for (var steps = 0; steps > xmovement; --steps) {
                     if (!MovingSystem.CanMoveHorizontal(this.engine, moveableComponent, -1)) {
-
                         moveableComponent.leftoverXMovement = 0;
                         moveableComponent.velocity.x = 0;
                     } else {

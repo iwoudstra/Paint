@@ -11,7 +11,8 @@ class SpawningSystem extends System {
             spawnComponent.spawnTimer += deltaTime;
             if (spawnComponent.spawnTimer >= spawnComponent.spawnTime) {
                 spawnComponent.spawnTimer = 0;
-                this.engine.AddEntity(EntityHelper.CreateSpawnedEntity(spawnComponent.spawnLocation.x, spawnComponent.spawnLocation.y, 10, 10, spawnComponent.spawnVelocity, spawnComponent.spawnMinPosition, spawnComponent.spawnMaxPosition));
+                var entity = EntityHelper.CreateSpawnedEntity(spawnComponent.spawnLocation.x, spawnComponent.spawnLocation.y, 10, 10, spawnComponent.spawnVelocity.clone(), spawnComponent.spawnMinPosition, spawnComponent.spawnMaxPosition);
+                this.engine.AddEntity(entity);
             }
         }
     }
