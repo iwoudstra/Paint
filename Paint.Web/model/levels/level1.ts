@@ -33,13 +33,13 @@ class Level1 extends Level {
             switch (self.interactingState) {
                 case 0: {
                     player.RemoveComponent(TopTextComponent.name);
-                    player.AddComponent(new TopTextComponent("You should follow me, i will lead you to the cookies.", ['I love cookies.', 'I hate cookies but will follow you anyway.']));
+                    player.AddComponent(new TopTextComponent("You! Follow. My people. Help need. I see where your broom go.", ['Show me the way strange man', 'My mother told me not to talk to strangers']));
 
                     return false;
                 }
                 case 1: {
                     player.RemoveComponent(TopTextComponent.name);
-                    player.AddComponent(new TopTextComponent("Come on hurry and follow me into the darkness."));
+                    player.AddComponent(new TopTextComponent("Let's go. You follow. Me lead."));
 
                     var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
                     playerComponent.HasBluePaint = true;
@@ -63,7 +63,7 @@ class Level1 extends Level {
                     self.interactingState = 2;
 
                     player.RemoveComponent(TopTextComponent.name);
-                    player.AddComponent(new TopTextComponent("Why haven't you followed me into the darkness, are you scared?"));
+                    player.AddComponent(new TopTextComponent("Hurry up! My people cannot wait much longer!"));
 
 
                     return true;
