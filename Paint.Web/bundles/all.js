@@ -534,11 +534,11 @@ class SpriteHelper {
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 19, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 520, 130, 260, 2, 'playerjumping');
-        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 4, 'playeridle');
+        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 20, 'playeridle');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
         this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
         this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
-        this.level1Animation = new GameAnimation(this.level1, 0, 0, 1917, 1147, 1, 'gamemap');
+        this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1bgAnimation = new GameAnimation(this.level1bg, 0, 0, 1917, 1147, 1, 'gamemap');
@@ -718,21 +718,14 @@ class Vector2d {
 }
 class Level1 extends Level {
     constructor() {
-        super(1917, 1147, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
+        super(2635, 845, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
     Init(engine, playerX, playerY) {
         engine.RemoveAllEntities();
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
-        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
-        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1bgAnimation.width, SpriteHelper.level1bgAnimation.height, SpriteHelper.level1bgAnimation, RenderLayer.Background));
-        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fgAnimation.width, SpriteHelper.level1fgAnimation.height, SpriteHelper.level1fgAnimation, RenderLayer.ForegroundPlayer));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(450, 895, 650, 260));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 770, 195, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 640, 650, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 640, 325, 260));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 0, 325, 455));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 0, 520, 390));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1802, 374, 115, 275));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 810, 2080, 35));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(2205, 715, 70, 130));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(2275, 650, 390, 195));
         engine.AddEntity(EntityHelper.CreateCamera());
         var npc = EntityHelper.CreateNpcEntity(1400, 445, 130, 195, 1163, 406, 857, 375, 'John', function (self, option, initialInteraction) {
             if (!self.interactable) {
@@ -1269,7 +1262,7 @@ class PlayerSystem extends System {
         switch (playerComponent.newState) {
             case PlayerState.OnGround: {
                 playerComponent.moveableComponent.velocity.y = 0;
-                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
                 entity.RemoveComponent(TopTextComponent.name);
@@ -1352,17 +1345,21 @@ class PlayerSystem extends System {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = true;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
         }
         else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             playerComponent.moveableComponent.velocity.x = this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = false;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
         }
         else {
             playerComponent.moveableComponent.velocity.x = 0;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle;
         }
         if (allowJump && playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
             }
             else {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;

@@ -22,7 +22,7 @@ class PlayerSystem extends System {
         switch (playerComponent.newState) {
             case PlayerState.OnGround: {
                 playerComponent.moveableComponent.velocity.y = 0;
-                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle; //playerWalking
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
 
@@ -117,18 +117,23 @@ class PlayerSystem extends System {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = true;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking; //ter voorbeeld
         } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             playerComponent.moveableComponent.velocity.x = this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = false;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking; //ter voorbeeld
         } else {
             playerComponent.moveableComponent.velocity.x = 0;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle; //ter voorbeeld
         }
 
         if (allowJump && playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
             } else {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
+
             }
             playerComponent.newState = PlayerState.Jumping;
         } else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent, false)) {

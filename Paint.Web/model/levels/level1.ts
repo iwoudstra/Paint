@@ -2,24 +2,22 @@
 
 class Level1 extends Level {
     constructor() {
-        super(1917, 1147, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
+        super(2635, 845, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
 
     public Init(engine: Engine, playerX: number, playerY: number): void {
         engine.RemoveAllEntities();
 
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
-        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
-        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1bgAnimation.width, SpriteHelper.level1bgAnimation.height, SpriteHelper.level1bgAnimation, RenderLayer.Background));
-        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fgAnimation.width, SpriteHelper.level1fgAnimation.height, SpriteHelper.level1fgAnimation, RenderLayer.ForegroundPlayer));
+      //  engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
+        //engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1bgAnimation.width, SpriteHelper.level1bgAnimation.height, SpriteHelper.level1bgAnimation, RenderLayer.Background));
+        //engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fgAnimation.width, SpriteHelper.level1fgAnimation.height, SpriteHelper.level1fgAnimation, RenderLayer.ForegroundPlayer));
 
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(450, 895, 650, 260));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 770, 195, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 640, 650, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 640, 325, 260));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 0, 325, 455));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 0, 520, 390));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1802, 374, 115, 275));
+
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 810, 2080, 35));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(2205, 715, 70, 130));
+        engine.AddEntity(EntityHelper.CreateSolidPlatform(2275, 650, 390, 195));
+
 
         engine.AddEntity(EntityHelper.CreateCamera());
 
