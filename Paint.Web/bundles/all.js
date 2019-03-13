@@ -535,9 +535,7 @@ class SpriteHelper {
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 19, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 520, 130, 260, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 20, 'playeridle');
-        this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 195, 1, 'npcwip');
-        this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
-        this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
+        this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 1917, 1147, 1, 'gamemap');
@@ -727,7 +725,7 @@ class Level1 extends Level {
         engine.AddEntity(EntityHelper.CreateSolidPlatform(2205, 715, 70, 130));
         engine.AddEntity(EntityHelper.CreateSolidPlatform(2275, 650, 390, 195));
         engine.AddEntity(EntityHelper.CreateCamera());
-        var npc = EntityHelper.CreateNpcEntity(1400, 445, 130, 195, 1163, 406, 857, 375, 'John', function (self, option, initialInteraction) {
+        var npc = EntityHelper.CreateNpcEntity(2370, 450, 65, 75, 2200, 450, 857, 375, 'John', function (self, option, initialInteraction) {
             if (!self.interactable) {
                 return;
             }
@@ -746,35 +744,10 @@ class Level1 extends Level {
                     player.AddComponent(new TopTextComponent("Come on hurry and follow me into the darkness."));
                     var playerComponent = player.GetComponent(PlayerComponent.name);
                     playerComponent.HasBluePaint = true;
-                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 250, 300));
+                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2560, 520, 1, 200, new Level2(), 250, 300));
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
                     npcMoveableComponent.velocity = new Vector2d(200, 0);
                     npc.AddComponent(npcMoveableComponent);
-                    var npcEyeLeft = new Entity('npcEyeLeft');
-                    var npcEyeLeftPosition = new PositionComponent(self.positionComponent.position.x + 60, self.positionComponent.position.y + 58);
-                    npcEyeLeft.AddComponent(npcEyeLeftPosition);
-                    npcEyeLeft.AddComponent(new RenderableComponent(npcEyeLeftPosition, 5, 6, '', RenderLayer.ForegroundPlayer, SpriteHelper.npcLeftEyeAnimation, 999));
-                    var npcEyeRight = new Entity('npcEyeRight');
-                    var npcEyeRightPosition = new PositionComponent(self.positionComponent.position.x + 75, self.positionComponent.position.y + 58);
-                    npcEyeRight.AddComponent(npcEyeRightPosition);
-                    npcEyeRight.AddComponent(new RenderableComponent(npcEyeRightPosition, 5, 8, '', RenderLayer.ForegroundPlayer, SpriteHelper.npcRightEyeAnimation, 999));
-                    npc.AddComponent(new ActionComponent(function (deltaTime, self, actionComponent) {
-                        var npcComponent = self.GetComponent(NPCComponent.name);
-                        npcEyeLeftPosition.position.x = npcComponent.positionComponent.position.x + 60;
-                        npcEyeLeftPosition.position.y = npcComponent.positionComponent.position.y + 58;
-                        npcEyeRightPosition.position.x = npcComponent.positionComponent.position.x + 75;
-                        npcEyeRightPosition.position.y = npcComponent.positionComponent.position.y + 57;
-                        actionComponent.timerHelper += deltaTime;
-                        if (actionComponent.timerHelper >= 1) {
-                            actionComponent.timerHelper = 0;
-                            var npcEyeLeftRender = npcEyeLeft.GetComponent(RenderableComponent.name);
-                            var npcEyeRightRender = npcEyeRight.GetComponent(RenderableComponent.name);
-                            npcEyeLeftRender.visible = !npcEyeLeftRender.visible;
-                            npcEyeRightRender.visible = !npcEyeRightRender.visible;
-                        }
-                    }));
-                    engine.AddEntity(npcEyeLeft);
-                    engine.AddEntity(npcEyeRight);
                     self.interactingState = 2;
                     return false;
                 }

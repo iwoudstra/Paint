@@ -20,8 +20,7 @@ class Level1 extends Level {
 
 
         engine.AddEntity(EntityHelper.CreateCamera());
-
-        var npc = EntityHelper.CreateNpcEntity(1400, 445, 130, 195, 1163, 406, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean): boolean {
+        var npc = EntityHelper.CreateNpcEntity(2370, 450, 65, 75, 2200, 450, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean): boolean {
             if (!self.interactable) {
                 return;
             }
@@ -45,40 +44,15 @@ class Level1 extends Level {
                     var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
                     playerComponent.HasBluePaint = true;
 
-                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(1800, 465, 1, 200, new Level2(), 250, 300));
+                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2560, 520, 1, 200, new Level2(), 250, 300));
 
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
                     npcMoveableComponent.velocity = new Vector2d(200, 0);
                     npc.AddComponent(npcMoveableComponent);
 
-                    var npcEyeLeft = new Entity('npcEyeLeft');
-                    var npcEyeLeftPosition = new PositionComponent(self.positionComponent.position.x + 60, self.positionComponent.position.y + 58);
-                    npcEyeLeft.AddComponent(npcEyeLeftPosition);
-                    npcEyeLeft.AddComponent(new RenderableComponent(npcEyeLeftPosition, 5, 6, '', RenderLayer.ForegroundPlayer, SpriteHelper.npcLeftEyeAnimation, 999));
-                    var npcEyeRight = new Entity('npcEyeRight');
-                    var npcEyeRightPosition = new PositionComponent(self.positionComponent.position.x + 75, self.positionComponent.position.y + 58);
-                    npcEyeRight.AddComponent(npcEyeRightPosition);
-                    npcEyeRight.AddComponent(new RenderableComponent(npcEyeRightPosition, 5, 8, '', RenderLayer.ForegroundPlayer, SpriteHelper.npcRightEyeAnimation, 999));
-                    npc.AddComponent(new ActionComponent(function (deltaTime: number, self: Entity, actionComponent: ActionComponent) {
-                        var npcComponent = <NPCComponent>self.GetComponent(NPCComponent.name);
-                        npcEyeLeftPosition.position.x = npcComponent.positionComponent.position.x + 60;
-                        npcEyeLeftPosition.position.y = npcComponent.positionComponent.position.y + 58;
-                        npcEyeRightPosition.position.x = npcComponent.positionComponent.position.x + 75;
-                        npcEyeRightPosition.position.y = npcComponent.positionComponent.position.y + 57;
 
-                        actionComponent.timerHelper += deltaTime;
-                        if (actionComponent.timerHelper >= 1) {
-                            actionComponent.timerHelper = 0;
-                            var npcEyeLeftRender = <RenderableComponent>npcEyeLeft.GetComponent(RenderableComponent.name);
-                            var npcEyeRightRender = <RenderableComponent>npcEyeRight.GetComponent(RenderableComponent.name);
 
-                            npcEyeLeftRender.visible = !npcEyeLeftRender.visible;
-                            npcEyeRightRender.visible = !npcEyeRightRender.visible;
-                        }
-                    }));
 
-                    engine.AddEntity(npcEyeLeft);
-                    engine.AddEntity(npcEyeRight);
 
                     self.interactingState = 2;
 
