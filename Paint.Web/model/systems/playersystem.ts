@@ -18,7 +18,7 @@ class PlayerSystem extends System {
                 break;
             }
         }
-
+        
         switch (playerComponent.newState) {
             case PlayerState.OnGround: {
                 playerComponent.moveableComponent.velocity.y = 0;
@@ -130,10 +130,8 @@ class PlayerSystem extends System {
         if (allowJump && playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
-                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
             } else {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
-
             }
             playerComponent.newState = PlayerState.Jumping;
         } else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent, false)) {

@@ -1332,7 +1332,6 @@ class PlayerSystem extends System {
         if (allowJump && playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
-                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerJumping;
             }
             else {
                 playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
