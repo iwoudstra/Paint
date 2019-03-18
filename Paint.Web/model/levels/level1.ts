@@ -7,9 +7,8 @@ class Level1 extends Level {
 
     public Init(engine: Engine, playerX: number, playerY: number): void {
         engine.RemoveAllEntities();
-
         engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
-      //  engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
+        //engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
         //engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1bgAnimation.width, SpriteHelper.level1bgAnimation.height, SpriteHelper.level1bgAnimation, RenderLayer.Background));
         //engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fgAnimation.width, SpriteHelper.level1fgAnimation.height, SpriteHelper.level1fgAnimation, RenderLayer.ForegroundPlayer));
 
@@ -50,10 +49,6 @@ class Level1 extends Level {
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
                     npcMoveableComponent.velocity = new Vector2d(200, 0);
                     npc.AddComponent(npcMoveableComponent);
-
-
-
-
 
                     self.interactingState = 2;
 
