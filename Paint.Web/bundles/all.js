@@ -1366,7 +1366,19 @@ class PlayerSystem extends System {
         }
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
             if (playerComponent.renderableComponent.frameTimer >= 0.024) {
+                playerComponent.renderableComponent.frameTimer = 0;
+                playerComponent.renderableComponent.frame++;
+                if (playerComponent.renderableComponent.frame >= playerComponent.renderableComponent.gameAnimation.frames) {
+                    playerComponent.renderableComponent.frame = 0;
+                }
+            }
+        }
+        if ((playerComponent.moveableComponent.velocity.x <= 0) && (playerComponent.moveableComponent.velocity.x >= 0)) {
+            playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle;
+            playerComponent.renderableComponent.frameTimer += deltaTime;
+            if (playerComponent.renderableComponent.frameTimer >= 0.030) {
                 playerComponent.renderableComponent.frameTimer = 0;
                 playerComponent.renderableComponent.frame++;
                 if (playerComponent.renderableComponent.frame >= playerComponent.renderableComponent.gameAnimation.frames) {
