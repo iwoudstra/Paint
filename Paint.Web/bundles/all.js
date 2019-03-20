@@ -538,6 +538,7 @@ class GameAnimation {
 }
 class SpriteHelper {
     static InitSprites() {
+        this.avatar.src = 'assets/sprites/npc/avatar.png';
         this.characterSpriteSheet.src = 'assets/sprites/player/characterspritesheet.png';
         this.playerSpriteSheet.src = 'assets/sprites/player/player.png';
         this.npcwip.src = 'assets/sprites/npc/npc.png';
@@ -552,6 +553,7 @@ class SpriteHelper {
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 520, 130, 260, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 20, 'playeridle');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
+        this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1, 'npcavatar');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 1917, 1147, 1, 'gamemap');
@@ -572,6 +574,7 @@ SpriteHelper.level2 = new Image();
 SpriteHelper.level3 = new Image();
 SpriteHelper.level3bg = new Image();
 SpriteHelper.npcwip = new Image();
+SpriteHelper.avatar = new Image();
 const precision = [
     1,
     10,
@@ -1404,7 +1407,7 @@ class PlayerSystem extends System {
         if ((playerComponent.moveableComponent.velocity.x <= 0) && (playerComponent.moveableComponent.velocity.x >= 0)) {
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle;
             playerComponent.renderableComponent.frameTimer += deltaTime;
-            if (playerComponent.renderableComponent.frameTimer >= 0.030) {
+            if (playerComponent.renderableComponent.frameTimer >= 0.060) {
                 playerComponent.renderableComponent.frameTimer = 0;
                 playerComponent.renderableComponent.frame++;
                 if (playerComponent.renderableComponent.frame >= playerComponent.renderableComponent.gameAnimation.frames) {
@@ -1533,14 +1536,12 @@ class RenderingSystem extends System {
         for (var i = 0; i < texts.length; ++i) {
             var topText = texts[i].GetComponent(TopTextComponent.name);
             context.fillStyle = '#ffffff';
-            context.strokeStyle = '#000000';
             context.textAlign = 'center';
             context.textBaseline = 'top';
-            context.font = '20pt Calibri';
+            context.font = '20pt Arial';
             var splitText = topText.text.split('\n');
             for (var j = 0; j < splitText.length; ++j) {
-                context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
-                context.strokeText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
+                context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 200 + (35 * j));
             }
             context.textAlign = 'left';
             context.font = '16pt Calibri';
@@ -1556,7 +1557,6 @@ class RenderingSystem extends System {
                 }
                 context.lineWidth = 1;
                 context.fillText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
-                context.strokeText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
             }
             context.fill();
             context.stroke();

@@ -7,7 +7,6 @@ class TopTextComponent extends Component {
 
     constructor(text: string, options: string[] = []) {
         super();
-
         this.text = text;
         this.options = options;
     }

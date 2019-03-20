@@ -8,7 +8,7 @@ class RenderingSystem extends System {
         var context = Game.Instance.context;
         context.clearRect(0, 0, Game.ResolutionWidth, Game.ResolutionHeight);
         context.beginPath();
-
+        
         var entities = this.engine.GetEntities(this.requiredComponents);
         entities.sort(function (a, b) {
             var renderA = <RenderableComponent>a.GetComponent(RenderableComponent.name);
@@ -81,17 +81,18 @@ class RenderingSystem extends System {
         for (var i = 0; i < texts.length; ++i) {
             var topText = <TopTextComponent>texts[i].GetComponent(TopTextComponent.name);
             context.fillStyle = '#ffffff';
-            context.strokeStyle = '#000000';
+            //context.strokeStyle = '#000000';
             context.textAlign = 'center';
             context.textBaseline = 'top';
-            context.font = '20pt Calibri';
+            context.font = '20pt Arial';
 
+            
             var splitText = topText.text.split('\n');
             for (var j = 0; j < splitText.length; ++j) {
-                context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
-                context.strokeText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
+                context.fillText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 200 + (35 * j));
+                //context.strokeText(splitText[j].toUpperCase(), Game.ResolutionWidth / 2, 5 + (35 * j));
             }
-
+            
             context.textAlign = 'left';
             context.font = '16pt Calibri';
             var startY = 35 * j + 10;
@@ -107,7 +108,7 @@ class RenderingSystem extends System {
 
                 context.lineWidth = 1;
                 context.fillText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
-                context.strokeText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
+                //context.strokeText(topText.options[k].toUpperCase(), 50, startY + (30 * k));
             }
 
             context.fill();

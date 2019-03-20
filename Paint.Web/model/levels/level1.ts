@@ -41,6 +41,9 @@ class Level1 extends Level {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("Let's go. You follow. Me lead."));
 
+                   
+                    
+                    
                     var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
                     playerComponent.HasBluePaint = true;
 

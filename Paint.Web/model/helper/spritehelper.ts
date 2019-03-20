@@ -10,6 +10,7 @@
     static level3: HTMLImageElement = new Image();
     static level3bg: HTMLImageElement = new Image();
     static npcwip: HTMLImageElement = new Image();
+    static avatar: HTMLImageElement = new Image();
 
     static playerWalking: GameAnimation;
     static playerJumping: GameAnimation;
@@ -24,9 +25,10 @@
     static npcwipAnimation: GameAnimation;
     static npcLeftEyeAnimation: GameAnimation;
     static npcRightEyeAnimation: GameAnimation;
-
+    static npcavatar: GameAnimation
 
     public static InitSprites(): void {
+        this.avatar.src = 'assets/sprites/npc/avatar.png';
         this.characterSpriteSheet.src = 'assets/sprites/player/characterspritesheet.png';
         this.playerSpriteSheet.src = 'assets/sprites/player/player.png';
         this.npcwip.src = 'assets/sprites/npc/npc.png';
@@ -45,7 +47,7 @@
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         //this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
         //this.npcRightEyeAnimation = new GameAnimation(this.npcwip, 75, 58, 5, 8, 1, 'npcRightEye');
-
+        this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1, 'npcavatar');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
         this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
         this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 1917, 1147, 1, 'gamemap');

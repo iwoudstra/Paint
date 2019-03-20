@@ -179,7 +179,7 @@ class PlayerSystem extends System {
         if ((playerComponent.moveableComponent.velocity.x <= 0) && (playerComponent.moveableComponent.velocity.x >= 0)) {
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle;
             playerComponent.renderableComponent.frameTimer += deltaTime;
-            if (playerComponent.renderableComponent.frameTimer >= 0.030) {
+            if (playerComponent.renderableComponent.frameTimer >= 0.060) {
                 playerComponent.renderableComponent.frameTimer = 0;
                 playerComponent.renderableComponent.frame++;
                 if (playerComponent.renderableComponent.frame >= playerComponent.renderableComponent.gameAnimation.frames) {
