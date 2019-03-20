@@ -67,7 +67,7 @@ class Level1 extends Level {
             }
         });
         engine.AddEntity(npc);
-
+        engine.AddEntity(EntityHelper.CreateEventEntity(300, 500, 200, 200, 250, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }

@@ -22,6 +22,7 @@ class InputHandlingSystem extends System {
         var platforms = this.engine.GetEntities([PlatformComponent.name]);
         var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
         var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
+        var events = this.engine.GetEntities([EventComponent.name]);
 
         for (var i = 0; i < platforms.length; ++i) {
             var positionComponent = <PositionComponent>platforms[i].GetComponent(PositionComponent.name);
@@ -37,12 +38,18 @@ class InputHandlingSystem extends System {
             var positionComponent = <PositionComponent>triggers[i].GetComponent(PositionComponent.name);
             triggers[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00', RenderLayer.ForegroundPlayer));
         }
+
+        for (var i = 0; i < events.length; ++i) {
+            var positionComponent = <PositionComponent>events[i].GetComponent(PositionComponent.name);
+            events[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ee92f4', RenderLayer.ForegroundPlayer));
+        }
     }
 
     private RemoveDebug(): void {
         var platforms = this.engine.GetEntities([PlatformComponent.name]);
         var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
         var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
+        var events = this.engine.GetEntities([EventComponent.name]);
 
         for (var i = 0; i < platforms.length; ++i) {
             platforms[i].RemoveComponent(RenderableComponent.name);
@@ -54,6 +61,10 @@ class InputHandlingSystem extends System {
 
         for (var i = 0; i < triggers.length; ++i) {
             triggers[i].RemoveComponent(RenderableComponent.name);
+        }
+
+        for (var i = 0; i < events.length; ++i) {
+            events[i].RemoveComponent(RenderableComponent.name);
         }
     }
 

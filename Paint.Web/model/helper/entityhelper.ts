@@ -111,4 +111,14 @@
 
         return levelTrigger;
     }
+
+    public static CreateEventEntity(x: number, y: number, width: number, height: number, playerX: number, playerY: number): Entity {
+        var levelEvent = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        levelEvent.AddComponent(positionComponent);
+        var levelEventComponent = new EventComponent(positionComponent, playerX, playerY);
+        levelEvent.AddComponent(levelEventComponent);
+
+        return levelEvent;
+    }
 }

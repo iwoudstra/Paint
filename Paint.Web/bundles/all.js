@@ -100,6 +100,14 @@ class CameraComponent extends Component {
         this.positionComponent = positionComponent;
     }
 }
+class EventComponent extends Component {
+    constructor(positionComponent, playerX, playerY) {
+        super();
+        this.positionComponent = positionComponent;
+        this.playerX = playerX;
+        this.playerY = playerY;
+    }
+}
 class InputComponent extends Component {
     constructor() {
         super(...arguments);
@@ -505,6 +513,14 @@ class EntityHelper {
         levelTrigger.AddComponent(levelTriggerComponent);
         return levelTrigger;
     }
+    static CreateEventEntity(x, y, width, height, playerX, playerY) {
+        var levelEvent = new Entity();
+        var positionComponent = new PositionComponent(x, y, width, height);
+        levelEvent.AddComponent(positionComponent);
+        var levelEventComponent = new EventComponent(positionComponent, playerX, playerY);
+        levelEvent.AddComponent(levelEventComponent);
+        return levelEvent;
+    }
 }
 EntityHelper.Player = 'player';
 EntityHelper.Camera = 'camera';
@@ -762,6 +778,7 @@ class Level1 extends Level {
             }
         });
         engine.AddEntity(npc);
+        engine.AddEntity(EntityHelper.CreateEventEntity(300, 500, 200, 200, 250, 300));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }
@@ -1002,6 +1019,7 @@ class InputHandlingSystem extends System {
         var platforms = this.engine.GetEntities([PlatformComponent.name]);
         var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
         var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
+        var events = this.engine.GetEntities([EventComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
             var positionComponent = platforms[i].GetComponent(PositionComponent.name);
             platforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00', RenderLayer.ForegroundPlayer));
@@ -1014,11 +1032,16 @@ class InputHandlingSystem extends System {
             var positionComponent = triggers[i].GetComponent(PositionComponent.name);
             triggers[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00', RenderLayer.ForegroundPlayer));
         }
+        for (var i = 0; i < events.length; ++i) {
+            var positionComponent = events[i].GetComponent(PositionComponent.name);
+            events[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ee92f4', RenderLayer.ForegroundPlayer));
+        }
     }
     RemoveDebug() {
         var platforms = this.engine.GetEntities([PlatformComponent.name]);
         var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
         var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
+        var events = this.engine.GetEntities([EventComponent.name]);
         for (var i = 0; i < platforms.length; ++i) {
             platforms[i].RemoveComponent(RenderableComponent.name);
         }
@@ -1027,6 +1050,9 @@ class InputHandlingSystem extends System {
         }
         for (var i = 0; i < triggers.length; ++i) {
             triggers[i].RemoveComponent(RenderableComponent.name);
+        }
+        for (var i = 0; i < events.length; ++i) {
+            events[i].RemoveComponent(RenderableComponent.name);
         }
     }
     HandleKey(ev, active) {
@@ -1594,6 +1620,10 @@ class SpawningSystem extends System {
     }
 }
 class TriggerSystem extends System {
+    constructor() {
+        super(...arguments);
+        this.eventTriggered = false;
+    }
     static CollisionWithPlayer(engine, positionComponent) {
         var playerEntity = engine.GetEntityByName('player');
         var player = playerEntity.GetComponent(PlayerComponent.name);
@@ -1605,10 +1635,18 @@ class TriggerSystem extends System {
     }
     Update(deltaTime) {
         var levelTriggers = this.engine.GetEntities([LevelTriggerComponent.name]);
+        var levelEvents = this.engine.GetEntities([EventComponent.name]);
         for (var i = 0; i < levelTriggers.length; ++i) {
             var levelTrigger = levelTriggers[i].GetComponent(LevelTriggerComponent.name);
             if (TriggerSystem.CollisionWithPlayer(this.engine, levelTrigger.positionComponent)) {
                 Game.Instance.ChangeLevel(levelTrigger.level, levelTrigger.playerX, levelTrigger.playerY);
+            }
+        }
+        for (var i = 0; i < levelEvents.length; ++i) {
+            var levelEvent = levelEvents[i].GetComponent(EventComponent.name);
+            if (TriggerSystem.CollisionWithPlayer(this.engine, levelEvent.positionComponent) && this.eventTriggered === false) {
+                console.log("Fire event");
+                this.eventTriggered = true;
             }
         }
     }
