@@ -111,4 +111,11 @@ class CameraSystem extends System {
             camera.positionComponent.position.y = (camera.positionComponent.position.y * (speedFactor - 1) + preferredYPosition) / speedFactor;
         }
     }
+
+    public LevelChanged(): void {
+    }
+    public EntityAdded(entity: Entity): void {
+    }
+    public EntityRemoved(entity: Entity): void {
+    }
 }

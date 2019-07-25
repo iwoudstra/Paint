@@ -47,19 +47,26 @@
         return paint;
     }
 
+    private static player: Entity = null;
     public static CreatePlayerEntity(x: number, y: number): Entity {
-        var player = new Entity("player");
-        var inputComponent = new InputComponent()
-        player.AddComponent(inputComponent);
-        var positionComponent = new PositionComponent(x, y, 65, 130);
-        player.AddComponent(positionComponent);
-        var moveableComponent = new MoveableComponent(positionComponent);
-        player.AddComponent(moveableComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
-        player.AddComponent(renderableComponent);
-        player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
+        if (this.player === null) {
+            this.player = new Entity("player");
+            var inputComponent = new InputComponent()
+            this.player.AddComponent(inputComponent);
+            var positionComponent = new PositionComponent(x, y, 65, 130);
+            this.player.AddComponent(positionComponent);
+            var moveableComponent = new MoveableComponent(positionComponent);
+            this.player.AddComponent(moveableComponent);
+            var renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
+            this.player.AddComponent(renderableComponent);
+            this.player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
+        } else {
+            let playerPosition = <PositionComponent>this.player.GetComponent(PositionComponent.name);
+            playerPosition.position.x = x;
+            playerPosition.position.y = y;
+        }
 
-        return player;
+        return this.player;
     }
 
     public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, name: string

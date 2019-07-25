@@ -26,22 +26,30 @@ class InputHandlingSystem extends System {
 
         for (var i = 0; i < platforms.length; ++i) {
             var positionComponent = <PositionComponent>platforms[i].GetComponent(PositionComponent.name);
-            platforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00', RenderLayer.ForegroundPlayer));
+            if (!platforms[i].HasComponent(DebugRenderableComponent.name)) {
+                platforms[i].AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00', RenderLayer.ForegroundPlayer));
+            }
         }
 
         for (var i = 0; i < solidPlatforms.length; ++i) {
             var positionComponent = <PositionComponent>solidPlatforms[i].GetComponent(PositionComponent.name);
-            solidPlatforms[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ff0000', RenderLayer.ForegroundPlayer));
+            if (!solidPlatforms[i].HasComponent(DebugRenderableComponent.name)) {
+                solidPlatforms[i].AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ff0000', RenderLayer.ForegroundPlayer));
+            }
         }
 
         for (var i = 0; i < triggers.length; ++i) {
             var positionComponent = <PositionComponent>triggers[i].GetComponent(PositionComponent.name);
-            triggers[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00', RenderLayer.ForegroundPlayer));
+            if (!triggers[i].HasComponent(DebugRenderableComponent.name)) {
+                triggers[i].AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00', RenderLayer.ForegroundPlayer));
+            }
         }
 
         for (var i = 0; i < events.length; ++i) {
             var positionComponent = <PositionComponent>events[i].GetComponent(PositionComponent.name);
-            events[i].AddComponent(new RenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ee92f4', RenderLayer.ForegroundPlayer));
+            if (!events[i].HasComponent(DebugRenderableComponent.name)) {
+                events[i].AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ee92f4', RenderLayer.ForegroundPlayer));
+            }
         }
     }
 
@@ -52,19 +60,19 @@ class InputHandlingSystem extends System {
         var events = this.engine.GetEntities([EventComponent.name]);
 
         for (var i = 0; i < platforms.length; ++i) {
-            platforms[i].RemoveComponent(RenderableComponent.name);
+            platforms[i].RemoveComponent(DebugRenderableComponent.name);
         }
 
         for (var i = 0; i < solidPlatforms.length; ++i) {
-            solidPlatforms[i].RemoveComponent(RenderableComponent.name);
+            solidPlatforms[i].RemoveComponent(DebugRenderableComponent.name);
         }
 
         for (var i = 0; i < triggers.length; ++i) {
-            triggers[i].RemoveComponent(RenderableComponent.name);
+            triggers[i].RemoveComponent(DebugRenderableComponent.name);
         }
 
         for (var i = 0; i < events.length; ++i) {
-            events[i].RemoveComponent(RenderableComponent.name);
+            events[i].RemoveComponent(DebugRenderableComponent.name);
         }
     }
 
@@ -135,5 +143,20 @@ class InputHandlingSystem extends System {
             inputComponent.jumpActivePrevious = inputComponent.jumpActive;
             inputComponent.downActivePrevious = inputComponent.downActive;
         }
+    }
+
+    public LevelChanged(): void {
+        if (this.addedDebug) {
+            this.AddDebug();
+        } else {
+            this.RemoveDebug();
+        }
+    }
+    public EntityAdded(entity: Entity): void {
+        if (this.addedDebug) {
+            this.AddDebug();
+        }
+    }
+    public EntityRemoved(entity: Entity): void {
     }
 }

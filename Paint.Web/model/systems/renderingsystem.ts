@@ -1,7 +1,6 @@
 ﻿/// <reference path="../core/system.ts" />
 
 class RenderingSystem extends System {
-    private requiredComponents: string[] = [RenderableComponent.name];
 
     public Update(deltaTime: number): void {
         var camera = <CameraComponent>this.engine.GetEntities([CameraComponent.name])[0].GetComponent(CameraComponent.name);
@@ -9,10 +8,11 @@ class RenderingSystem extends System {
         context.clearRect(0, 0, Game.ResolutionWidth, Game.ResolutionHeight);
         context.beginPath();
         
-        var entities = this.engine.GetEntities(this.requiredComponents);
+        var entities = this.engine.GetEntities([RenderableComponent.name]);
+        entities = entities.concat(this.engine.GetEntities([DebugRenderableComponent.name]));
         entities.sort(function (a, b) {
-            var renderA = <RenderableComponent>a.GetComponent(RenderableComponent.name);
-            var renderB = <RenderableComponent>b.GetComponent(RenderableComponent.name);
+            var renderA = <RenderableComponent>(a.GetComponent(RenderableComponent.name) || a.GetComponent(DebugRenderableComponent.name));
+            var renderB = <RenderableComponent>(b.GetComponent(RenderableComponent.name) || b.GetComponent(DebugRenderableComponent.name));
             if (renderA.renderLayer < renderB.renderLayer) {
                 return -1;
             }
@@ -29,7 +29,7 @@ class RenderingSystem extends System {
             return 0;
         });
         for (var i = 0; i < entities.length; ++i) {
-            var renderableComponent: RenderableComponent = <RenderableComponent>entities[i].GetComponent(RenderableComponent.name);
+            var renderableComponent: RenderableComponent = <RenderableComponent>(entities[i].GetComponent(RenderableComponent.name) || entities[i].GetComponent(DebugRenderableComponent.name));
             if (!renderableComponent.visible) {
                 continue;
             }
@@ -114,5 +114,12 @@ class RenderingSystem extends System {
             context.fill();
             context.stroke();
         }
+    }
+
+    public LevelChanged(): void {
+    }
+    public EntityAdded(entity: Entity): void {
+    }
+    public EntityRemoved(entity: Entity): void {
     }
 }

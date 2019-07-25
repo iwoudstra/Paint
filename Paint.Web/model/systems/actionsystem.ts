@@ -11,4 +11,11 @@ class ActionSystem extends System {
             actionComponent.action(deltaTime, actions[i], actionComponent);
         }
     }
+
+    public LevelChanged(): void {
+    }
+    public EntityAdded(entity: Entity): void {
+    }
+    public EntityRemoved(entity: Entity): void {
+    }
 }

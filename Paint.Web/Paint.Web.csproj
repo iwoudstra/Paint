@@ -90,6 +90,8 @@
   <ItemGroup>
     <TypeScriptCompile Include="model\components\actioncomponent.ts" />
     <TypeScriptCompile Include="model\components\cameracomponent.ts" />
+    <TypeScriptCompile Include="model\components\debugrenderablecomponent.ts" />
+    <TypeScriptCompile Include="model\components\eventcomponent.ts" />
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
     <TypeScriptCompile Include="model\components\leveltriggercomponent.ts" />
     <TypeScriptCompile Include="model\components\movablecomponent.ts" />

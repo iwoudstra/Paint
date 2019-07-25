@@ -1,7 +1,16 @@
 /// <reference path="../core/system.ts" />
 
 class Level3 extends Level {
-    constructor() {
+    private static instance: Level = null;
+    public static get Instance(): Level {
+        if (this.instance === null) {
+            this.instance = new Level3();
+        }
+
+        return this.instance;
+    }
+
+    private constructor() {
         super(2950, 1855, SpriteHelper.level3Animation, SpriteHelper.level3Animation);
     }
 
@@ -51,7 +60,7 @@ class Level3 extends Level {
 
 
         engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 380, 130, 130, new Level2(), 980, 1470));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 380, 130, 130, Level2.Instance, 980, 1470));
         engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
     }
 }

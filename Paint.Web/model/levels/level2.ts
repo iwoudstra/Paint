@@ -1,7 +1,16 @@
 ﻿/// <reference path="../core/system.ts" />
 
 class Level2 extends Level {
-    constructor() {
+    private static instance: Level = null;
+    public static get Instance(): Level {
+        if (this.instance === null) {
+            this.instance = new Level2();
+        }
+
+        return this.instance;
+    }
+
+    private constructor() {
         super(2495, 1920, SpriteHelper.level2Animation, SpriteHelper.level2Animation);
     }
 
@@ -38,8 +47,8 @@ class Level2 extends Level {
         engine.AddEntity(EntityHelper.CreateCamera());
 
 
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, new Level3(), 2360, 255));
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, new Level1(), 1630, 550));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, Level3.Instance, 2360, 255));
+        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, Level1.Instance, 2400, 500));
 
         engine.AddEntity(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 5));
         engine.AddEntity(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 5));

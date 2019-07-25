@@ -128,4 +128,11 @@ class MovingSystem extends System {
             }
         }
     }
+
+    public LevelChanged(): void {
+    }
+    public EntityAdded(entity: Entity): void {
+    }
+    public EntityRemoved(entity: Entity): void {
+    }
 }

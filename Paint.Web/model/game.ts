@@ -78,7 +78,7 @@
         this.engine = new Engine();
 
         SpriteHelper.InitSprites();
-        this.ChangeLevel(new Level1(), 600, 600);
+        this.ChangeLevel(Level1.Instance, 600, 600);
 
         this.lastTime = performance.now();
         this.Handle(this.lastTime);
@@ -94,6 +94,7 @@
         this.currentLevel = level;
         this.currentLevel.Init(this.engine, playerX, playerY);
         this.currentLevel.InitState(this.engine);
+        this.engine.LevelChanged();
     }
 
     public Handle(timestamp: number): void {

@@ -1,25 +1,42 @@
 ﻿/// <reference path="../core/system.ts" />
 
 class Level1 extends Level {
-    constructor() {
+    private static instance: Level = null;
+    public static get Instance(): Level {
+        if (this.instance === null) {
+            this.instance = new Level1();
+        }
+
+        return this.instance;
+    }
+
+    private entitiesInitialized: boolean = false;
+    private playerEntity: Entity;
+    private entities: Entity[] = [];
+
+    private constructor() {
         super(2635, 845, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
 
-    public Init(engine: Engine, playerX: number, playerY: number): void {
-        engine.RemoveAllEntities();
-        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
-        //engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fAnimation.width, SpriteHelper.level1fAnimation.height, SpriteHelper.level1fAnimation, RenderLayer.Foreground));
-        //engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1bgAnimation.width, SpriteHelper.level1bgAnimation.height, SpriteHelper.level1bgAnimation, RenderLayer.Background));
-        //engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level1fgAnimation.width, SpriteHelper.level1fgAnimation.height, SpriteHelper.level1fgAnimation, RenderLayer.ForegroundPlayer));
+    private initEntities(engine: Engine, playerX: number, playerY: number): void {
+        if (this.entitiesInitialized) {
+            return;
+        }
+        this.entitiesInitialized = true;
+
+        this.entities.push(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
 
 
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(130, 810, 2080, 35));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2205, 715, 70, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2275, 650, 390, 195));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 550, 155, 350));
+        this.entities.push(EntityHelper.CreateSolidPlatform(130, 810, 2080, 35));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2205, 715, 70, 130));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2275, 650, 390, 195));
+        this.entities.push(EntityHelper.CreateSolidPlatform(0, 550, 155, 350));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2636, 0, 1, 800));
 
 
-        engine.AddEntity(EntityHelper.CreateCamera());
+        this.entities.push(EntityHelper.CreateCamera());
+
+        let levelEntities = this.entities;
         var npc = EntityHelper.CreateNpcEntity(2370, 450, 65, 75, 2200, 450, 857, 375, 'John', function (self: NPCComponent, option: number, initialInteraction: boolean): boolean {
             if (!self.interactable) {
                 return;
@@ -41,13 +58,15 @@ class Level1 extends Level {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("Let's go. You follow. Me lead."));
 
-                   
-                    
-                    
+
+
+
                     var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
                     playerComponent.HasBluePaint = true;
 
-                    engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2560, 520, 1, 200, new Level2(), 250, 300));
+                    let levelTrigger = EntityHelper.CreateLevelTriggerEntity(2560, 520, 1, 200, Level2.Instance, 250, 300)
+                    levelEntities.push(levelTrigger);
+                    engine.AddEntity(levelTrigger);
 
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
                     npcMoveableComponent.velocity = new Vector2d(200, 0);
@@ -69,8 +88,23 @@ class Level1 extends Level {
                 }
             }
         });
-        engine.AddEntity(npc);
-        engine.AddEntity(EntityHelper.CreateEventEntity(300, 500, 200, 200, 250, 300));
-        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
+        this.entities.push(npc);
+        this.entities.push(EntityHelper.CreateEventEntity(300, 500, 200, 200, 250, 300));
+
+        this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY)
+        this.entities.push(this.playerEntity);
+    }
+
+    public Init(engine: Engine, playerX: number, playerY: number): void {
+        this.initEntities(engine, playerX, playerY);
+
+        let playerPosition = <PositionComponent>this.playerEntity.GetComponent(PositionComponent.name);
+        playerPosition.position.x = playerX;
+        playerPosition.position.y = playerY;
+
+        engine.RemoveAllEntities();
+        for (let entity of this.entities) {
+            engine.AddEntity(entity);
+        }
     }
 }

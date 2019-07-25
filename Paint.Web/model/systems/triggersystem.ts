@@ -21,15 +21,21 @@ class TriggerSystem extends System {
                 Game.Instance.ChangeLevel(levelTrigger.level, levelTrigger.playerX, levelTrigger.playerY);
             }
         }
-        
+
         for (var i = 0; i < levelEvents.length; ++i) {
             var levelEvent: EventComponent = <EventComponent>levelEvents[i].GetComponent(EventComponent.name);
-           
+
             if (TriggerSystem.CollisionWithPlayer(this.engine, levelEvent.positionComponent) && this.eventTriggered === false) {
                 console.log("Fire event");
                 this.eventTriggered = true;
             }
-
         }
+    }
+
+    public LevelChanged(): void {
+    }
+    public EntityAdded(entity: Entity): void {
+    }
+    public EntityRemoved(entity: Entity): void {
     }
 }

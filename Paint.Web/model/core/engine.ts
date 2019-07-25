@@ -23,6 +23,10 @@
 
         this.entityNames.set(entity.name, entity);
         this.entities.push(entity);
+
+        for (let system of this.systems) {
+            system.EntityAdded(entity);
+        }
     }
 
     public RemoveEntity(entity: Entity): Entity {
@@ -32,6 +36,11 @@
 
             this.entityNames.delete(entity.name);
             this.entities.splice(index, 1);
+
+            for (let system of this.systems) {
+                system.EntityRemoved(entity);
+            }
+
             return entity;
         }
 
@@ -62,10 +71,16 @@
     public Update(deltaTime: number): void {
         this.updating = true;
 
-        for (var system in this.systems) {
-            this.systems[system].Update(deltaTime);
+        for (let system of this.systems) {
+            system.Update(deltaTime);
         }
 
         this.updating = false;
+    }
+
+    public LevelChanged(): void {
+        for (let system of this.systems) {
+            system.LevelChanged();
+        }
     }
 }
