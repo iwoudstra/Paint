@@ -10,20 +10,11 @@ class Level1 extends Level {
         return this.instance;
     }
 
-    private entitiesInitialized: boolean = false;
-    private playerEntity: Entity;
-    private entities: Entity[] = [];
-
     private constructor() {
         super(2635, 845, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
     }
 
-    private initEntities(engine: Engine, playerX: number, playerY: number): void {
-        if (this.entitiesInitialized) {
-            return;
-        }
-        this.entitiesInitialized = true;
-
+    protected initEntities(engine: Engine, playerX: number, playerY: number): void {
         this.entities.push(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
 
 
@@ -62,9 +53,9 @@ class Level1 extends Level {
 
 
                     var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
-                    playerComponent.HasBluePaint = true;
+                    playerComponent.hasBluePaint = true;
 
-                    let levelTrigger = EntityHelper.CreateLevelTriggerEntity(2560, 520, 1, 200, Level2.Instance, 250, 300)
+                    let levelTrigger = EntityHelper.CreateLevelTriggerEntity(2560, 0, 1, 700, Level2.Instance, 250, 300)
                     levelEntities.push(levelTrigger);
                     engine.AddEntity(levelTrigger);
 
@@ -80,6 +71,10 @@ class Level1 extends Level {
                 case 3: {
                     self.interactingState = 2;
 
+                    if (!initialInteraction) {
+                        return true;
+                    }
+
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("Hurry up! My people cannot wait much longer!"));
 
@@ -91,20 +86,8 @@ class Level1 extends Level {
         this.entities.push(npc);
         this.entities.push(EntityHelper.CreateEventEntity(300, 500, 200, 200, 250, 300));
 
-        this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY)
+        this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY);
         this.entities.push(this.playerEntity);
-    }
-
-    public Init(engine: Engine, playerX: number, playerY: number): void {
-        this.initEntities(engine, playerX, playerY);
-
-        let playerPosition = <PositionComponent>this.playerEntity.GetComponent(PositionComponent.name);
-        playerPosition.position.x = playerX;
-        playerPosition.position.y = playerY;
-
-        engine.RemoveAllEntities();
-        for (let entity of this.entities) {
-            engine.AddEntity(entity);
-        }
+        this.entities.push(EntityHelper.CreatePlayerBrush());
     }
 }

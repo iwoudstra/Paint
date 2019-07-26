@@ -1,9 +1,3 @@
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 class Game {
     constructor() {
         this.requestAnimFrame = window.requestAnimationFrame;
@@ -61,13 +55,9 @@ class Game {
         this.Handle(this.lastTime);
     }
     ChangeLevel(level, playerX, playerY) {
-        if (this.currentLevel != null) {
-            this.currentLevel.SaveState(this.engine);
-        }
         this.engine.RemoveAllEntities();
         this.currentLevel = level;
         this.currentLevel.Init(this.engine, playerX, playerY);
-        this.currentLevel.InitState(this.engine);
         this.engine.LevelChanged();
     }
     Handle(timestamp) {
@@ -211,18 +201,13 @@ class PlayerComponent extends Component {
         this.currentState = PlayerState.OnGround;
         this.newState = PlayerState.OnGround;
         this.interactingWith = null;
-        this._hasBluePaint = false;
+        this.hasBluePaint = false;
         this.positionComponent = positionComponent;
         this.moveableComponent = moveableComponent;
         this.inputComponent = inputComponent;
         this.renderableComponent = renderableComponent;
     }
-    get HasBluePaint() { return this._hasBluePaint; }
-    set HasBluePaint(value) { this._hasBluePaint = value; }
 }
-__decorate([
-    serializeParameter(true)
-], PlayerComponent.prototype, "HasBluePaint", null);
 class PositionComponent extends Component {
     constructor(x = 0, y = 0, width = 50, height = 100) {
         super();
@@ -393,43 +378,26 @@ class Entity {
 Entity.nameCounter = 0;
 class Level {
     constructor(width, height, loadScreen, mapLayout) {
+        this.entitiesInitialized = false;
+        this.entities = [];
         this.Width = width;
         this.Height = height;
         this.LoadScreen = loadScreen;
         this.MapLayout = mapLayout;
     }
-    SaveState(engine) {
-        var entities = engine.GetEntities([]);
-        for (var i = 0; i < entities.length; ++i) {
-            var components = entities[i].GetAllComponents();
-            for (var j = 0; j < components.length; ++j) {
-                var component = components[j];
-                Game.Instance.GetSerializationAttributes(component.constructor.name).forEach(function (property) {
-                    Game.Instance.SetSerializationState(entities[i].name, component.constructor.name, property, component[property]);
-                });
-            }
+    Init(engine, playerX, playerY) {
+        if (!this.entitiesInitialized) {
+            this.initEntities(engine, playerX, playerY);
+            this.entitiesInitialized = true;
+        }
+        let playerPosition = this.playerEntity.GetComponent(PositionComponent.name);
+        playerPosition.position.x = playerX;
+        playerPosition.position.y = playerY;
+        engine.RemoveAllEntities();
+        for (let entity of this.entities) {
+            engine.AddEntity(entity);
         }
     }
-    InitState(engine) {
-        var entities = engine.GetEntities([]);
-        for (var i = 0; i < entities.length; ++i) {
-            var components = entities[i].GetAllComponents();
-            for (var j = 0; j < components.length; ++j) {
-                var component = components[j];
-                Game.Instance.GetSerializationAttributes(component.constructor.name).forEach(function (property) {
-                    var propertyValue = Game.Instance.GetSerializationState(entities[i].name, component.constructor.name, property);
-                    if (propertyValue) {
-                        component[property] = propertyValue;
-                    }
-                });
-            }
-        }
-    }
-}
-function serializeParameter(saveState) {
-    return function (target, propertyKey, descriptor) {
-        Game.Instance.AddSerializationAttribute(target.constructor.name, propertyKey);
-    };
 }
 class System {
     constructor(engine) {
@@ -439,53 +407,53 @@ class System {
 }
 class EntityHelper {
     static CreatePlatform(x, y, width, height) {
-        var platform = new Entity();
-        var positionComponent = new PositionComponent(x, y, width, height);
+        let platform = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
         platform.AddComponent(positionComponent);
         platform.AddComponent(new PlatformComponent(positionComponent));
         return platform;
     }
     static CreateSolidPlatform(x, y, width, height) {
-        var platform = new Entity();
-        var positionComponent = new PositionComponent(x, y, width, height);
+        let platform = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
         platform.AddComponent(positionComponent);
         platform.AddComponent(new SolidPlatformComponent(positionComponent));
         return platform;
     }
     static CreateGameMap(width, height, gameAnimation, renderLayer) {
-        var gamemap = new Entity();
-        var positionComponent = new PositionComponent(0, 0, width, height);
+        let gamemap = new Entity();
+        let positionComponent = new PositionComponent(0, 0, width, height);
         gamemap.AddComponent(positionComponent);
         gamemap.AddComponent(new RenderableComponent(positionComponent, width, height, '', renderLayer, gameAnimation));
         return gamemap;
     }
     static CreateCamera() {
-        var camera = new Entity();
-        var positionComponent = new PositionComponent();
+        let camera = new Entity();
+        let positionComponent = new PositionComponent();
         camera.AddComponent(positionComponent);
         camera.AddComponent(new CameraComponent(positionComponent));
         return camera;
     }
     static CreateJumpPaint(x, y) {
-        var paint = new Entity();
-        var positionComponent = new PositionComponent(x, y, 100, 5);
+        let paint = new Entity();
+        let positionComponent = new PositionComponent(x, y, 100, 5);
         paint.AddComponent(positionComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 100, 5, '#0077ff', RenderLayer.ForegroundPlayer);
+        let renderableComponent = new RenderableComponent(positionComponent, 100, 5, '#0077ff', RenderLayer.ForegroundPlayer);
         paint.AddComponent(renderableComponent);
-        var paintComponent = new PaintComponent(positionComponent, renderableComponent, PaintType.HighJump);
+        let paintComponent = new PaintComponent(positionComponent, renderableComponent, PaintType.HighJump);
         paint.AddComponent(paintComponent);
         return paint;
     }
     static CreatePlayerEntity(x, y) {
         if (this.player === null) {
             this.player = new Entity("player");
-            var inputComponent = new InputComponent();
+            let inputComponent = new InputComponent();
             this.player.AddComponent(inputComponent);
-            var positionComponent = new PositionComponent(x, y, 65, 130);
+            let positionComponent = new PositionComponent(x, y, 65, 130);
             this.player.AddComponent(positionComponent);
-            var moveableComponent = new MoveableComponent(positionComponent);
+            let moveableComponent = new MoveableComponent(positionComponent);
             this.player.AddComponent(moveableComponent);
-            var renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
+            let renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
             this.player.AddComponent(renderableComponent);
             this.player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         }
@@ -496,52 +464,78 @@ class EntityHelper {
         }
         return this.player;
     }
+    static CreatePlayerBrush() {
+        if (this.playerBrush === null) {
+            this.playerBrush = new Entity("playerbrush");
+            let positionComponent = new PositionComponent(0, 0, 100, 100);
+            this.playerBrush.AddComponent(positionComponent);
+            let renderableComponent = new RenderableComponent(positionComponent, 100, 100, '', RenderLayer.Player, SpriteHelper.playerBrush, 101);
+            this.playerBrush.AddComponent(renderableComponent);
+            let playerComponent = this.player.GetComponent(PlayerComponent.name);
+            playerComponent.brushEntity = this.playerBrush;
+            Object.defineProperty(renderableComponent, 'orientationLeft', {
+                get() { return playerComponent.renderableComponent.orientationLeft; },
+                set(_newValue) { }
+            });
+            Object.defineProperty(positionComponent.position, 'x', {
+                get() {
+                    return (playerComponent.renderableComponent.orientationLeft ? -40 : 0) + playerComponent.positionComponent.position.x;
+                },
+                set(_newValue) { }
+            });
+            Object.defineProperty(positionComponent.position, 'y', {
+                get() { return playerComponent.positionComponent.position.y; },
+                set(_newValue) { }
+            });
+        }
+        return this.playerBrush;
+    }
     static CreateNpcEntity(x, y, width, height, interactionX, interactionY, interactionWidth, interactionHeight, name, interactionAction) {
-        var npc = new Entity();
-        var positionComponent = new PositionComponent(x, y, width, height);
+        let npc = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
         npc.AddComponent(positionComponent);
-        var npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
+        let npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
         npc.AddComponent(npcComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, 130, 195, '', RenderLayer.Player, SpriteHelper.npcwipAnimation);
+        let renderableComponent = new RenderableComponent(positionComponent, 130, 195, '', RenderLayer.Player, SpriteHelper.npcwipAnimation);
         npc.AddComponent(renderableComponent);
         return npc;
     }
     static CreateSpawnedEntity(x, y, width, height, spawnVelocity, spawnMinPosition, spawnMaxPosition) {
-        var spawnedEntity = new Entity();
-        var positionComponent = new PositionComponent(x, y, width, height);
+        let spawnedEntity = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
         spawnedEntity.AddComponent(positionComponent);
-        var moveableComponent = new MoveableComponent(positionComponent);
+        let moveableComponent = new MoveableComponent(positionComponent);
         moveableComponent.velocity = spawnVelocity;
         spawnedEntity.AddComponent(moveableComponent);
-        var spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
+        let spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
         spawnedEntity.AddComponent(spawnedComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
+        let renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
         spawnedEntity.AddComponent(renderableComponent);
         return spawnedEntity;
     }
     static CreateSpawningEntity(x, y, width, height, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime) {
-        var spawningEntity = new Entity();
-        var positionComponent = new PositionComponent(x, y, width, height);
+        let spawningEntity = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
         spawningEntity.AddComponent(positionComponent);
-        var spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
+        let spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
         spawningEntity.AddComponent(spawnComponent);
-        var renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff', RenderLayer.Player);
+        let renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff', RenderLayer.Player);
         spawningEntity.AddComponent(renderableComponent);
         return spawningEntity;
     }
     static CreateLevelTriggerEntity(x, y, width, height, newLevel, playerX, playerY) {
-        var levelTrigger = new Entity();
-        var positionComponent = new PositionComponent(x, y, width, height);
+        let levelTrigger = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
         levelTrigger.AddComponent(positionComponent);
-        var levelTriggerComponent = new LevelTriggerComponent(positionComponent, playerX, playerY, newLevel);
+        let levelTriggerComponent = new LevelTriggerComponent(positionComponent, playerX, playerY, newLevel);
         levelTrigger.AddComponent(levelTriggerComponent);
         return levelTrigger;
     }
     static CreateEventEntity(x, y, width, height, playerX, playerY) {
-        var levelEvent = new Entity();
-        var positionComponent = new PositionComponent(x, y, width, height);
+        let levelEvent = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
         levelEvent.AddComponent(positionComponent);
-        var levelEventComponent = new EventComponent(positionComponent, playerX, playerY);
+        let levelEventComponent = new EventComponent(positionComponent, playerX, playerY);
         levelEvent.AddComponent(levelEventComponent);
         return levelEvent;
     }
@@ -550,6 +544,7 @@ EntityHelper.Player = 'player';
 EntityHelper.Camera = 'camera';
 EntityHelper.TopText = 'toptext';
 EntityHelper.player = null;
+EntityHelper.playerBrush = null;
 class GameAnimation {
     constructor(imageFile, sourceX, sourceY, width, height, frames, name) {
         this.imageFile = imageFile;
@@ -574,9 +569,11 @@ class SpriteHelper {
         this.level2.src = 'assets/sprites/level-2/level-2.png';
         this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
+        this.brush.src = 'assets/sprites/player/brush.png';
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 19, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 520, 130, 260, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 20, 'playeridle');
+        this.playerBrush = new GameAnimation(this.brush, 0, 0, 100, 100, 1, 'brush');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1, 'npcavatar');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
@@ -600,6 +597,7 @@ SpriteHelper.level3 = new Image();
 SpriteHelper.level3bg = new Image();
 SpriteHelper.npcwip = new Image();
 SpriteHelper.avatar = new Image();
+SpriteHelper.brush = new Image();
 const precision = [
     1,
     10,
@@ -761,8 +759,6 @@ class Vector2d {
 class Level1 extends Level {
     constructor() {
         super(2635, 845, SpriteHelper.level1Animation, SpriteHelper.level1Animation);
-        this.entitiesInitialized = false;
-        this.entities = [];
     }
     static get Instance() {
         if (this.instance === null) {
@@ -771,10 +767,6 @@ class Level1 extends Level {
         return this.instance;
     }
     initEntities(engine, playerX, playerY) {
-        if (this.entitiesInitialized) {
-            return;
-        }
-        this.entitiesInitialized = true;
         this.entities.push(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
         this.entities.push(EntityHelper.CreateSolidPlatform(130, 810, 2080, 35));
         this.entities.push(EntityHelper.CreateSolidPlatform(2205, 715, 70, 130));
@@ -801,8 +793,8 @@ class Level1 extends Level {
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("Let's go. You follow. Me lead."));
                     var playerComponent = player.GetComponent(PlayerComponent.name);
-                    playerComponent.HasBluePaint = true;
-                    let levelTrigger = EntityHelper.CreateLevelTriggerEntity(2560, 520, 1, 200, Level2.Instance, 250, 300);
+                    playerComponent.hasBluePaint = true;
+                    let levelTrigger = EntityHelper.CreateLevelTriggerEntity(2560, 0, 1, 700, Level2.Instance, 250, 300);
                     levelEntities.push(levelTrigger);
                     engine.AddEntity(levelTrigger);
                     var npcMoveableComponent = new MoveableComponent(self.positionComponent);
@@ -814,6 +806,9 @@ class Level1 extends Level {
                 case 2:
                 case 3: {
                     self.interactingState = 2;
+                    if (!initialInteraction) {
+                        return true;
+                    }
                     player.RemoveComponent(TopTextComponent.name);
                     player.AddComponent(new TopTextComponent("Hurry up! My people cannot wait much longer!"));
                     return true;
@@ -824,16 +819,7 @@ class Level1 extends Level {
         this.entities.push(EntityHelper.CreateEventEntity(300, 500, 200, 200, 250, 300));
         this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY);
         this.entities.push(this.playerEntity);
-    }
-    Init(engine, playerX, playerY) {
-        this.initEntities(engine, playerX, playerY);
-        let playerPosition = this.playerEntity.GetComponent(PositionComponent.name);
-        playerPosition.position.x = playerX;
-        playerPosition.position.y = playerY;
-        engine.RemoveAllEntities();
-        for (let entity of this.entities) {
-            engine.AddEntity(entity);
-        }
+        this.entities.push(EntityHelper.CreatePlayerBrush());
     }
 }
 Level1.instance = null;
@@ -847,35 +833,36 @@ class Level2 extends Level {
         }
         return this.instance;
     }
-    Init(engine, playerX, playerY) {
-        engine.RemoveAllEntities();
-        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 450, 320, 255));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(320, 700, 255, 50));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(575, 575, 385, 700));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1730, 575, 780, 715));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1790, 1280, 130, 195));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1920, 1470, 130, 195));
-        engine.AddEntity(EntityHelper.CreatePlatform(960, 705, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(960, 830, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(960, 955, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(960, 1080, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(960, 1205, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(960, 1405, 130, 15));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(960, 1600, 195, 195));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 1665, 320, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(640, 1470, 260, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(380, 1275, 130, 520));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1790, 1665, 320, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(510, 1790, 1300, 130));
-        engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, Level3.Instance, 2360, 255));
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, Level1.Instance, 2400, 500));
-        engine.AddEntity(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 5));
-        engine.AddEntity(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 5));
-        engine.AddEntity(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 5));
-        engine.AddEntity(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 5));
-        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
+    initEntities(engine, playerX, playerY) {
+        this.entities.push(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
+        this.entities.push(EntityHelper.CreateSolidPlatform(0, 450, 320, 255));
+        this.entities.push(EntityHelper.CreateSolidPlatform(320, 700, 255, 50));
+        this.entities.push(EntityHelper.CreateSolidPlatform(575, 575, 385, 700));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1730, 575, 780, 715));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1790, 1280, 130, 195));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1920, 1470, 130, 195));
+        this.entities.push(EntityHelper.CreatePlatform(960, 705, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(960, 830, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(960, 955, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(960, 1080, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(960, 1205, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(960, 1405, 130, 15));
+        this.entities.push(EntityHelper.CreateSolidPlatform(960, 1600, 195, 195));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1280, 1665, 320, 130));
+        this.entities.push(EntityHelper.CreateSolidPlatform(640, 1470, 260, 130));
+        this.entities.push(EntityHelper.CreateSolidPlatform(380, 1275, 130, 520));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1790, 1665, 320, 130));
+        this.entities.push(EntityHelper.CreateSolidPlatform(510, 1790, 1300, 130));
+        this.entities.push(EntityHelper.CreateCamera());
+        this.entities.push(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, Level3.Instance, 2360, 255));
+        this.entities.push(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, Level1.Instance, 2400, 500));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 5));
+        this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY);
+        this.entities.push(this.playerEntity);
+        this.entities.push(EntityHelper.CreatePlayerBrush());
     }
 }
 Level2.instance = null;
@@ -889,46 +876,47 @@ class Level3 extends Level {
         }
         return this.instance;
     }
-    Init(engine, playerX, playerY) {
-        engine.RemoveAllEntities();
-        engine.AddEntity(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
-        engine.AddEntity(EntityHelper.CreateGameMap(SpriteHelper.level3bgAnimation.width, SpriteHelper.level3bgAnimation.height, SpriteHelper.level3bgAnimation, RenderLayer.Background));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 0, 65, 260));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(0, 250, 390, 1105));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(635, 250, 1495, 455));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(635, 700, 910, 65));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(380, 1340, 715, 65));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1090, 1099, 195, 520));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2365, 510, 585, 195));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2880, 0, 65, 520));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2880, 0, 65, 520));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1535, 765, 195, 650));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1920, 700, 65, 325));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1725, 1020, 780, 325));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2750, 700, 195, 1105));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2045, 1790, 715, 65));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(2430, 1665, 130, 130));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(1280, 1600, 780, 195));
-        engine.AddEntity(EntityHelper.CreateSolidPlatform(640, 1280, 195, 65));
-        engine.AddEntity(EntityHelper.CreatePlatform(2240, 640, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(2115, 865, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(2620, 1215, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(2495, 1405, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(2625, 1585, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(2175, 1660, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(1280, 1405, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(1405, 1215, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(1405, 1215, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(1405, 1215, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(1405, 1215, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(380, 1150, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(380, 955, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(380, 570, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(510, 745, 130, 15));
-        engine.AddEntity(EntityHelper.CreatePlatform(510, 380, 130, 15));
-        engine.AddEntity(EntityHelper.CreateCamera());
-        engine.AddEntity(EntityHelper.CreateLevelTriggerEntity(2625, 380, 130, 130, Level2.Instance, 980, 1470));
-        engine.AddEntity(EntityHelper.CreatePlayerEntity(playerX, playerY));
+    initEntities(engine, playerX, playerY) {
+        this.entities.push(EntityHelper.CreateGameMap(this.Width, this.Height, this.MapLayout, RenderLayer.Player));
+        this.entities.push(EntityHelper.CreateGameMap(SpriteHelper.level3bgAnimation.width, SpriteHelper.level3bgAnimation.height, SpriteHelper.level3bgAnimation, RenderLayer.Background));
+        this.entities.push(EntityHelper.CreateSolidPlatform(0, 0, 65, 260));
+        this.entities.push(EntityHelper.CreateSolidPlatform(0, 250, 390, 1105));
+        this.entities.push(EntityHelper.CreateSolidPlatform(635, 250, 1495, 455));
+        this.entities.push(EntityHelper.CreateSolidPlatform(635, 700, 910, 65));
+        this.entities.push(EntityHelper.CreateSolidPlatform(380, 1340, 715, 65));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1090, 1099, 195, 520));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2365, 510, 585, 195));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2880, 0, 65, 520));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2880, 0, 65, 520));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1535, 765, 195, 650));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1920, 700, 65, 325));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1725, 1020, 780, 325));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2750, 700, 195, 1105));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2045, 1790, 715, 65));
+        this.entities.push(EntityHelper.CreateSolidPlatform(2430, 1665, 130, 130));
+        this.entities.push(EntityHelper.CreateSolidPlatform(1280, 1600, 780, 195));
+        this.entities.push(EntityHelper.CreateSolidPlatform(640, 1280, 195, 65));
+        this.entities.push(EntityHelper.CreatePlatform(2240, 640, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(2115, 865, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(2620, 1215, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(2495, 1405, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(2625, 1585, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(2175, 1660, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(1280, 1405, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(1405, 1215, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(1405, 1215, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(1405, 1215, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(1405, 1215, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(380, 1150, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(380, 955, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(380, 570, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(510, 745, 130, 15));
+        this.entities.push(EntityHelper.CreatePlatform(510, 380, 130, 15));
+        this.entities.push(EntityHelper.CreateCamera());
+        this.entities.push(EntityHelper.CreateLevelTriggerEntity(2625, 380, 130, 130, Level2.Instance, 980, 1470));
+        this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY);
+        this.entities.push(this.playerEntity);
+        this.entities.push(EntityHelper.CreatePlayerBrush());
     }
 }
 Level3.instance = null;
@@ -1525,7 +1513,7 @@ class PlayerSystem extends System {
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.newState = PlayerState.Falling;
         }
-        else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.HasBluePaint) {
+        else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.hasBluePaint) {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
         }
     }

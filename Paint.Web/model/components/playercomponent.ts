@@ -15,12 +15,9 @@ class PlayerComponent extends Component {
     moveableComponent: MoveableComponent;
     inputComponent: InputComponent;
     renderableComponent: RenderableComponent;
+    brushEntity: Entity;
     interactingWith: NPCComponent = null;
-
-    _hasBluePaint: boolean = false;
-    @serializeParameter(true)
-    get HasBluePaint() { return this._hasBluePaint; }
-    set HasBluePaint(value) { this._hasBluePaint = value; }
+    hasBluePaint: boolean = false;
 
     constructor(positionComponent: PositionComponent, moveableComponent: MoveableComponent, inputComponent: InputComponent, renderableComponent: RenderableComponent) {
         super();

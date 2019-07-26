@@ -85,15 +85,10 @@
     }
 
     public ChangeLevel(level: Level, playerX: number, playerY: number): void {
-        if (this.currentLevel != null) {
-            this.currentLevel.SaveState(this.engine);
-        }
-
         this.engine.RemoveAllEntities();
 
         this.currentLevel = level;
         this.currentLevel.Init(this.engine, playerX, playerY);
-        this.currentLevel.InitState(this.engine);
         this.engine.LevelChanged();
     }
 
