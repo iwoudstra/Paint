@@ -25,4 +25,8 @@ class InputComponent extends Component {
 
     cancelInteractionKey: string = 'Q';
     cancelInteractionActive: boolean;
+
+    attackKey: string = 'F';
+    attackActive: boolean;
+    attackActivePrevious: boolean;
 }

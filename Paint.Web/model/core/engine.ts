@@ -12,6 +12,7 @@
         this.systems.push(new SpawningSystem(this));
         this.systems.push(new SpawnedSystem(this));
         this.systems.push(new TriggerSystem(this));
+        this.systems.push(new AttackSystem(this));
         this.systems.push(new CameraSystem(this));
         this.systems.push(new RenderingSystem(this));
     }

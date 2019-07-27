@@ -4,6 +4,7 @@ class PlayerSystem extends System {
     private requiredComponents: string[] = [PlayerComponent.name];
     private movementSpeed: number = 400;
     private fallSpeed: number = 800;
+    private attackTime: number = 0.75;
 
     public ChangeState(entity: Entity, playerComponent: PlayerComponent): void {
         switch (playerComponent.currentState) {
@@ -13,12 +14,16 @@ class PlayerSystem extends System {
                 }
                 break;
             }
+            case PlayerState.Attacking: {
+                playerComponent.attackTimer = 0;
+                break;
+            }
             default: {
                 //do nothing.
                 break;
             }
         }
-        
+
         switch (playerComponent.newState) {
             case PlayerState.OnGround: {
                 playerComponent.moveableComponent.velocity.y = 0;
@@ -44,6 +49,10 @@ class PlayerSystem extends System {
                 break;
             }
             case PlayerState.Interacting: {
+
+                break;
+            }
+            case PlayerState.Attacking: {
 
                 break;
             }
@@ -82,6 +91,10 @@ class PlayerSystem extends System {
                     this.HandleInteractingState(entities[i], playerComponent, deltaTime);
                     break;
                 }
+                case PlayerState.Attacking: {
+                    this.HandleAttackingState(entities[i], playerComponent, deltaTime);
+                    break;
+                }
             }
         }
     }
@@ -117,14 +130,13 @@ class PlayerSystem extends System {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = true;
-            
+
         } else if (playerComponent.inputComponent.moveRightActive && !playerComponent.inputComponent.moveLeftActive) {
             playerComponent.moveableComponent.velocity.x = this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = false;
-           
+
         } else {
             playerComponent.moveableComponent.velocity.x = 0;
-          
         }
 
         if (allowJump && playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
@@ -175,7 +187,7 @@ class PlayerSystem extends System {
                 }
             }
         }
-        
+
         if ((playerComponent.moveableComponent.velocity.x <= 0) && (playerComponent.moveableComponent.velocity.x >= 0)) {
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle;
             playerComponent.renderableComponent.frameTimer += deltaTime;
@@ -187,13 +199,34 @@ class PlayerSystem extends System {
                 }
             }
 
-            
+
         }
 
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.newState = PlayerState.Falling;
         } else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.hasBluePaint) {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
+        }
+
+        if (playerComponent.inputComponent.attackActive && playerComponent.currentState != PlayerState.Attacking) {
+            playerComponent.newState = PlayerState.Attacking;
+
+            let attackEntity = new Entity();
+            let attackPosition = new PositionComponent(0, 0, playerComponent.positionComponent.width, playerComponent.positionComponent.height);
+            Object.defineProperty(attackPosition.position, 'x', {
+                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x - (2 / 3 * playerComponent.positionComponent.width)) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
+                set(_) { }
+            });
+            Object.defineProperty(attackPosition.position, 'y', {
+                get() { return playerComponent.positionComponent.position.y; },
+                set(_) { }
+            });
+
+            attackEntity.AddComponent(attackPosition);
+            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
+
+            playerComponent.attackEntity = attackEntity;
+            this.engine.AddEntity(attackEntity);
         }
     }
 
@@ -245,6 +278,34 @@ class PlayerSystem extends System {
                 if (topText.chosenOption < 0) {
                     topText.chosenOption = topText.options.length - 1;
                 }
+            }
+        }
+    }
+
+    private HandleAttackingState(entity: Entity, playerComponent: PlayerComponent, deltaTime: number): void {
+        this.HandleMovement(playerComponent, false);
+
+        playerComponent.attackTimer += deltaTime;
+        if (playerComponent.attackTimer >= this.attackTime) {
+            this.engine.RemoveEntity(playerComponent.attackEntity);
+            playerComponent.attackEntity = null;
+
+            if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
+                playerComponent.newState = PlayerState.OnGround;
+            } else if (playerComponent.moveableComponent.velocity.y >= 0) {
+                playerComponent.newState = PlayerState.Falling;
+            } else {
+                playerComponent.newState = PlayerState.Jumping;
+            }
+        } else {
+            let attackFrame = Math.round(playerComponent.attackTimer / (this.attackTime / 7));
+        }
+
+        if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
+            if (playerComponent.moveableComponent.velocity.y >= 0) {
+                playerComponent.moveableComponent.velocity.y = ((playerComponent.moveableComponent.velocity.y * 7.0) + this.fallSpeed) / 8.0;
+            } else {
+                playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
             }
         }
     }

@@ -86,8 +86,9 @@ class Level1 extends Level {
         this.entities.push(npc);
         this.entities.push(EntityHelper.CreateEventEntity(300, 500, 200, 200, 250, 300));
 
+        this.entities.push(EntityHelper.CreateAttackableObstacle(1600, 0, 10, 900, 130));
+
         this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY);
         this.entities.push(this.playerEntity);
-        this.entities.push(EntityHelper.CreatePlayerBrush());
     }
 }

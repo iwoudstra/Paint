@@ -19,73 +19,99 @@ class InputHandlingSystem extends System {
     }
 
     private AddDebug(): void {
-        var platforms = this.engine.GetEntities([PlatformComponent.name]);
-        var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
-        var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
-        var events = this.engine.GetEntities([EventComponent.name]);
+        let platforms = this.engine.GetEntities([PlatformComponent.name]);
+        let solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
+        let triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
+        let events = this.engine.GetEntities([EventComponent.name]);
+        let attacks = this.engine.GetEntities([AttackComponent.name]);
+        let attackables = this.engine.GetEntities([AttackableComponent.name]);
 
-        for (var i = 0; i < platforms.length; ++i) {
-            var positionComponent = <PositionComponent>platforms[i].GetComponent(PositionComponent.name);
+        for (let i = 0; i < platforms.length; ++i) {
+            let positionComponent = <PositionComponent>platforms[i].GetComponent(PositionComponent.name);
             if (!platforms[i].HasComponent(DebugRenderableComponent.name)) {
                 platforms[i].AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ff00', RenderLayer.ForegroundPlayer));
             }
         }
 
-        for (var i = 0; i < solidPlatforms.length; ++i) {
-            var positionComponent = <PositionComponent>solidPlatforms[i].GetComponent(PositionComponent.name);
+        for (let i = 0; i < solidPlatforms.length; ++i) {
+            let positionComponent = <PositionComponent>solidPlatforms[i].GetComponent(PositionComponent.name);
             if (!solidPlatforms[i].HasComponent(DebugRenderableComponent.name)) {
                 solidPlatforms[i].AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ff0000', RenderLayer.ForegroundPlayer));
             }
         }
 
-        for (var i = 0; i < triggers.length; ++i) {
-            var positionComponent = <PositionComponent>triggers[i].GetComponent(PositionComponent.name);
+        for (let i = 0; i < triggers.length; ++i) {
+            let positionComponent = <PositionComponent>triggers[i].GetComponent(PositionComponent.name);
             if (!triggers[i].HasComponent(DebugRenderableComponent.name)) {
                 triggers[i].AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ffff00', RenderLayer.ForegroundPlayer));
             }
         }
 
-        for (var i = 0; i < events.length; ++i) {
-            var positionComponent = <PositionComponent>events[i].GetComponent(PositionComponent.name);
+        for (let i = 0; i < events.length; ++i) {
+            let positionComponent = <PositionComponent>events[i].GetComponent(PositionComponent.name);
             if (!events[i].HasComponent(DebugRenderableComponent.name)) {
                 events[i].AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#ee92f4', RenderLayer.ForegroundPlayer));
+            }
+        }
+
+        for (let attack of attacks) {
+            let positionComponent = <PositionComponent>attack.GetComponent(PositionComponent.name);
+            if (!attack.HasComponent(DebugRenderableComponent.name)) {
+                attack.AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#00ffff', RenderLayer.ForegroundPlayer));
+            }
+        }
+
+        for (let attackable of attackables) {
+            let positionComponent = <PositionComponent>attackable.GetComponent(PositionComponent.name);
+            if (!attackable.HasComponent(DebugRenderableComponent.name)) {
+                attackable.AddComponent(new DebugRenderableComponent(positionComponent, positionComponent.width, positionComponent.height, '#33AA77', RenderLayer.ForegroundPlayer));
             }
         }
     }
 
     private RemoveDebug(): void {
-        var platforms = this.engine.GetEntities([PlatformComponent.name]);
-        var solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
-        var triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
-        var events = this.engine.GetEntities([EventComponent.name]);
+        let platforms = this.engine.GetEntities([PlatformComponent.name]);
+        let solidPlatforms = this.engine.GetEntities([SolidPlatformComponent.name]);
+        let triggers = this.engine.GetEntities([LevelTriggerComponent.name]);
+        let events = this.engine.GetEntities([EventComponent.name]);
+        let attacks = this.engine.GetEntities([AttackComponent.name]);
+        let attackables = this.engine.GetEntities([AttackableComponent.name]);
 
-        for (var i = 0; i < platforms.length; ++i) {
+        for (let i = 0; i < platforms.length; ++i) {
             platforms[i].RemoveComponent(DebugRenderableComponent.name);
         }
 
-        for (var i = 0; i < solidPlatforms.length; ++i) {
+        for (let i = 0; i < solidPlatforms.length; ++i) {
             solidPlatforms[i].RemoveComponent(DebugRenderableComponent.name);
         }
 
-        for (var i = 0; i < triggers.length; ++i) {
+        for (let i = 0; i < triggers.length; ++i) {
             triggers[i].RemoveComponent(DebugRenderableComponent.name);
         }
 
-        for (var i = 0; i < events.length; ++i) {
+        for (let i = 0; i < events.length; ++i) {
             events[i].RemoveComponent(DebugRenderableComponent.name);
+        }
+
+        for (let attack of attacks) {
+            attack.RemoveComponent(DebugRenderableComponent.name);
+        }
+
+        for (let attackable of attackables) {
+            attackable.RemoveComponent(DebugRenderableComponent.name);
         }
     }
 
-    private addedDebug: boolean = false;
+    public static addedDebug: boolean = false;
 
     private HandleKey(ev: KeyboardEvent, active: boolean) {
         if (ev.repeat) {
             return;
         }
 
-        var entities = this.engine.GetEntities(this.requiredComponents);
-        for (var i = 0; i < entities.length; ++i) {
-            var inputComponent: InputComponent = <InputComponent>entities[i].GetComponent(InputComponent.name);
+        let entities = this.engine.GetEntities(this.requiredComponents);
+        for (let i = 0; i < entities.length; ++i) {
+            let inputComponent: InputComponent = <InputComponent>entities[i].GetComponent(InputComponent.name);
 
             switch (ev.key.toUpperCase()) {
                 case inputComponent.moveLeftKey: {
@@ -116,16 +142,20 @@ class InputHandlingSystem extends System {
                     inputComponent.cancelInteractionActive = active;
                     break;
                 }
+                case inputComponent.attackKey: {
+                    inputComponent.attackActive = active;
+                    break;
+                }
                 case ',': {
-                    if (!this.addedDebug) {
-                        this.addedDebug = true;
+                    if (!InputHandlingSystem.addedDebug) {
+                        InputHandlingSystem.addedDebug = true;
                         this.AddDebug();
                     }
                     break;
                 }
                 case '.': {
-                    if (this.addedDebug) {
-                        this.addedDebug = false;
+                    if (InputHandlingSystem.addedDebug) {
+                        InputHandlingSystem.addedDebug = false;
                         this.RemoveDebug();
                     }
                     break;
@@ -135,25 +165,26 @@ class InputHandlingSystem extends System {
     }
 
     public Update(deltaTime: number): void {
-        var entities = this.engine.GetEntities(this.requiredComponents);
-        for (var i = 0; i < entities.length; ++i) {
-            var inputComponent: InputComponent = <InputComponent>entities[i].GetComponent(InputComponent.name);
+        let entities = this.engine.GetEntities(this.requiredComponents);
+        for (let i = 0; i < entities.length; ++i) {
+            let inputComponent: InputComponent = <InputComponent>entities[i].GetComponent(InputComponent.name);
             inputComponent.paintActivePrevious = inputComponent.paintActive;
             inputComponent.interactionActivePrevious = inputComponent.interactionActive;
             inputComponent.jumpActivePrevious = inputComponent.jumpActive;
             inputComponent.downActivePrevious = inputComponent.downActive;
+            inputComponent.attackActivePrevious = inputComponent.attackActive;
         }
     }
 
     public LevelChanged(): void {
-        if (this.addedDebug) {
+        if (InputHandlingSystem.addedDebug) {
             this.AddDebug();
         } else {
             this.RemoveDebug();
         }
     }
     public EntityAdded(entity: Entity): void {
-        if (this.addedDebug) {
+        if (InputHandlingSystem.addedDebug) {
             this.AddDebug();
         }
     }

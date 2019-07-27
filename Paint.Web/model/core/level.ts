@@ -32,4 +32,11 @@
             engine.AddEntity(entity);
         }
     }
+
+    public RemoveEntity(entity: Entity): void {
+        let index = this.entities.indexOf(entity);
+        if (index !== -1) {
+            this.entities.splice(index, 1);
+        }
+    }
 }

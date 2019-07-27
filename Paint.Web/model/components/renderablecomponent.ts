@@ -16,6 +16,9 @@ class RenderableComponent extends Component {
     renderLayer: RenderLayer;
     renderPriority: number;
     visible: boolean = true;
+    rotation: number = 0;
+    rotationX: number = 0;
+    rotationY: number = 0;
 
     public frame: number = 0;
     public frameTimer: number = 0;

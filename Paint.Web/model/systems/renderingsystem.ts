@@ -36,6 +36,7 @@ class RenderingSystem extends System {
 
             var cameraSpeedModifier = renderableComponent.renderLayer == RenderLayer.Background ? 0.5 : (renderableComponent.renderLayer == RenderLayer.Foreground ? 1.2 : 1);
 
+
             if (renderableComponent.gameAnimation) {
                 var extra = renderableComponent.orientationLeft ? renderableComponent.width : 0;
 

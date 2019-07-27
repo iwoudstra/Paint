@@ -70,36 +70,6 @@
         return this.player;
     }
 
-    private static playerBrush: Entity = null;
-    public static CreatePlayerBrush(): Entity {
-        if (this.playerBrush === null) {
-            this.playerBrush = new Entity("playerbrush");
-            let positionComponent = new PositionComponent(0, 0, 100, 100);
-            this.playerBrush.AddComponent(positionComponent);
-            let renderableComponent = new RenderableComponent(positionComponent, 100, 100, '', RenderLayer.Player, SpriteHelper.playerBrush, 101);
-            this.playerBrush.AddComponent(renderableComponent);
-
-            let playerComponent = <PlayerComponent>this.player.GetComponent(PlayerComponent.name);
-            playerComponent.brushEntity = this.playerBrush;
-            Object.defineProperty(renderableComponent, 'orientationLeft', {
-                get() { return playerComponent.renderableComponent.orientationLeft; },
-                set(_newValue) { }
-            });
-            Object.defineProperty(positionComponent.position, 'x', {
-                get() {
-                    return (playerComponent.renderableComponent.orientationLeft ? -40 : 0) + playerComponent.positionComponent.position.x;
-                },
-                set(_newValue) { }
-            });
-            Object.defineProperty(positionComponent.position, 'y', {
-                get() { return playerComponent.positionComponent.position.y; },
-                set(_newValue) { }
-            });
-        }
-
-        return this.playerBrush;
-    }
-
     public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, name: string
         , interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => boolean): Entity {
         let npc = new Entity();
@@ -111,6 +81,20 @@
         npc.AddComponent(renderableComponent);
 
         return npc;
+    }
+
+    public static CreateAttackableObstacle(x: number, y: number, width: number, height: number, health: number): Entity {
+        let obstacle = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
+        let attackableComponent = new AttackableComponent(positionComponent, health);
+        let renderableComponent = new RenderableComponent(positionComponent, width, height, '#33AA77', RenderLayer.ForegroundPlayer);
+        let solidPlatformComponent = new SolidPlatformComponent(positionComponent);
+        obstacle.AddComponent(positionComponent);
+        obstacle.AddComponent(attackableComponent);
+        obstacle.AddComponent(renderableComponent);
+        obstacle.AddComponent(solidPlatformComponent);
+
+        return obstacle;
     }
 
     public static CreateSpawnedEntity(x: number, y: number, width: number, height: number, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d): Entity {

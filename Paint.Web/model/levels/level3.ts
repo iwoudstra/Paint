@@ -60,6 +60,5 @@ class Level3 extends Level {
         this.entities.push(EntityHelper.CreateLevelTriggerEntity(2625, 380, 130, 130, Level2.Instance, 980, 1470));
         this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY)
         this.entities.push(this.playerEntity);
-        this.entities.push(EntityHelper.CreatePlayerBrush());
     }
 }

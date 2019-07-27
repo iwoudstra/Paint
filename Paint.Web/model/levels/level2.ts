@@ -55,6 +55,5 @@ class Level2 extends Level {
 
         this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY)
         this.entities.push(this.playerEntity);
-        this.entities.push(EntityHelper.CreatePlayerBrush());
     }
 }
