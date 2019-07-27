@@ -432,10 +432,10 @@ class EntityHelper {
     static CreateJumpPaint(x, y) {
         let paint = new Entity();
         let positionComponent = new PositionComponent(x, y, 100, 5);
-        paint.AddComponent(positionComponent);
         let renderableComponent = new RenderableComponent(positionComponent, 100, 5, '#0077ff', RenderLayer.ForegroundPlayer);
-        paint.AddComponent(renderableComponent);
         let paintComponent = new PaintComponent(positionComponent, renderableComponent, PaintType.HighJump);
+        paint.AddComponent(positionComponent);
+        paint.AddComponent(renderableComponent);
         paint.AddComponent(paintComponent);
         return paint;
     }
@@ -443,12 +443,12 @@ class EntityHelper {
         if (this.player === null) {
             this.player = new Entity("player");
             let inputComponent = new InputComponent();
-            this.player.AddComponent(inputComponent);
             let positionComponent = new PositionComponent(x, y, 65, 130);
-            this.player.AddComponent(positionComponent);
             let moveableComponent = new MoveableComponent(positionComponent);
-            this.player.AddComponent(moveableComponent);
             let renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
+            this.player.AddComponent(inputComponent);
+            this.player.AddComponent(positionComponent);
+            this.player.AddComponent(moveableComponent);
             this.player.AddComponent(renderableComponent);
             this.player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         }
@@ -462,10 +462,10 @@ class EntityHelper {
     static CreateNpcEntity(x, y, width, height, interactionX, interactionY, interactionWidth, interactionHeight, name, interactionAction) {
         let npc = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        npc.AddComponent(positionComponent);
         let npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
-        npc.AddComponent(npcComponent);
         let renderableComponent = new RenderableComponent(positionComponent, 130, 195, '', RenderLayer.Player, SpriteHelper.npcwipAnimation);
+        npc.AddComponent(positionComponent);
+        npc.AddComponent(npcComponent);
         npc.AddComponent(renderableComponent);
         return npc;
     }
@@ -484,39 +484,39 @@ class EntityHelper {
     static CreateSpawnedEntity(x, y, width, height, spawnVelocity, spawnMinPosition, spawnMaxPosition) {
         let spawnedEntity = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        spawnedEntity.AddComponent(positionComponent);
         let moveableComponent = new MoveableComponent(positionComponent);
+        let spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
+        let renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
+        spawnedEntity.AddComponent(positionComponent);
         moveableComponent.velocity = spawnVelocity;
         spawnedEntity.AddComponent(moveableComponent);
-        let spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
         spawnedEntity.AddComponent(spawnedComponent);
-        let renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
         spawnedEntity.AddComponent(renderableComponent);
         return spawnedEntity;
     }
     static CreateSpawningEntity(x, y, width, height, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime) {
         let spawningEntity = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        spawningEntity.AddComponent(positionComponent);
         let spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
-        spawningEntity.AddComponent(spawnComponent);
         let renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff', RenderLayer.Player);
+        spawningEntity.AddComponent(positionComponent);
+        spawningEntity.AddComponent(spawnComponent);
         spawningEntity.AddComponent(renderableComponent);
         return spawningEntity;
     }
     static CreateLevelTriggerEntity(x, y, width, height, newLevel, playerX, playerY) {
         let levelTrigger = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        levelTrigger.AddComponent(positionComponent);
         let levelTriggerComponent = new LevelTriggerComponent(positionComponent, playerX, playerY, newLevel);
+        levelTrigger.AddComponent(positionComponent);
         levelTrigger.AddComponent(levelTriggerComponent);
         return levelTrigger;
     }
     static CreateEventEntity(x, y, width, height, playerX, playerY) {
         let levelEvent = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        levelEvent.AddComponent(positionComponent);
         let levelEventComponent = new EventComponent(positionComponent, playerX, playerY);
+        levelEvent.AddComponent(positionComponent);
         levelEvent.AddComponent(levelEventComponent);
         return levelEvent;
     }
@@ -1485,7 +1485,7 @@ class PlayerSystem extends System {
         }
         return null;
     }
-    HandleMovement(playerComponent, allowJump) {
+    HandleMovement(playerComponent, allowJump, setJumpState) {
         if (playerComponent.inputComponent.moveLeftActive && !playerComponent.inputComponent.moveRightActive) {
             playerComponent.moveableComponent.velocity.x = -this.movementSpeed;
             playerComponent.renderableComponent.orientationLeft = true;
@@ -1498,20 +1498,44 @@ class PlayerSystem extends System {
             playerComponent.moveableComponent.velocity.x = 0;
         }
         if (allowJump && playerComponent.inputComponent.jumpActive && MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
-            if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
-                playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
+            this.Jump(playerComponent);
+            if (setJumpState) {
+                playerComponent.newState = PlayerState.Jumping;
             }
-            else {
-                playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
-            }
-            playerComponent.newState = PlayerState.Jumping;
         }
         else if (playerComponent.inputComponent.downActive && MovingSystem.IsOnPlatform(this.engine, playerComponent.moveableComponent, false)) {
             playerComponent.positionComponent.position.y += 1;
         }
     }
+    Jump(playerComponent) {
+        if (PlayerSystem.CollisionWithPaint(this.engine, playerComponent.positionComponent, PaintType.HighJump)) {
+            playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 3;
+        }
+        else {
+            playerComponent.moveableComponent.velocity.y = -this.movementSpeed * 2;
+        }
+    }
+    CheckAttack(entity, playerComponent) {
+        if (playerComponent.inputComponent.attackActive && playerComponent.currentState != PlayerState.Attacking) {
+            playerComponent.newState = PlayerState.Attacking;
+            let attackEntity = new Entity();
+            let attackPosition = new PositionComponent(0, 0, playerComponent.positionComponent.width, playerComponent.positionComponent.height);
+            Object.defineProperty(attackPosition.position, 'x', {
+                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x - (2 / 3 * playerComponent.positionComponent.width)) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
+                set(_) { }
+            });
+            Object.defineProperty(attackPosition.position, 'y', {
+                get() { return playerComponent.positionComponent.position.y; },
+                set(_) { }
+            });
+            attackEntity.AddComponent(attackPosition);
+            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
+            playerComponent.attackEntity = attackEntity;
+            this.engine.AddEntity(attackEntity);
+        }
+    }
     HandleOnGroundState(entity, playerComponent, deltaTime) {
-        this.HandleMovement(playerComponent, true);
+        this.HandleMovement(playerComponent, true, true);
         var npc = PlayerSystem.CanInteractWithNPC(this.engine, playerComponent);
         if (npc) {
             var npcComponent = npc.GetComponent(NPCComponent.name);
@@ -1562,39 +1586,25 @@ class PlayerSystem extends System {
         else if (playerComponent.inputComponent.paintActive && !playerComponent.inputComponent.paintActivePrevious && playerComponent.hasBluePaint) {
             Game.Instance.AddEntity(EntityHelper.CreateJumpPaint(playerComponent.positionComponent.position.x, playerComponent.positionComponent.position.y + playerComponent.positionComponent.height - 2));
         }
-        if (playerComponent.inputComponent.attackActive && playerComponent.currentState != PlayerState.Attacking) {
-            playerComponent.newState = PlayerState.Attacking;
-            let attackEntity = new Entity();
-            let attackPosition = new PositionComponent(0, 0, playerComponent.positionComponent.width, playerComponent.positionComponent.height);
-            Object.defineProperty(attackPosition.position, 'x', {
-                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x - (2 / 3 * playerComponent.positionComponent.width)) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
-                set(_) { }
-            });
-            Object.defineProperty(attackPosition.position, 'y', {
-                get() { return playerComponent.positionComponent.position.y; },
-                set(_) { }
-            });
-            attackEntity.AddComponent(attackPosition);
-            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
-            playerComponent.attackEntity = attackEntity;
-            this.engine.AddEntity(attackEntity);
-        }
+        this.CheckAttack(entity, playerComponent);
     }
     HandleJumpingState(entity, playerComponent, deltaTime) {
-        this.HandleMovement(playerComponent, false);
+        this.HandleMovement(playerComponent, false, false);
         playerComponent.moveableComponent.velocity.y += 4 * this.movementSpeed * deltaTime;
         if (playerComponent.moveableComponent.velocity.y >= 0) {
             playerComponent.newState = PlayerState.Falling;
         }
+        this.CheckAttack(entity, playerComponent);
     }
     HandleFallingState(entity, playerComponent, deltaTime) {
-        this.HandleMovement(playerComponent, false);
+        this.HandleMovement(playerComponent, false, false);
         if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             playerComponent.newState = PlayerState.OnGround;
         }
         else {
             playerComponent.moveableComponent.velocity.y = ((playerComponent.moveableComponent.velocity.y * 7.0) + this.fallSpeed) / 8.0;
         }
+        this.CheckAttack(entity, playerComponent);
     }
     HandleRespawningState(entity, playerComponent, deltaTime) {
         playerComponent.renderableComponent.frameTimer += deltaTime;
@@ -1628,7 +1638,7 @@ class PlayerSystem extends System {
         }
     }
     HandleAttackingState(entity, playerComponent, deltaTime) {
-        this.HandleMovement(playerComponent, false);
+        this.HandleMovement(playerComponent, true, false);
         playerComponent.attackTimer += deltaTime;
         if (playerComponent.attackTimer >= this.attackTime) {
             this.engine.RemoveEntity(playerComponent.attackEntity);

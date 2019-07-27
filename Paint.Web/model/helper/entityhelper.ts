@@ -38,10 +38,10 @@
     public static CreateJumpPaint(x: number, y: number): Entity {
         let paint = new Entity();
         let positionComponent = new PositionComponent(x, y, 100, 5);
-        paint.AddComponent(positionComponent);
         let renderableComponent = new RenderableComponent(positionComponent, 100, 5, '#0077ff', RenderLayer.ForegroundPlayer);
-        paint.AddComponent(renderableComponent);
         let paintComponent = new PaintComponent(positionComponent, renderableComponent, PaintType.HighJump);
+        paint.AddComponent(positionComponent);
+        paint.AddComponent(renderableComponent);
         paint.AddComponent(paintComponent);
 
         return paint;
@@ -52,12 +52,12 @@
         if (this.player === null) {
             this.player = new Entity("player");
             let inputComponent = new InputComponent()
-            this.player.AddComponent(inputComponent);
             let positionComponent = new PositionComponent(x, y, 65, 130);
-            this.player.AddComponent(positionComponent);
             let moveableComponent = new MoveableComponent(positionComponent);
-            this.player.AddComponent(moveableComponent);
             let renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
+            this.player.AddComponent(inputComponent);
+            this.player.AddComponent(positionComponent);
+            this.player.AddComponent(moveableComponent);
             this.player.AddComponent(renderableComponent);
 
             this.player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
@@ -74,10 +74,10 @@
         , interactionAction: (self: NPCComponent, option: number, initialInteraction: boolean) => boolean): Entity {
         let npc = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        npc.AddComponent(positionComponent);
         let npcComponent = new NPCComponent(positionComponent, new PositionComponent(interactionX, interactionY, interactionWidth, interactionHeight), name, interactionAction);
-        npc.AddComponent(npcComponent);
         let renderableComponent = new RenderableComponent(positionComponent, 130, 195, '', RenderLayer.Player, SpriteHelper.npcwipAnimation);
+        npc.AddComponent(positionComponent);
+        npc.AddComponent(npcComponent);
         npc.AddComponent(renderableComponent);
 
         return npc;
@@ -100,13 +100,13 @@
     public static CreateSpawnedEntity(x: number, y: number, width: number, height: number, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d): Entity {
         let spawnedEntity = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        spawnedEntity.AddComponent(positionComponent);
         let moveableComponent = new MoveableComponent(positionComponent);
+        let spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
+        let renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
+        spawnedEntity.AddComponent(positionComponent);
         moveableComponent.velocity = spawnVelocity;
         spawnedEntity.AddComponent(moveableComponent);
-        let spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
         spawnedEntity.AddComponent(spawnedComponent);
-        let renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
         spawnedEntity.AddComponent(renderableComponent);
 
         return spawnedEntity;
@@ -115,10 +115,10 @@
     public static CreateSpawningEntity(x: number, y: number, width: number, height: number, spawnLocation: Vector2d, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d, spawnTime: number): Entity {
         let spawningEntity = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        spawningEntity.AddComponent(positionComponent);
         let spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
-        spawningEntity.AddComponent(spawnComponent);
         let renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff', RenderLayer.Player);
+        spawningEntity.AddComponent(positionComponent);
+        spawningEntity.AddComponent(spawnComponent);
         spawningEntity.AddComponent(renderableComponent);
 
         return spawningEntity;
@@ -127,8 +127,8 @@
     public static CreateLevelTriggerEntity(x: number, y: number, width: number, height: number, newLevel: Level, playerX: number, playerY: number): Entity {
         let levelTrigger = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        levelTrigger.AddComponent(positionComponent);
         let levelTriggerComponent = new LevelTriggerComponent(positionComponent, playerX, playerY, newLevel);
+        levelTrigger.AddComponent(positionComponent);
         levelTrigger.AddComponent(levelTriggerComponent);
 
         return levelTrigger;
@@ -137,8 +137,8 @@
     public static CreateEventEntity(x: number, y: number, width: number, height: number, playerX: number, playerY: number): Entity {
         let levelEvent = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        levelEvent.AddComponent(positionComponent);
         let levelEventComponent = new EventComponent(positionComponent, playerX, playerY);
+        levelEvent.AddComponent(positionComponent);
         levelEvent.AddComponent(levelEventComponent);
 
         return levelEvent;
