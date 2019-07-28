@@ -4,7 +4,10 @@ class PlayerSystem extends System {
     private requiredComponents: string[] = [PlayerComponent.name];
     private movementSpeed: number = 400;
     private fallSpeed: number = 800;
-    private attackTime: number = 0.75;
+
+    private attackPreTime: number = 0.25;
+    private attackTime: number = 0.65;
+    private attackPostTime: number = 0.75;
 
     public ChangeState(entity: Entity, playerComponent: PlayerComponent): void {
         switch (playerComponent.currentState) {
@@ -160,23 +163,6 @@ class PlayerSystem extends System {
     private CheckAttack(entity: Entity, playerComponent: PlayerComponent): void {
         if (playerComponent.inputComponent.attackActive && playerComponent.currentState != PlayerState.Attacking) {
             playerComponent.newState = PlayerState.Attacking;
-
-            let attackEntity = new Entity();
-            let attackPosition = new PositionComponent(0, 0, playerComponent.positionComponent.width, playerComponent.positionComponent.height);
-            Object.defineProperty(attackPosition.position, 'x', {
-                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x - (2 / 3 * playerComponent.positionComponent.width)) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
-                set(_) { }
-            });
-            Object.defineProperty(attackPosition.position, 'y', {
-                get() { return playerComponent.positionComponent.position.y; },
-                set(_) { }
-            });
-
-            attackEntity.AddComponent(attackPosition);
-            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
-
-            playerComponent.attackEntity = attackEntity;
-            this.engine.AddEntity(attackEntity);
         }
     }
 
@@ -300,10 +286,8 @@ class PlayerSystem extends System {
         this.HandleMovement(playerComponent, true, false);
 
         playerComponent.attackTimer += deltaTime;
-        if (playerComponent.attackTimer >= this.attackTime) {
-            this.engine.RemoveEntity(playerComponent.attackEntity);
-            playerComponent.attackEntity = null;
 
+        if (playerComponent.attackTimer >= this.attackPostTime) {
             if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
                 playerComponent.newState = PlayerState.OnGround;
             } else if (playerComponent.moveableComponent.velocity.y >= 0) {
@@ -311,6 +295,26 @@ class PlayerSystem extends System {
             } else {
                 playerComponent.newState = PlayerState.Jumping;
             }
+        } else if (playerComponent.attackTimer >= this.attackTime) {
+            this.engine.RemoveEntity(playerComponent.attackEntity);
+            playerComponent.attackEntity = null;
+        } else if (playerComponent.attackTimer >= this.attackPreTime && playerComponent.attackEntity === null) {
+            let attackEntity = new Entity();
+            let attackPosition = new PositionComponent(0, 0, playerComponent.positionComponent.width, playerComponent.positionComponent.height);
+            Object.defineProperty(attackPosition.position, 'x', {
+                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x - (2 / 3 * playerComponent.positionComponent.width)) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
+                set(_) { }
+            });
+            Object.defineProperty(attackPosition.position, 'y', {
+                get() { return playerComponent.positionComponent.position.y; },
+                set(_) { }
+            });
+
+            attackEntity.AddComponent(attackPosition);
+            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
+
+            playerComponent.attackEntity = attackEntity;
+            this.engine.AddEntity(attackEntity);
         } else {
             let attackFrame = Math.round(playerComponent.attackTimer / (this.attackTime / 7));
         }

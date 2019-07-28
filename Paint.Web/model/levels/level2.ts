@@ -48,10 +48,10 @@ class Level2 extends Level {
         this.entities.push(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, Level3.Instance, 2360, 255));
         this.entities.push(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, Level1.Instance, 2400, 500));
 
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 50, 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 50, 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 50, 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 50, 5));
 
         this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY)
         this.entities.push(this.playerEntity);

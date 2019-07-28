@@ -97,25 +97,27 @@
         return obstacle;
     }
 
-    public static CreateSpawnedEntity(x: number, y: number, width: number, height: number, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d): Entity {
+    public static CreateSpawnedEntity(x: number, y: number, width: number, height: number, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d, health: number): Entity {
         let spawnedEntity = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
         let moveableComponent = new MoveableComponent(positionComponent);
         let spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
         let renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
+        let attackableComponent = new AttackableComponent(positionComponent, health);
         spawnedEntity.AddComponent(positionComponent);
         moveableComponent.velocity = spawnVelocity;
         spawnedEntity.AddComponent(moveableComponent);
         spawnedEntity.AddComponent(spawnedComponent);
         spawnedEntity.AddComponent(renderableComponent);
+        spawnedEntity.AddComponent(attackableComponent);
 
         return spawnedEntity;
     }
 
-    public static CreateSpawningEntity(x: number, y: number, width: number, height: number, spawnLocation: Vector2d, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d, spawnTime: number): Entity {
+    public static CreateSpawningEntity(x: number, y: number, width: number, height: number, spawnLocation: Vector2d, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d, spawnHealth: number, spawnTime: number): Entity {
         let spawningEntity = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        let spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
+        let spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnHealth, spawnTime);
         let renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff', RenderLayer.Player);
         spawningEntity.AddComponent(positionComponent);
         spawningEntity.AddComponent(spawnComponent);

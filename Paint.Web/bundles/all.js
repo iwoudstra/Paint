@@ -213,7 +213,7 @@ class SolidPlatformComponent extends Component {
     }
 }
 class SpawnComponent extends Component {
-    constructor(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime) {
+    constructor(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnHealth, spawnTime) {
         super();
         this.spawnTimer = 0;
         this.positionComponent = positionComponent;
@@ -221,6 +221,7 @@ class SpawnComponent extends Component {
         this.spawnVelocity = spawnVelocity;
         this.spawnMaxPosition = spawnMaxPosition;
         this.spawnMinPosition = spawnMinPosition;
+        this.spawnHealth = spawnHealth;
         this.spawnTime = spawnTime;
     }
 }
@@ -481,23 +482,25 @@ class EntityHelper {
         obstacle.AddComponent(solidPlatformComponent);
         return obstacle;
     }
-    static CreateSpawnedEntity(x, y, width, height, spawnVelocity, spawnMinPosition, spawnMaxPosition) {
+    static CreateSpawnedEntity(x, y, width, height, spawnVelocity, spawnMinPosition, spawnMaxPosition, health) {
         let spawnedEntity = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
         let moveableComponent = new MoveableComponent(positionComponent);
         let spawnedComponent = new SpawnedComponent(positionComponent, moveableComponent, spawnMinPosition, spawnMaxPosition);
         let renderableComponent = new RenderableComponent(positionComponent, width, height, '#ff00ff', RenderLayer.Player);
+        let attackableComponent = new AttackableComponent(positionComponent, health);
         spawnedEntity.AddComponent(positionComponent);
         moveableComponent.velocity = spawnVelocity;
         spawnedEntity.AddComponent(moveableComponent);
         spawnedEntity.AddComponent(spawnedComponent);
         spawnedEntity.AddComponent(renderableComponent);
+        spawnedEntity.AddComponent(attackableComponent);
         return spawnedEntity;
     }
-    static CreateSpawningEntity(x, y, width, height, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime) {
+    static CreateSpawningEntity(x, y, width, height, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnHealth, spawnTime) {
         let spawningEntity = new Entity();
         let positionComponent = new PositionComponent(x, y, width, height);
-        let spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnTime);
+        let spawnComponent = new SpawnComponent(positionComponent, spawnLocation, spawnVelocity, spawnMinPosition, spawnMaxPosition, spawnHealth, spawnTime);
         let renderableComponent = new RenderableComponent(positionComponent, width, height, '#00ffff', RenderLayer.Player);
         spawningEntity.AddComponent(positionComponent);
         spawningEntity.AddComponent(spawnComponent);
@@ -833,10 +836,10 @@ class Level2 extends Level {
         this.entities.push(EntityHelper.CreateCamera());
         this.entities.push(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, Level3.Instance, 2360, 255));
         this.entities.push(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, Level1.Instance, 2400, 500));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 50, 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 50, 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 50, 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 50, 5));
         this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY);
         this.entities.push(this.playerEntity);
     }
@@ -1378,7 +1381,9 @@ class PlayerSystem extends System {
         this.requiredComponents = [PlayerComponent.name];
         this.movementSpeed = 400;
         this.fallSpeed = 800;
-        this.attackTime = 0.75;
+        this.attackPreTime = 0.25;
+        this.attackTime = 0.65;
+        this.attackPostTime = 0.75;
     }
     ChangeState(entity, playerComponent) {
         switch (playerComponent.currentState) {
@@ -1518,20 +1523,6 @@ class PlayerSystem extends System {
     CheckAttack(entity, playerComponent) {
         if (playerComponent.inputComponent.attackActive && playerComponent.currentState != PlayerState.Attacking) {
             playerComponent.newState = PlayerState.Attacking;
-            let attackEntity = new Entity();
-            let attackPosition = new PositionComponent(0, 0, playerComponent.positionComponent.width, playerComponent.positionComponent.height);
-            Object.defineProperty(attackPosition.position, 'x', {
-                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x - (2 / 3 * playerComponent.positionComponent.width)) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
-                set(_) { }
-            });
-            Object.defineProperty(attackPosition.position, 'y', {
-                get() { return playerComponent.positionComponent.position.y; },
-                set(_) { }
-            });
-            attackEntity.AddComponent(attackPosition);
-            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
-            playerComponent.attackEntity = attackEntity;
-            this.engine.AddEntity(attackEntity);
         }
     }
     HandleOnGroundState(entity, playerComponent, deltaTime) {
@@ -1640,9 +1631,7 @@ class PlayerSystem extends System {
     HandleAttackingState(entity, playerComponent, deltaTime) {
         this.HandleMovement(playerComponent, true, false);
         playerComponent.attackTimer += deltaTime;
-        if (playerComponent.attackTimer >= this.attackTime) {
-            this.engine.RemoveEntity(playerComponent.attackEntity);
-            playerComponent.attackEntity = null;
+        if (playerComponent.attackTimer >= this.attackPostTime) {
             if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
                 playerComponent.newState = PlayerState.OnGround;
             }
@@ -1652,6 +1641,26 @@ class PlayerSystem extends System {
             else {
                 playerComponent.newState = PlayerState.Jumping;
             }
+        }
+        else if (playerComponent.attackTimer >= this.attackTime) {
+            this.engine.RemoveEntity(playerComponent.attackEntity);
+            playerComponent.attackEntity = null;
+        }
+        else if (playerComponent.attackTimer >= this.attackPreTime && playerComponent.attackEntity === null) {
+            let attackEntity = new Entity();
+            let attackPosition = new PositionComponent(0, 0, playerComponent.positionComponent.width, playerComponent.positionComponent.height);
+            Object.defineProperty(attackPosition.position, 'x', {
+                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x - (2 / 3 * playerComponent.positionComponent.width)) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
+                set(_) { }
+            });
+            Object.defineProperty(attackPosition.position, 'y', {
+                get() { return playerComponent.positionComponent.position.y; },
+                set(_) { }
+            });
+            attackEntity.AddComponent(attackPosition);
+            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
+            playerComponent.attackEntity = attackEntity;
+            this.engine.AddEntity(attackEntity);
         }
         else {
             let attackFrame = Math.round(playerComponent.attackTimer / (this.attackTime / 7));
@@ -1824,7 +1833,7 @@ class SpawningSystem extends System {
             spawnComponent.spawnTimer += deltaTime;
             if (spawnComponent.spawnTimer >= spawnComponent.spawnTime) {
                 spawnComponent.spawnTimer = 0;
-                var entity = EntityHelper.CreateSpawnedEntity(spawnComponent.spawnLocation.x, spawnComponent.spawnLocation.y, 10, 10, spawnComponent.spawnVelocity.clone(), spawnComponent.spawnMinPosition, spawnComponent.spawnMaxPosition);
+                var entity = EntityHelper.CreateSpawnedEntity(spawnComponent.spawnLocation.x, spawnComponent.spawnLocation.y, 10, 10, spawnComponent.spawnVelocity.clone(), spawnComponent.spawnMinPosition, spawnComponent.spawnMaxPosition, spawnComponent.spawnHealth);
                 this.engine.AddEntity(entity);
             }
         }

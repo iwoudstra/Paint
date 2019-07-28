@@ -6,10 +6,11 @@ class SpawnComponent extends Component {
     spawnVelocity: Vector2d;
     spawnMinPosition: Vector2d;
     spawnMaxPosition: Vector2d;
+    spawnHealth: number;
     spawnTime: number;
     spawnTimer: number = 0;
 
-    constructor(positionComponent: PositionComponent, spawnLocation: Vector2d, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d, spawnTime: number) {
+    constructor(positionComponent: PositionComponent, spawnLocation: Vector2d, spawnVelocity: Vector2d, spawnMinPosition: Vector2d, spawnMaxPosition: Vector2d, spawnHealth: number, spawnTime: number) {
         super();
 
         this.positionComponent = positionComponent;
@@ -17,6 +18,7 @@ class SpawnComponent extends Component {
         this.spawnVelocity = spawnVelocity;
         this.spawnMaxPosition = spawnMaxPosition;
         this.spawnMinPosition = spawnMinPosition;
+        this.spawnHealth = spawnHealth;
         this.spawnTime = spawnTime;
     }
 }
