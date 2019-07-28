@@ -56,7 +56,9 @@ class PlayerSystem extends System {
                 break;
             }
             case PlayerState.Attacking: {
-
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
+                playerComponent.renderableComponent.frame = 0;
+                playerComponent.renderableComponent.frameTimer = 0;
                 break;
             }
         }

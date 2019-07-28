@@ -15,6 +15,7 @@
     static playerWalking: GameAnimation;
     static playerJumping: GameAnimation;
     static playerIdle: GameAnimation;
+    static playerAttack: GameAnimation;
     static level1Animation: GameAnimation;
     static level1fAnimation: GameAnimation;
     static level1fgAnimation: GameAnimation;
@@ -24,7 +25,7 @@
     static level3bgAnimation: GameAnimation;
     static npcwipAnimation: GameAnimation;
     static npcLeftEyeAnimation: GameAnimation;
-    static npcRightEyeAnimation: GameAnimation;
+    static npcRightEyeAnimation: GameAnimation; 
     static npcavatar: GameAnimation;
 
     public static InitSprites(): void {
@@ -43,6 +44,7 @@
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 19, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 520, 130, 260, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 20, 'playeridle');
+        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 780, 130, 260, 16 , 'playerattacking');
 
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         //this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');
