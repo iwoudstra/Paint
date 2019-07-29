@@ -555,7 +555,7 @@ class SpriteHelper {
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 19, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 520, 130, 260, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 20, 'playeridle');
-        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 780, 130, 260, 16, 'playerattacking');
+        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 780, 216, 260, 15, 'playerattacking');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1, 'npcavatar');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
@@ -1396,6 +1396,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.attackTimer = 0;
+                playerComponent.renderableComponent.width = 65;
                 break;
             }
             default: {
@@ -1429,6 +1430,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
+                playerComponent.renderableComponent.width = 108;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
                 break;
@@ -1666,9 +1668,9 @@ class PlayerSystem extends System {
             playerComponent.attackEntity = attackEntity;
             this.engine.AddEntity(attackEntity);
         }
-        else {
-            let attackFrame = Math.round(playerComponent.attackTimer / (this.attackTime / 7));
-        }
+        let attackFrame = Math.round(playerComponent.attackTimer / (this.attackPostTime / 15));
+        playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
+        playerComponent.renderableComponent.frame = attackFrame;
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (playerComponent.moveableComponent.velocity.y >= 0) {
                 playerComponent.moveableComponent.velocity.y = ((playerComponent.moveableComponent.velocity.y * 7.0) + this.fallSpeed) / 8.0;

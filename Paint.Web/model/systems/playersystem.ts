@@ -19,6 +19,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.attackTimer = 0;
+                playerComponent.renderableComponent.width = 65;
                 break;
             }
             default: {
@@ -57,6 +58,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
+                playerComponent.renderableComponent.width = 108;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
                 break;
@@ -317,9 +319,11 @@ class PlayerSystem extends System {
 
             playerComponent.attackEntity = attackEntity;
             this.engine.AddEntity(attackEntity);
-        } else {
-            let attackFrame = Math.round(playerComponent.attackTimer / (this.attackTime / 7));
         }
+
+        let attackFrame = Math.round(playerComponent.attackTimer / (this.attackPostTime / 15));
+        playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
+        playerComponent.renderableComponent.frame = attackFrame;
 
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (playerComponent.moveableComponent.velocity.y >= 0) {
