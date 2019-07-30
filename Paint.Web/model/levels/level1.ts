@@ -55,7 +55,7 @@ class Level1 extends Level {
                     var playerComponent = <PlayerComponent>player.GetComponent(PlayerComponent.name);
                     playerComponent.hasBluePaint = true;
 
-                    let levelTrigger = EntityHelper.CreateLevelTriggerEntity(2560, 0, 1, 700, Level2.Instance, 250, 300)
+                    let levelTrigger = EntityHelper.CreateLevelTriggerEntity(2560, 0, 1, 700, Level2.Instance, 10, 300)
                     levelEntities.push(levelTrigger);
                     engine.AddEntity(levelTrigger);
 

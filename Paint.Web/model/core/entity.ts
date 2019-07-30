@@ -32,7 +32,7 @@
     }
 
     public GetAllComponents(): Component[] {
-        var result : Component[] = [];
+        var result: Component[] = [];
         this.components.forEach(function (c) {
             result.push(c);
         })
