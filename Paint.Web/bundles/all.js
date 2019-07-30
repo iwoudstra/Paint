@@ -570,9 +570,9 @@ class SpriteHelper {
         this.level2.src = 'assets/sprites/level-2/level-2.png';
         this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
-        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 19, 'playerwalking');
+        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 8, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 520, 130, 260, 2, 'playerjumping');
-        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 20, 'playeridle');
+        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 8, 'playeridle');
         this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 780, 216, 260, 15, 'playerattacking');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1, 'npcavatar');
@@ -1592,7 +1592,7 @@ class PlayerSystem extends System {
         if (playerComponent.moveableComponent.velocity.x !== 0) {
             playerComponent.renderableComponent.frameTimer += deltaTime;
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
-            if (playerComponent.renderableComponent.frameTimer >= 0.024) {
+            if (playerComponent.renderableComponent.frameTimer >= 0.080) {
                 playerComponent.renderableComponent.frameTimer = 0;
                 playerComponent.renderableComponent.frame++;
                 if (playerComponent.renderableComponent.frame >= playerComponent.renderableComponent.gameAnimation.frames) {
@@ -1603,7 +1603,7 @@ class PlayerSystem extends System {
         if ((playerComponent.moveableComponent.velocity.x <= 0) && (playerComponent.moveableComponent.velocity.x >= 0)) {
             playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerIdle;
             playerComponent.renderableComponent.frameTimer += deltaTime;
-            if (playerComponent.renderableComponent.frameTimer >= 0.060) {
+            if (playerComponent.renderableComponent.frameTimer >= 0.100) {
                 playerComponent.renderableComponent.frameTimer = 0;
                 playerComponent.renderableComponent.frame++;
                 if (playerComponent.renderableComponent.frame >= playerComponent.renderableComponent.gameAnimation.frames) {
