@@ -1,6 +1,8 @@
 class Game {
     constructor() {
         this.requestAnimFrame = window.requestAnimationFrame;
+        this.respawnPlayerX = 0;
+        this.respawnPlayerY = 0;
         this.canvas = document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
     }
@@ -22,6 +24,8 @@ class Game {
         this.currentLevel = level;
         this.currentLevel.Init(this.engine, playerX, playerY);
         this.engine.LevelChanged();
+        this.respawnPlayerX = playerX;
+        this.respawnPlayerY = playerY;
     }
     Handle(timestamp) {
         this.now = timestamp;
@@ -1423,6 +1427,13 @@ class PlayerSystem extends System {
                 break;
             }
             case PlayerState.Respawing: {
+                playerComponent.positionComponent.position.x = Game.Instance.respawnPlayerX;
+                playerComponent.positionComponent.position.y = Game.Instance.respawnPlayerY;
+                playerComponent.moveableComponent.velocity.x = 0;
+                playerComponent.moveableComponent.velocity.y = 0;
+                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
+                playerComponent.renderableComponent.frame = 0;
+                playerComponent.renderableComponent.frameTimer = 0;
                 break;
             }
             case PlayerState.Interacting: {
@@ -1809,14 +1820,7 @@ class SpawnedSystem extends System {
                 this.engine.RemoveEntity(entities[i]);
             }
             else if (this.CollisionWithPlayer(playerComponent, spawnComponent)) {
-                playerComponent.currentState = PlayerState.Respawing;
-                playerComponent.positionComponent.position.x = 0;
-                playerComponent.positionComponent.position.y = 600;
-                playerComponent.moveableComponent.velocity.x = 0;
-                playerComponent.moveableComponent.velocity.y = 0;
-                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
-                playerComponent.renderableComponent.frame = 0;
-                playerComponent.renderableComponent.frameTimer = 0;
+                playerComponent.newState = PlayerState.Respawing;
             }
         }
     }

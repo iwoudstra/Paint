@@ -25,14 +25,7 @@ class SpawnedSystem extends System {
                 || spawnComponent.moveableComponent.positionComponent.position.y > spawnComponent.maxPosition.y || spawnComponent.moveableComponent.positionComponent.position.y < spawnComponent.minPosition.y) {
                 this.engine.RemoveEntity(entities[i]);
             } else if(this.CollisionWithPlayer(playerComponent, spawnComponent)) {
-                playerComponent.currentState = PlayerState.Respawing;
-                playerComponent.positionComponent.position.x = 0;
-                playerComponent.positionComponent.position.y = 600;
-                playerComponent.moveableComponent.velocity.x = 0;
-                playerComponent.moveableComponent.velocity.y = 0;
-                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerWalking;
-                playerComponent.renderableComponent.frame = 0;
-                playerComponent.renderableComponent.frameTimer = 0;
+                playerComponent.newState = PlayerState.Respawing;
             }
         }
     }

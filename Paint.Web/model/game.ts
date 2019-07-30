@@ -12,6 +12,9 @@
     public static ResolutionWidth: number = 1280;
     public static ResolutionHeight: number = 720;
 
+    public respawnPlayerX: number = 0;
+    public respawnPlayerY: number = 0;
+
     private constructor() {
         this.canvas = <HTMLCanvasElement>document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
@@ -41,6 +44,9 @@
         this.currentLevel = level;
         this.currentLevel.Init(this.engine, playerX, playerY);
         this.engine.LevelChanged();
+
+        this.respawnPlayerX = playerX;
+        this.respawnPlayerY = playerY;
     }
 
     public Handle(timestamp: number): void {
