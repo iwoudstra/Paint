@@ -19,6 +19,15 @@
         return platform;
     }
 
+    public static CreateDeadlyArea(x: number, y: number, width: number, height: number): Entity {
+        let area = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
+        let attackComponent = new AttackComponent(positionComponent, area, 99999999, false, false);
+        area.AddComponent(positionComponent);
+        area.AddComponent(attackComponent);
+        return area;
+    }
+
     public static CreateGameMap(width: number, height: number, gameAnimation: GameAnimation, renderLayer: RenderLayer): Entity {
         let gamemap = new Entity();
         let positionComponent = new PositionComponent(0, 0, width, height);
@@ -54,12 +63,13 @@
             let inputComponent = new InputComponent()
             let positionComponent = new PositionComponent(x, y, 65, 130);
             let moveableComponent = new MoveableComponent(positionComponent);
+            let attackableComponent = new AttackableComponent(positionComponent, 100);
             let renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
             this.player.AddComponent(inputComponent);
             this.player.AddComponent(positionComponent);
             this.player.AddComponent(moveableComponent);
+            this.player.AddComponent(attackableComponent);
             this.player.AddComponent(renderableComponent);
-
             this.player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         } else {
             let playerPosition = <PositionComponent>this.player.GetComponent(PositionComponent.name);

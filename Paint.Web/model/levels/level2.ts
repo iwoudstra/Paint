@@ -53,7 +53,9 @@ class Level2 extends Level {
         this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 50, 5));
         this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 50, 5));
 
-        this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY)
+        this.entities.push(EntityHelper.CreateDeadlyArea(1154, 1675, 121, 115));
+
+        this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY);
         this.entities.push(this.playerEntity);
     }
 }

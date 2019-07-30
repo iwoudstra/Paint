@@ -20,11 +20,11 @@ class SpawnedSystem extends System {
             var spawnComponent: SpawnedComponent = <SpawnedComponent>entities[i].GetComponent(SpawnedComponent.name);
 
             if (spawnComponent.moveableComponent.velocity.x === 0 && spawnComponent.moveableComponent.velocity.y === 0) {
-                this.engine.RemoveEntity(entities[i]);
+                this.engine.RemoveEntity(entities[i], false);
             } else if (spawnComponent.moveableComponent.positionComponent.position.x > spawnComponent.maxPosition.x || spawnComponent.moveableComponent.positionComponent.position.x < spawnComponent.minPosition.x
                 || spawnComponent.moveableComponent.positionComponent.position.y > spawnComponent.maxPosition.y || spawnComponent.moveableComponent.positionComponent.position.y < spawnComponent.minPosition.y) {
-                this.engine.RemoveEntity(entities[i]);
-            } else if(this.CollisionWithPlayer(playerComponent, spawnComponent)) {
+                this.engine.RemoveEntity(entities[i], false);
+            } else if (this.CollisionWithPlayer(playerComponent, spawnComponent)) {
                 playerComponent.newState = PlayerState.Respawing;
             }
         }

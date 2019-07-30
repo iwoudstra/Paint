@@ -5,15 +5,17 @@ class AttackComponent extends Component {
     entity: Entity;
     damage: number;
     isPlayer: boolean;
+    attackOnce: boolean;
 
     attackedComponents: AttackableComponent[] = [];
 
-    constructor(positionComponent: PositionComponent, entity: Entity, damage: number, isPlayer: boolean) {
+    constructor(positionComponent: PositionComponent, entity: Entity, damage: number, isPlayer: boolean, attackOnce: boolean) {
         super();
 
         this.positionComponent = positionComponent;
         this.entity = entity;
         this.damage = damage;
         this.isPlayer = isPlayer;
+        this.attackOnce = attackOnce;
     }
 }

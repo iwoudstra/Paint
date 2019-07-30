@@ -306,7 +306,7 @@ class PlayerSystem extends System {
                 playerComponent.newState = PlayerState.Jumping;
             }
         } else if (playerComponent.attackTimer >= this.attackTime) {
-            this.engine.RemoveEntity(playerComponent.attackEntity);
+            this.engine.RemoveEntity(playerComponent.attackEntity, false);
             playerComponent.attackEntity = null;
         } else if (playerComponent.attackTimer >= this.attackPreTime && playerComponent.attackEntity === null) {
             let attackEntity = new Entity();
@@ -321,7 +321,7 @@ class PlayerSystem extends System {
             });
 
             attackEntity.AddComponent(attackPosition);
-            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
+            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true, true));
 
             playerComponent.attackEntity = attackEntity;
             this.engine.AddEntity(attackEntity);

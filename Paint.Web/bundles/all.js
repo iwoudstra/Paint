@@ -56,13 +56,14 @@ class AttackableComponent extends Component {
     }
 }
 class AttackComponent extends Component {
-    constructor(positionComponent, entity, damage, isPlayer) {
+    constructor(positionComponent, entity, damage, isPlayer, attackOnce) {
         super();
         this.attackedComponents = [];
         this.positionComponent = positionComponent;
         this.entity = entity;
         this.damage = damage;
         this.isPlayer = isPlayer;
+        this.attackOnce = attackOnce;
     }
 }
 class CameraComponent extends Component {
@@ -280,7 +281,7 @@ class Engine {
             system.EntityAdded(entity);
         }
     }
-    RemoveEntity(entity) {
+    RemoveEntity(entity, removeFromLevel) {
         var index = this.entities.indexOf(entity);
         if (index !== -1) {
             var entity = this.entities[index];
@@ -290,6 +291,9 @@ class Engine {
                 system.EntityRemoved(entity);
             }
             return entity;
+        }
+        if (removeFromLevel) {
+            Game.Instance.currentLevel.RemoveEntity(entity);
         }
         return null;
     }
@@ -420,6 +424,14 @@ class EntityHelper {
         platform.AddComponent(new SolidPlatformComponent(positionComponent));
         return platform;
     }
+    static CreateDeadlyArea(x, y, width, height) {
+        let area = new Entity();
+        let positionComponent = new PositionComponent(x, y, width, height);
+        let attackComponent = new AttackComponent(positionComponent, area, 99999999, false, false);
+        area.AddComponent(positionComponent);
+        area.AddComponent(attackComponent);
+        return area;
+    }
     static CreateGameMap(width, height, gameAnimation, renderLayer) {
         let gamemap = new Entity();
         let positionComponent = new PositionComponent(0, 0, width, height);
@@ -450,10 +462,12 @@ class EntityHelper {
             let inputComponent = new InputComponent();
             let positionComponent = new PositionComponent(x, y, 65, 130);
             let moveableComponent = new MoveableComponent(positionComponent);
+            let attackableComponent = new AttackableComponent(positionComponent, 100);
             let renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
             this.player.AddComponent(inputComponent);
             this.player.AddComponent(positionComponent);
             this.player.AddComponent(moveableComponent);
+            this.player.AddComponent(attackableComponent);
             this.player.AddComponent(renderableComponent);
             this.player.AddComponent(new PlayerComponent(positionComponent, moveableComponent, inputComponent, renderableComponent));
         }
@@ -845,6 +859,7 @@ class Level2 extends Level {
         this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 50, 5));
         this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 50, 5));
         this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 50, 5));
+        this.entities.push(EntityHelper.CreateDeadlyArea(1154, 1675, 121, 115));
         this.playerEntity = EntityHelper.CreatePlayerEntity(playerX, playerY);
         this.entities.push(this.playerEntity);
     }
@@ -930,7 +945,8 @@ class AttackSystem extends System {
             for (let attackable of attackables) {
                 let attackComponent = attack.GetComponent(AttackComponent.name);
                 let attackableComponent = attackable.GetComponent(AttackableComponent.name);
-                if (attackComponent.attackedComponents.indexOf(attackableComponent) !== -1) {
+                if (attackComponent.attackedComponents.indexOf(attackableComponent) !== -1
+                    || attackComponent.entity === attackable) {
                     continue;
                 }
                 let attackPosition = attackComponent.positionComponent;
@@ -938,10 +954,17 @@ class AttackSystem extends System {
                 if ((attackPosition.position.x <= attackablePosition.position.x + attackablePosition.width && attackPosition.position.x + attackPosition.width > attackablePosition.position.x)
                     && (attackPosition.position.y <= attackablePosition.position.y + attackablePosition.height && attackPosition.position.y + attackPosition.height > attackablePosition.position.y)) {
                     attackableComponent.health -= attackComponent.damage;
-                    attackComponent.attackedComponents.push(attackableComponent);
+                    if (attackComponent.attackOnce) {
+                        attackComponent.attackedComponents.push(attackableComponent);
+                    }
                     if (attackableComponent.health <= 0) {
-                        Game.Instance.currentLevel.RemoveEntity(attackable);
-                        this.engine.RemoveEntity(attackable);
+                        let playerComponent = attackable.GetComponent(PlayerComponent.name);
+                        if (playerComponent) {
+                            playerComponent.newState = PlayerState.Respawing;
+                        }
+                        else {
+                            this.engine.RemoveEntity(attackable, true);
+                        }
                     }
                 }
             }
@@ -1660,7 +1683,7 @@ class PlayerSystem extends System {
             }
         }
         else if (playerComponent.attackTimer >= this.attackTime) {
-            this.engine.RemoveEntity(playerComponent.attackEntity);
+            this.engine.RemoveEntity(playerComponent.attackEntity, false);
             playerComponent.attackEntity = null;
         }
         else if (playerComponent.attackTimer >= this.attackPreTime && playerComponent.attackEntity === null) {
@@ -1675,7 +1698,7 @@ class PlayerSystem extends System {
                 set(_) { }
             });
             attackEntity.AddComponent(attackPosition);
-            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true));
+            attackEntity.AddComponent(new AttackComponent(attackPosition, entity, playerComponent.attackDamage, true, true));
             playerComponent.attackEntity = attackEntity;
             this.engine.AddEntity(attackEntity);
         }
@@ -1813,11 +1836,11 @@ class SpawnedSystem extends System {
         for (var i = 0; i < entities.length; ++i) {
             var spawnComponent = entities[i].GetComponent(SpawnedComponent.name);
             if (spawnComponent.moveableComponent.velocity.x === 0 && spawnComponent.moveableComponent.velocity.y === 0) {
-                this.engine.RemoveEntity(entities[i]);
+                this.engine.RemoveEntity(entities[i], false);
             }
             else if (spawnComponent.moveableComponent.positionComponent.position.x > spawnComponent.maxPosition.x || spawnComponent.moveableComponent.positionComponent.position.x < spawnComponent.minPosition.x
                 || spawnComponent.moveableComponent.positionComponent.position.y > spawnComponent.maxPosition.y || spawnComponent.moveableComponent.positionComponent.position.y < spawnComponent.minPosition.y) {
-                this.engine.RemoveEntity(entities[i]);
+                this.engine.RemoveEntity(entities[i], false);
             }
             else if (this.CollisionWithPlayer(playerComponent, spawnComponent)) {
                 playerComponent.newState = PlayerState.Respawing;

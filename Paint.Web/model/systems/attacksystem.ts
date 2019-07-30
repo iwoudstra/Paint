@@ -10,7 +10,8 @@ class AttackSystem extends System {
                 let attackComponent = <AttackComponent>attack.GetComponent(AttackComponent.name);
                 let attackableComponent = <AttackableComponent>attackable.GetComponent(AttackableComponent.name);
 
-                if (attackComponent.attackedComponents.indexOf(attackableComponent) !== -1) {
+                if (attackComponent.attackedComponents.indexOf(attackableComponent) !== -1
+                    || attackComponent.entity === attackable) {
                     continue;
                 }
 
@@ -20,11 +21,19 @@ class AttackSystem extends System {
                 if ((attackPosition.position.x <= attackablePosition.position.x + attackablePosition.width && attackPosition.position.x + attackPosition.width > attackablePosition.position.x)
                     && (attackPosition.position.y <= attackablePosition.position.y + attackablePosition.height && attackPosition.position.y + attackPosition.height > attackablePosition.position.y)) {
                     attackableComponent.health -= attackComponent.damage;
-                    attackComponent.attackedComponents.push(attackableComponent);
+
+                    if (attackComponent.attackOnce) {
+                        attackComponent.attackedComponents.push(attackableComponent);
+                    }
 
                     if (attackableComponent.health <= 0) {
-                        Game.Instance.currentLevel.RemoveEntity(attackable);
-                        this.engine.RemoveEntity(attackable);
+                        let playerComponent = <PlayerComponent | undefined>attackable.GetComponent(PlayerComponent.name);
+
+                        if (playerComponent) {
+                            playerComponent.newState = PlayerState.Respawing;
+                        } else {
+                            this.engine.RemoveEntity(attackable, true);
+                        }
                     }
                 }
             }
