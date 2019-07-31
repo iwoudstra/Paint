@@ -19,7 +19,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.attackTimer = 0;
-                playerComponent.renderableComponent.width = 65;
+                playerComponent.renderableComponent.width = 130;
                 break;
             }
             default: {
@@ -64,7 +64,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
-                playerComponent.renderableComponent.width = 108;
+                playerComponent.renderableComponent.width = 216;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
                 break;

@@ -460,10 +460,10 @@ class EntityHelper {
         if (this.player === null) {
             this.player = new Entity("player");
             let inputComponent = new InputComponent();
-            let positionComponent = new PositionComponent(x, y, 65, 130);
+            let positionComponent = new PositionComponent(x, y, 130, 260);
             let moveableComponent = new MoveableComponent(positionComponent);
             let attackableComponent = new AttackableComponent(positionComponent, 100);
-            let renderableComponent = new RenderableComponent(positionComponent, 65, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
+            let renderableComponent = new RenderableComponent(positionComponent, 130, 260, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
             this.player.AddComponent(inputComponent);
             this.player.AddComponent(positionComponent);
             this.player.AddComponent(moveableComponent);
@@ -1423,7 +1423,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.attackTimer = 0;
-                playerComponent.renderableComponent.width = 65;
+                playerComponent.renderableComponent.width = 130;
                 break;
             }
             default: {
@@ -1464,7 +1464,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
-                playerComponent.renderableComponent.width = 108;
+                playerComponent.renderableComponent.width = 216;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
                 break;
