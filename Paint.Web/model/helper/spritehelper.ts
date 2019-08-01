@@ -41,10 +41,10 @@
         this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
 
-        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 260, 8, 'playerwalking');
-        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 520, 130, 260, 2, 'playerjumping');
-        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 260, 8, 'playeridle');
-        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 780, 216, 260, 15 , 'playerattacking');
+        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 130, 8, 'playerwalking');
+        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 130, 2, 'playerjumping');
+        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 130, 130, 130, 4, 'playeridle');
+        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 8 , 'playerattacking');
 
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         //this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');

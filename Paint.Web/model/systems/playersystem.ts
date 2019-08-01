@@ -5,8 +5,8 @@ class PlayerSystem extends System {
     private movementSpeed: number = 400;
     private fallSpeed: number = 800;
 
-    private attackPreTime: number = 0.25;
-    private attackTime: number = 0.65;
+    private attackPreTime: number = 0.0;
+    private attackTime: number = 0.50;
     private attackPostTime: number = 0.75;
 
     public ChangeState(entity: Entity, playerComponent: PlayerComponent): void {
@@ -64,7 +64,7 @@ class PlayerSystem extends System {
             }
             case PlayerState.Attacking: {
                 playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
-                playerComponent.renderableComponent.width = 216;
+                playerComponent.renderableComponent.width = 130;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
                 break;

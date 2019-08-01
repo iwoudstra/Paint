@@ -61,10 +61,10 @@
         if (this.player === null) {
             this.player = new Entity("player");
             let inputComponent = new InputComponent()
-            let positionComponent = new PositionComponent(x, y, 130, 260);
+            let positionComponent = new PositionComponent(x, y, 130, 130);
             let moveableComponent = new MoveableComponent(positionComponent);
             let attackableComponent = new AttackableComponent(positionComponent, 100);
-            let renderableComponent = new RenderableComponent(positionComponent, 130, 260, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
+            let renderableComponent = new RenderableComponent(positionComponent, 130, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
             this.player.AddComponent(inputComponent);
             this.player.AddComponent(positionComponent);
             this.player.AddComponent(moveableComponent);
