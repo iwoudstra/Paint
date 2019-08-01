@@ -1410,8 +1410,8 @@ class PlayerSystem extends System {
         this.movementSpeed = 400;
         this.fallSpeed = 800;
         this.attackPreTime = 0.10;
-        this.attackTime = 0.50;
-        this.attackPostTime = 0.25;
+        this.attackTime = 0.25;
+        this.attackPostTime = 0.30;
     }
     ChangeState(entity, playerComponent) {
         switch (playerComponent.currentState) {

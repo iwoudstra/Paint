@@ -6,8 +6,8 @@ class PlayerSystem extends System {
     private fallSpeed: number = 800;
 
     private attackPreTime: number = 0.10;
-    private attackTime: number = 0.50;
-    private attackPostTime: number = 0.25;
+    private attackTime: number = 0.25;
+    private attackPostTime: number = 0.30;
 
     public ChangeState(entity: Entity, playerComponent: PlayerComponent): void {
         switch (playerComponent.currentState) {
