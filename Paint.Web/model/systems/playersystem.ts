@@ -5,9 +5,9 @@ class PlayerSystem extends System {
     private movementSpeed: number = 400;
     private fallSpeed: number = 800;
 
-    private attackPreTime: number = 0.0;
+    private attackPreTime: number = 0.10;
     private attackTime: number = 0.50;
-    private attackPostTime: number = 0.75;
+    private attackPostTime: number = 0.25;
 
     public ChangeState(entity: Entity, playerComponent: PlayerComponent): void {
         switch (playerComponent.currentState) {
@@ -327,7 +327,7 @@ class PlayerSystem extends System {
             this.engine.AddEntity(attackEntity);
         }
 
-        let attackFrame = Math.round(playerComponent.attackTimer / (this.attackPostTime / 15));
+        let attackFrame = Math.round(playerComponent.attackTimer / (this.attackPostTime / 3));
         playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
         playerComponent.renderableComponent.frame = attackFrame;
 

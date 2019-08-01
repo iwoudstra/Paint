@@ -44,7 +44,7 @@
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 130, 8, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 130, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 130, 130, 130, 4, 'playeridle');
-        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 8 , 'playerattacking');
+        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 3 , 'playerattacking');
 
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         //this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');

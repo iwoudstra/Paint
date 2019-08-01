@@ -573,7 +573,7 @@ class SpriteHelper {
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 130, 8, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 130, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 130, 130, 130, 4, 'playeridle');
-        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 8, 'playerattacking');
+        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 3, 'playerattacking');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1, 'npcavatar');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
@@ -1409,9 +1409,9 @@ class PlayerSystem extends System {
         this.requiredComponents = [PlayerComponent.name];
         this.movementSpeed = 400;
         this.fallSpeed = 800;
-        this.attackPreTime = 0.0;
+        this.attackPreTime = 0.10;
         this.attackTime = 0.50;
-        this.attackPostTime = 0.75;
+        this.attackPostTime = 0.25;
     }
     ChangeState(entity, playerComponent) {
         switch (playerComponent.currentState) {
@@ -1702,7 +1702,7 @@ class PlayerSystem extends System {
             playerComponent.attackEntity = attackEntity;
             this.engine.AddEntity(attackEntity);
         }
-        let attackFrame = Math.round(playerComponent.attackTimer / (this.attackPostTime / 15));
+        let attackFrame = Math.round(playerComponent.attackTimer / (this.attackPostTime / 3));
         playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
         playerComponent.renderableComponent.frame = attackFrame;
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
