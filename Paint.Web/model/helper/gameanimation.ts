@@ -5,15 +5,13 @@
     public width: number;
     public height: number;
     public frames: number;
-    public name: string;
 
-    constructor(imageFile: HTMLImageElement, sourceX: number, sourceY: number, width: number, height: number, frames: number, name: string) {
+    constructor(imageFile: HTMLImageElement, sourceX: number, sourceY: number, width: number, height: number, frames: number) {
         this.imageFile = imageFile;
         this.sourceX = sourceX;
         this.sourceY = sourceY;
         this.width = width;
         this.height = height;
         this.frames = frames;
-        this.name = name;
     }
 }

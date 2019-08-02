@@ -107,6 +107,36 @@ class DebugRenderableComponent extends RenderableComponent {
         super(positionComponent, width, height, color, renderLayer, gameAnimation, renderPriority);
     }
 }
+var EnemyType;
+(function (EnemyType) {
+    EnemyType[EnemyType["Patrol"] = 0] = "Patrol";
+})(EnemyType || (EnemyType = {}));
+var EnemyAttackType;
+(function (EnemyAttackType) {
+    EnemyAttackType[EnemyAttackType["Auto"] = 0] = "Auto";
+})(EnemyAttackType || (EnemyAttackType = {}));
+class EnemyComponent extends Component {
+    constructor(positionComponent, moveableComponent, renderableComponent, enemyType, enemyAttackType) {
+        super();
+        this.attackEntity = null;
+        this.attackTimer = 0;
+        this.attackDamage = 80;
+        this.isAttacking = false;
+        this.attackPreTime = 0.10;
+        this.attackTime = 0.25;
+        this.attackPostTime = 0.35;
+        this.attackLength = 80;
+        this.autoAttackTime = 0;
+        this.autoAttackTimer = 0;
+        this.patrolFromX = 0;
+        this.patrolToX = 0;
+        this.positionComponent = positionComponent;
+        this.moveableComponent = moveableComponent;
+        this.renderableComponent = renderableComponent;
+        this.enemyType = enemyType;
+        this.enemyAttackType = enemyAttackType;
+    }
+}
 class EventComponent extends Component {
     constructor(positionComponent, playerX, playerY) {
         super();
@@ -271,6 +301,7 @@ class Engine {
         this.updating = false;
         this.systems.push(new MovingSystem(this));
         this.systems.push(new PlayerSystem(this));
+        this.systems.push(new EnemySystem(this));
         this.systems.push(new InputHandlingSystem(this));
         this.systems.push(new ActionSystem(this));
         this.systems.push(new SpawningSystem(this));
@@ -469,7 +500,7 @@ class EntityHelper {
         if (this.player === null) {
             this.player = new Entity("player");
             let inputComponent = new InputComponent();
-            let positionComponent = new PositionComponent(x, y, 130, 130);
+            let positionComponent = new PositionComponent(x, y, 90, 130);
             let moveableComponent = new MoveableComponent(positionComponent);
             let attackableComponent = new AttackableComponent(positionComponent, 100);
             let renderableComponent = new RenderableComponent(positionComponent, 130, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
@@ -486,6 +517,23 @@ class EntityHelper {
             playerPosition.position.y = y;
         }
         return this.player;
+    }
+    static CreatePatrolingEnemyEntity(x, y, enemyAttackType, fromX, toX, autoAttackTime) {
+        let enemy = new Entity();
+        let positionComponent = new PositionComponent(x, y, 90, 130);
+        let moveableComponent = new MoveableComponent(positionComponent);
+        let attackableComponent = new AttackableComponent(positionComponent, 50);
+        let renderableComponent = new RenderableComponent(positionComponent, 130, 130, '', RenderLayer.Player, SpriteHelper.enemyWalking, 100);
+        let enemyComponent = new EnemyComponent(positionComponent, moveableComponent, renderableComponent, EnemyType.Patrol, enemyAttackType);
+        enemyComponent.patrolFromX = fromX;
+        enemyComponent.patrolToX = toX;
+        enemyComponent.autoAttackTime = autoAttackTime;
+        enemy.AddComponent(positionComponent);
+        enemy.AddComponent(moveableComponent);
+        enemy.AddComponent(attackableComponent);
+        enemy.AddComponent(renderableComponent);
+        enemy.AddComponent(enemyComponent);
+        return enemy;
     }
     static CreateNpcEntity(x, y, width, height, interactionX, interactionY, interactionWidth, interactionHeight, name, interactionAction) {
         let npc = new Entity();
@@ -556,21 +604,20 @@ EntityHelper.Camera = 'camera';
 EntityHelper.TopText = 'toptext';
 EntityHelper.player = null;
 class GameAnimation {
-    constructor(imageFile, sourceX, sourceY, width, height, frames, name) {
+    constructor(imageFile, sourceX, sourceY, width, height, frames) {
         this.imageFile = imageFile;
         this.sourceX = sourceX;
         this.sourceY = sourceY;
         this.width = width;
         this.height = height;
         this.frames = frames;
-        this.name = name;
     }
 }
 class SpriteHelper {
     static InitSprites() {
         this.avatar.src = 'assets/sprites/npc/avatar.png';
-        this.characterSpriteSheet.src = 'assets/sprites/player/characterspritesheet.png';
         this.playerSpriteSheet.src = 'assets/sprites/player/player.png';
+        this.enemySpriteSheet.src = 'assets/sprites/player/enemy.png';
         this.npcwip.src = 'assets/sprites/npc/npc.png';
         this.level1.src = 'assets/sprites/level-1/level.png';
         this.level1fg.src = 'assets/sprites/level-1/level-1-fg.png';
@@ -579,27 +626,33 @@ class SpriteHelper {
         this.level2.src = 'assets/sprites/level-2/level-2.png';
         this.level3.src = 'assets/sprites/level-3/level-3.png';
         this.level3bg.src = 'assets/sprites/level-3/level-3-bg.png';
-        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 130, 8, 'playerwalking');
-        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 130, 2, 'playerjumping');
-        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 130, 130, 130, 4, 'playeridle');
+        this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 130, 8);
+        this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 130, 2);
+        this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 130, 130, 130, 4);
         this.playerAttack = new Array();
         this.playerAttack.push(new Array(3));
-        this.playerAttack[0][0] = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 1, 'playerattacking');
-        this.playerAttack[0][1] = new GameAnimation(this.playerSpriteSheet, 130, 390, 130, 130, 1, 'playerattacking');
-        this.playerAttack[0][2] = new GameAnimation(this.playerSpriteSheet, 260, 390, 130, 130, 1, 'playerattacking');
-        this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
-        this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1, 'npcavatar');
-        this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
-        this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1, 'gamemap');
-        this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 1917, 1147, 1, 'gamemap');
-        this.level1bgAnimation = new GameAnimation(this.level1bg, 0, 0, 1917, 1147, 1, 'gamemap');
-        this.level2Animation = new GameAnimation(this.level2, 0, 0, 2495, 1920, 1, 'gamemap');
-        this.level3Animation = new GameAnimation(this.level3, 0, 0, 2950, 1855, 1, 'gamemap');
-        this.level3bgAnimation = new GameAnimation(this.level3bg, 0, 0, 2950, 1855, 1, 'gamemap');
+        this.playerAttack[0][0] = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 1);
+        this.playerAttack[0][1] = new GameAnimation(this.playerSpriteSheet, 130, 390, 130, 130, 1);
+        this.playerAttack[0][2] = new GameAnimation(this.playerSpriteSheet, 260, 390, 130, 130, 1);
+        this.enemyWalking = new GameAnimation(this.enemySpriteSheet, 0, 0, 130, 130, 8);
+        this.enemyAttack = new Array();
+        this.enemyAttack.push(new Array(3));
+        this.enemyAttack[0][0] = new GameAnimation(this.enemySpriteSheet, 0, 390, 130, 130, 1);
+        this.enemyAttack[0][1] = new GameAnimation(this.enemySpriteSheet, 130, 390, 130, 130, 1);
+        this.enemyAttack[0][2] = new GameAnimation(this.enemySpriteSheet, 260, 390, 130, 130, 1);
+        this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1);
+        this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1);
+        this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1);
+        this.level1fAnimation = new GameAnimation(this.level1f, 0, 0, 1917, 1147, 1);
+        this.level1fgAnimation = new GameAnimation(this.level1fg, 0, 0, 1917, 1147, 1);
+        this.level1bgAnimation = new GameAnimation(this.level1bg, 0, 0, 1917, 1147, 1);
+        this.level2Animation = new GameAnimation(this.level2, 0, 0, 2495, 1920, 1);
+        this.level3Animation = new GameAnimation(this.level3, 0, 0, 2950, 1855, 1);
+        this.level3bgAnimation = new GameAnimation(this.level3bg, 0, 0, 2950, 1855, 1);
     }
 }
-SpriteHelper.characterSpriteSheet = new Image();
 SpriteHelper.playerSpriteSheet = new Image();
+SpriteHelper.enemySpriteSheet = new Image();
 SpriteHelper.rockPlatform = new Image();
 SpriteHelper.level1 = new Image();
 SpriteHelper.level1fg = new Image();
@@ -866,8 +919,9 @@ class Level2 extends Level {
         this.entities.push(EntityHelper.CreateSolidPlatform(1790, 1665, 320, 130));
         this.entities.push(EntityHelper.CreateSolidPlatform(510, 1790, 1300, 130));
         this.entities.push(EntityHelper.CreateCamera());
+        this.entities.push(EntityHelper.CreatePatrolingEnemyEntity(576, 445, EnemyAttackType.Auto, 576, 876, 1.5));
         this.entities.push(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, Level3.Instance, 2360, 255));
-        this.entities.push(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, Level1.Instance, 2500, 500));
+        this.entities.push(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, Level1.Instance, 2450, 500));
         this.entities.push(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 50, 5));
         this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 50, 5));
         this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 50, 5));
@@ -1119,6 +1173,100 @@ class CameraSystem extends System {
     EntityAdded(entity) {
     }
     EntityRemoved(entity) {
+    }
+}
+class EnemySystem extends System {
+    Update(deltaTime) {
+        let enemies = this.engine.GetEntities([EnemyComponent.name]);
+        for (let enemy of enemies) {
+            let enemyComponent = enemy.GetComponent(EnemyComponent.name);
+            switch (enemyComponent.enemyType) {
+                case EnemyType.Patrol: {
+                    if (enemyComponent.positionComponent.position.x <= enemyComponent.patrolFromX) {
+                        enemyComponent.moveableComponent.velocity.x = 200;
+                        enemyComponent.renderableComponent.orientationLeft = false;
+                    }
+                    else if (enemyComponent.positionComponent.position.x >= enemyComponent.patrolToX) {
+                        enemyComponent.moveableComponent.velocity.x = -200;
+                        enemyComponent.renderableComponent.orientationLeft = true;
+                    }
+                    break;
+                }
+            }
+            switch (enemyComponent.enemyAttackType) {
+                case EnemyAttackType.Auto: {
+                    if (!enemyComponent.isAttacking) {
+                        enemyComponent.renderableComponent.gameAnimation = SpriteHelper.enemyWalking;
+                        enemyComponent.renderableComponent.frame = 0;
+                        enemyComponent.autoAttackTimer += deltaTime;
+                        if (enemyComponent.autoAttackTimer > enemyComponent.autoAttackTime) {
+                            enemyComponent.autoAttackTimer = 0;
+                            enemyComponent.attackTimer = 0;
+                            enemyComponent.isAttacking = true;
+                        }
+                    }
+                    else {
+                        enemyComponent.attackTimer += deltaTime;
+                        if (enemyComponent.attackTimer >= enemyComponent.attackPostTime) {
+                            enemyComponent.isAttacking = false;
+                        }
+                        else if (enemyComponent.attackTimer >= enemyComponent.attackTime) {
+                            this.engine.RemoveEntity(enemyComponent.attackEntity, false);
+                            enemyComponent.attackEntity = null;
+                        }
+                        else if (enemyComponent.attackTimer >= enemyComponent.attackPreTime && enemyComponent.attackEntity === null) {
+                            let attackEntity = new Entity();
+                            let attackPosition = new PositionComponent(0, 0, enemyComponent.attackLength, enemyComponent.positionComponent.height);
+                            Object.defineProperty(attackPosition.position, 'x', {
+                                get() { return enemyComponent.renderableComponent.orientationLeft ? (enemyComponent.positionComponent.position.x + (1 / 3 * enemyComponent.positionComponent.width) - enemyComponent.attackLength) : (enemyComponent.positionComponent.position.x + (2 / 3 * enemyComponent.positionComponent.width)); },
+                                set(_) { }
+                            });
+                            Object.defineProperty(attackPosition.position, 'y', {
+                                get() { return enemyComponent.positionComponent.position.y; },
+                                set(_) { }
+                            });
+                            attackEntity.AddComponent(attackPosition);
+                            attackEntity.AddComponent(new AttackComponent(attackPosition, enemy, enemyComponent.attackDamage, true, true));
+                            enemyComponent.attackEntity = attackEntity;
+                            this.engine.AddEntity(attackEntity);
+                        }
+                        let stanceAnimation = SpriteHelper.enemyAttack[0];
+                        let stanceAttackAnimation = stanceAnimation[0];
+                        let attackFrame = 0;
+                        if (enemyComponent.attackTimer <= enemyComponent.attackPreTime) {
+                            stanceAttackAnimation = stanceAnimation[0];
+                            attackFrame = Math.floor(enemyComponent.attackTimer / (enemyComponent.attackPreTime / stanceAttackAnimation.frames));
+                        }
+                        else if (enemyComponent.attackTimer <= enemyComponent.attackTime) {
+                            stanceAttackAnimation = stanceAnimation[1];
+                            attackFrame = Math.floor((enemyComponent.attackTimer - enemyComponent.attackPreTime) / ((enemyComponent.attackTime - enemyComponent.attackPreTime) / stanceAttackAnimation.frames));
+                        }
+                        else {
+                            stanceAttackAnimation = stanceAnimation[2];
+                            attackFrame = Math.floor((enemyComponent.attackTimer - enemyComponent.attackTime) / ((enemyComponent.attackPostTime - enemyComponent.attackTime) / stanceAttackAnimation.frames));
+                        }
+                        if (attackFrame >= stanceAttackAnimation.frames) {
+                            attackFrame = stanceAttackAnimation.frames - 1;
+                        }
+                        enemyComponent.renderableComponent.gameAnimation = stanceAttackAnimation;
+                        enemyComponent.renderableComponent.frame = attackFrame;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    LevelChanged() {
+    }
+    EntityAdded(entity) {
+    }
+    EntityRemoved(entity) {
+        if (entity.HasComponent(EnemyComponent.name)) {
+            let enemyComponent = entity.GetComponent(EnemyComponent.name);
+            if (enemyComponent.attackEntity) {
+                this.engine.RemoveEntity(enemyComponent.attackEntity, false);
+            }
+        }
     }
 }
 class InputHandlingSystem extends System {

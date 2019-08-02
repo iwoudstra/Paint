@@ -61,7 +61,7 @@
         if (this.player === null) {
             this.player = new Entity("player");
             let inputComponent = new InputComponent()
-            let positionComponent = new PositionComponent(x, y, 130, 130);
+            let positionComponent = new PositionComponent(x, y, 90, 130);
             let moveableComponent = new MoveableComponent(positionComponent);
             let attackableComponent = new AttackableComponent(positionComponent, 100);
             let renderableComponent = new RenderableComponent(positionComponent, 130, 130, '', RenderLayer.Player, SpriteHelper.playerWalking, 100);
@@ -78,6 +78,25 @@
         }
 
         return this.player;
+    }
+
+    public static CreatePatrolingEnemyEntity(x: number, y: number, enemyAttackType: EnemyAttackType, fromX: number, toX: number, autoAttackTime: number): Entity {
+        let enemy = new Entity();
+        let positionComponent = new PositionComponent(x, y, 90, 130);
+        let moveableComponent = new MoveableComponent(positionComponent);
+        let attackableComponent = new AttackableComponent(positionComponent, 50);
+        let renderableComponent = new RenderableComponent(positionComponent, 130, 130, '', RenderLayer.Player, SpriteHelper.enemyWalking, 100);
+        let enemyComponent = new EnemyComponent(positionComponent, moveableComponent, renderableComponent, EnemyType.Patrol, enemyAttackType);
+        enemyComponent.patrolFromX = fromX;
+        enemyComponent.patrolToX = toX;
+        enemyComponent.autoAttackTime = autoAttackTime;
+        enemy.AddComponent(positionComponent);
+        enemy.AddComponent(moveableComponent);
+        enemy.AddComponent(attackableComponent);
+        enemy.AddComponent(renderableComponent);
+        enemy.AddComponent(enemyComponent);
+
+        return enemy;
     }
 
     public static CreateNpcEntity(x: number, y: number, width: number, height: number, interactionX: number, interactionY: number, interactionWidth: number, interactionHeight: number, name: string

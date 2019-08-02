@@ -69,6 +69,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assets\sprites\player\enemy.png" />
     <Content Include="bundles\all.js" />
     <Content Include="index.html" />
     <Content Include="Web.config" />
@@ -93,6 +94,7 @@
     <TypeScriptCompile Include="model\components\attackcomponent.ts" />
     <TypeScriptCompile Include="model\components\cameracomponent.ts" />
     <TypeScriptCompile Include="model\components\debugrenderablecomponent.ts" />
+    <TypeScriptCompile Include="model\components\enemycomponent.ts" />
     <TypeScriptCompile Include="model\components\eventcomponent.ts" />
     <TypeScriptCompile Include="model\components\inputcomponent.ts" />
     <TypeScriptCompile Include="model\components\leveltriggercomponent.ts" />
@@ -125,6 +127,7 @@
     <TypeScriptCompile Include="model\systems\actionsystem.ts" />
     <TypeScriptCompile Include="model\systems\attacksystem.ts" />
     <TypeScriptCompile Include="model\systems\camerasystem.ts" />
+    <TypeScriptCompile Include="model\systems\enemysystem.ts" />
     <TypeScriptCompile Include="model\systems\inputhandlingsystem.ts" />
     <TypeScriptCompile Include="model\systems\movingsystem.ts" />
     <TypeScriptCompile Include="model\systems\playersystem.ts" />

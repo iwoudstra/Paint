@@ -21,7 +21,6 @@ class PlayerComponent extends Component {
     moveableComponent: MoveableComponent;
     inputComponent: InputComponent;
     renderableComponent: RenderableComponent;
-    brushEntity: Entity;
     interactingWith: NPCComponent = null;
     hasBluePaint: boolean = false;
 
