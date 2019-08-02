@@ -15,7 +15,7 @@
     static playerWalking: GameAnimation;
     static playerJumping: GameAnimation;
     static playerIdle: GameAnimation;
-    static playerAttack: GameAnimation;
+    static playerAttack: Array<Array<GameAnimation>>; //outer array maps to PlayerStance. inner array maps to: pre attack [0], attack [1], post attack [2]
     static level1Animation: GameAnimation;
     static level1fAnimation: GameAnimation;
     static level1fgAnimation: GameAnimation;
@@ -44,7 +44,12 @@
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 130, 8, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 130, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 130, 130, 130, 4, 'playeridle');
-        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 3 , 'playerattacking');
+
+        this.playerAttack = new Array<Array<GameAnimation>>();
+        this.playerAttack.push(new Array<GameAnimation>(3));
+        this.playerAttack[0][0] = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 1, 'playerattacking');
+        this.playerAttack[0][1] = new GameAnimation(this.playerSpriteSheet, 130, 390, 130, 130, 1, 'playerattacking');
+        this.playerAttack[0][2] = new GameAnimation(this.playerSpriteSheet, 260, 390, 130, 130, 1, 'playerattacking');
 
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         //this.npcLeftEyeAnimation = new GameAnimation(this.npcwip, 60, 58, 5, 6, 1, 'npcLeftEye');

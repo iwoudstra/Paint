@@ -185,16 +185,25 @@ var PlayerState;
     PlayerState[PlayerState["Interacting"] = 4] = "Interacting";
     PlayerState[PlayerState["Attacking"] = 5] = "Attacking";
 })(PlayerState || (PlayerState = {}));
+var PlayerStance;
+(function (PlayerStance) {
+    PlayerStance[PlayerStance["Blue"] = 0] = "Blue";
+})(PlayerStance || (PlayerStance = {}));
 class PlayerComponent extends Component {
     constructor(positionComponent, moveableComponent, inputComponent, renderableComponent) {
         super();
         this.currentState = PlayerState.OnGround;
         this.newState = PlayerState.OnGround;
+        this.currentStance = PlayerStance.Blue;
         this.interactingWith = null;
         this.hasBluePaint = false;
         this.attackEntity = null;
         this.attackTimer = 0;
         this.attackDamage = 80;
+        this.attackPreTime = 0.10;
+        this.attackTime = 0.25;
+        this.attackPostTime = 0.35;
+        this.attackLength = 80;
         this.positionComponent = positionComponent;
         this.moveableComponent = moveableComponent;
         this.inputComponent = inputComponent;
@@ -573,7 +582,11 @@ class SpriteHelper {
         this.playerWalking = new GameAnimation(this.playerSpriteSheet, 0, 0, 130, 130, 8, 'playerwalking');
         this.playerJumping = new GameAnimation(this.playerSpriteSheet, 0, 260, 130, 130, 2, 'playerjumping');
         this.playerIdle = new GameAnimation(this.playerSpriteSheet, 0, 130, 130, 130, 4, 'playeridle');
-        this.playerAttack = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 3, 'playerattacking');
+        this.playerAttack = new Array();
+        this.playerAttack.push(new Array(3));
+        this.playerAttack[0][0] = new GameAnimation(this.playerSpriteSheet, 0, 390, 130, 130, 1, 'playerattacking');
+        this.playerAttack[0][1] = new GameAnimation(this.playerSpriteSheet, 130, 390, 130, 130, 1, 'playerattacking');
+        this.playerAttack[0][2] = new GameAnimation(this.playerSpriteSheet, 260, 390, 130, 130, 1, 'playerattacking');
         this.npcwipAnimation = new GameAnimation(this.npcwip, 0, 0, 130, 160, 1, 'npcwip');
         this.npcavatar = new GameAnimation(this.avatar, 0, 0, 150, 150, 1, 'npcavatar');
         this.level1Animation = new GameAnimation(this.level1, 0, 0, 2635, 845, 1, 'gamemap');
@@ -1409,9 +1422,6 @@ class PlayerSystem extends System {
         this.requiredComponents = [PlayerComponent.name];
         this.movementSpeed = 400;
         this.fallSpeed = 800;
-        this.attackPreTime = 0.10;
-        this.attackTime = 0.25;
-        this.attackPostTime = 0.30;
     }
     ChangeState(entity, playerComponent) {
         switch (playerComponent.currentState) {
@@ -1463,7 +1473,6 @@ class PlayerSystem extends System {
                 break;
             }
             case PlayerState.Attacking: {
-                playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
                 playerComponent.renderableComponent.width = 130;
                 playerComponent.renderableComponent.frame = 0;
                 playerComponent.renderableComponent.frameTimer = 0;
@@ -1671,7 +1680,7 @@ class PlayerSystem extends System {
     HandleAttackingState(entity, playerComponent, deltaTime) {
         this.HandleMovement(playerComponent, true, false);
         playerComponent.attackTimer += deltaTime;
-        if (playerComponent.attackTimer >= this.attackPostTime) {
+        if (playerComponent.attackTimer >= playerComponent.attackPostTime) {
             if (MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
                 playerComponent.newState = PlayerState.OnGround;
             }
@@ -1682,15 +1691,15 @@ class PlayerSystem extends System {
                 playerComponent.newState = PlayerState.Jumping;
             }
         }
-        else if (playerComponent.attackTimer >= this.attackTime) {
+        else if (playerComponent.attackTimer >= playerComponent.attackTime) {
             this.engine.RemoveEntity(playerComponent.attackEntity, false);
             playerComponent.attackEntity = null;
         }
-        else if (playerComponent.attackTimer >= this.attackPreTime && playerComponent.attackEntity === null) {
+        else if (playerComponent.attackTimer >= playerComponent.attackPreTime && playerComponent.attackEntity === null) {
             let attackEntity = new Entity();
-            let attackPosition = new PositionComponent(0, 0, playerComponent.positionComponent.width, playerComponent.positionComponent.height);
+            let attackPosition = new PositionComponent(0, 0, playerComponent.attackLength, playerComponent.positionComponent.height);
             Object.defineProperty(attackPosition.position, 'x', {
-                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x - (2 / 3 * playerComponent.positionComponent.width)) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
+                get() { return playerComponent.renderableComponent.orientationLeft ? (playerComponent.positionComponent.position.x + (1 / 3 * playerComponent.positionComponent.width) - playerComponent.attackLength) : (playerComponent.positionComponent.position.x + (2 / 3 * playerComponent.positionComponent.width)); },
                 set(_) { }
             });
             Object.defineProperty(attackPosition.position, 'y', {
@@ -1702,8 +1711,25 @@ class PlayerSystem extends System {
             playerComponent.attackEntity = attackEntity;
             this.engine.AddEntity(attackEntity);
         }
-        let attackFrame = Math.round(playerComponent.attackTimer / (this.attackPostTime / 3));
-        playerComponent.renderableComponent.gameAnimation = SpriteHelper.playerAttack;
+        let stanceAnimation = SpriteHelper.playerAttack[playerComponent.currentStance];
+        let stanceAttackAnimation = stanceAnimation[0];
+        let attackFrame = 0;
+        if (playerComponent.attackTimer <= playerComponent.attackPreTime) {
+            stanceAttackAnimation = stanceAnimation[0];
+            attackFrame = Math.floor(playerComponent.attackTimer / (playerComponent.attackPreTime / stanceAttackAnimation.frames));
+        }
+        else if (playerComponent.attackTimer <= playerComponent.attackTime) {
+            stanceAttackAnimation = stanceAnimation[1];
+            attackFrame = Math.floor((playerComponent.attackTimer - playerComponent.attackPreTime) / ((playerComponent.attackTime - playerComponent.attackPreTime) / stanceAttackAnimation.frames));
+        }
+        else {
+            stanceAttackAnimation = stanceAnimation[2];
+            attackFrame = Math.floor((playerComponent.attackTimer - playerComponent.attackTime) / ((playerComponent.attackPostTime - playerComponent.attackTime) / stanceAttackAnimation.frames));
+        }
+        if (attackFrame >= stanceAttackAnimation.frames) {
+            attackFrame = stanceAttackAnimation.frames - 1;
+        }
+        playerComponent.renderableComponent.gameAnimation = stanceAttackAnimation;
         playerComponent.renderableComponent.frame = attackFrame;
         if (!MovingSystem.IsOnGroundOrPlatform(this.engine, playerComponent.moveableComponent)) {
             if (playerComponent.moveableComponent.velocity.y >= 0) {
