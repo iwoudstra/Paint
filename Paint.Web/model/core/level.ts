@@ -35,6 +35,7 @@
 
     public RemoveEntity(entity: Entity): void {
         let index = this.entities.indexOf(entity);
+        console.log(index);
         if (index !== -1) {
             this.entities.splice(index, 1);
         }

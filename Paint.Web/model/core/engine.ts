@@ -32,6 +32,10 @@
     }
 
     public RemoveEntity(entity: Entity, removeFromLevel: boolean): Entity {
+        if (removeFromLevel) {
+            Game.Instance.currentLevel.RemoveEntity(entity);
+        }
+
         var index = this.entities.indexOf(entity);
         if (index !== -1) {
             var entity = this.entities[index];
@@ -44,10 +48,6 @@
             }
 
             return entity;
-        }
-
-        if (removeFromLevel) {
-            Game.Instance.currentLevel.RemoveEntity(entity);
         }
 
         return null;

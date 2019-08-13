@@ -140,7 +140,18 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\**\*.*" />
+    <None Include="assets\sprites\level-1\level-1-bg.png" />
+    <None Include="assets\sprites\level-1\level-1-f.png" />
+    <None Include="assets\sprites\level-1\level-1-fg.png" />
+    <None Include="assets\sprites\level-1\level.png" />
+    <None Include="assets\sprites\level-2\level-2.png" />
+    <None Include="assets\sprites\level-3\level-3-bg.png" />
+    <None Include="assets\sprites\level-3\level-3.png" />
+    <None Include="assets\sprites\npc\avatar.png" />
+    <None Include="assets\sprites\npc\npc.png" />
+    <None Include="assets\sprites\player\characterspritesheet.png" />
+    <None Include="assets\sprites\player\enemy.png" />
+    <None Include="assets\sprites\player\player.png" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

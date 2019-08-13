@@ -45,15 +45,16 @@ class Level2 extends Level {
         this.entities.push(EntityHelper.CreateCamera());
 
         this.entities.push(EntityHelper.CreatePatrolingEnemyEntity(576, 445, EnemyAttackType.Auto, 576, 876, 1.5));
+        this.entities.push(EntityHelper.CreatePatrolingEnemyEntity(1280, 1535, EnemyAttackType.Auto, 1280, 1520, 1.5));
 
 
         this.entities.push(EntityHelper.CreateLevelTriggerEntity(700, 1345, 130, 130, Level3.Instance, 2360, 255));
         this.entities.push(EntityHelper.CreateLevelTriggerEntity(2, 225, 2, 195, Level1.Instance, 2450, 500));
 
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 50, 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 50, 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 50, 5));
-        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 50, 5));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 598, 45, 60, new Vector2d(1672, 628), new Vector2d(-100, 0), new Vector2d(966, 628), new Vector2d(1673, 628), 50, 4));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 740, 45, 60, new Vector2d(1672, 770), new Vector2d(-200, 0), new Vector2d(966, 770), new Vector2d(1673, 770), 50, 6));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 882, 45, 60, new Vector2d(1672, 912), new Vector2d(-400, 0), new Vector2d(966, 912), new Vector2d(1673, 912), 50, 8));
+        this.entities.push(EntityHelper.CreateSpawningEntity(1672, 1024, 45, 60, new Vector2d(1672, 1054), new Vector2d(-800, 0), new Vector2d(966, 1054), new Vector2d(1673, 1054), 50, 10));
 
         this.entities.push(EntityHelper.CreateDeadlyArea(1154, 1675, 121, 115));
 
